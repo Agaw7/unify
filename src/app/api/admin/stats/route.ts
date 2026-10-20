@@ -20,12 +20,22 @@ function phDate(value: unknown): string {
 
 export async function GET(request: NextRequest) {
   try {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !anonKey || !serviceKey) {
-      return NextResponse.json({ error: "Missing server configuration." }, { status: 500 });
-    }
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!url || !anonKey || !serviceKey) {
+  console.error("UNIFY ADMIN STATS CONFIG:", {
+    supabaseUrl: Boolean(url),
+    supabaseAnonKey: Boolean(anonKey),
+    supabaseServiceRoleKey: Boolean(serviceKey),
+  });
+
+  return NextResponse.json(
+    { error: "Missing server configuration." },
+    { status: 500 }
+  );
+}
 
     const authorization = request.headers.get("authorization");
     if (!authorization?.startsWith("Bearer ")) {
@@ -171,11 +181,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Explicitly simulated payouts, NOT real verified GCash/Maya transfers.
-    const sandboxPayouts = await 
-    all(
+const sandboxPayouts = await all(
   "sandbox_withdrawal_payouts",
-  "id,withdrawal_request_id,transaction_id,amount,currency,status,created_at"
-)
+  "id,withdrawal_request_id,transaction_id,user_id,amount,currency,status,is_simulated,created_at"
+);
     const withdrawalById = new Map(withdrawals.map((w) => [String(w.id), w]));
     const seenSandbox = new Set<string>();
     let simulatedPaidCents = 0;
