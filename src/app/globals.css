@@ -1957,3 +1957,61 @@ button {
 .unify-modal-feedback { color: #fda4af; margin: 0; font-size: 14px; }
 .unify-disclosure { text-align: center; color: #94a3b8; font-size: 11px; padding: 12px 18px 85px; }
 @media (max-width: 390px) { .unify-modal-card { padding: 20px; } .unify-action-grid .unify-action-card { min-height: 112px; } }
+
+
+
+/* UNIFY Password Show/Hide Icon */
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 55px;
+  box-sizing: border-box;
+}
+
+.password-wrapper .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  margin: 0;
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.password-wrapper .password-toggle:hover {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  opacity: 0.8;
+}
+
+.password-wrapper .password-toggle:focus-visible {
+  outline: 2px solid #00d2ff;
+  outline-offset: 2px;
+  border-radius: 6px;
+}

@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
@@ -9,33 +10,37 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"phone" | "verify">("phone");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
-  function formatPhone(value: string) {
-    const cleaned = value.replace(/\D/g, "");
+  async function handleRegister(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (loading) return;
+
+    const cleaned = phone.replace(/\D/g, "");
+    let formattedPhone: string;
 
     if (/^09\d{9}$/.test(cleaned)) {
-      return "+63" + cleaned.slice(1);
-    }
-
-    if (/^639\d{9}$/.test(cleaned)) {
-      return "+" + cleaned;
-    }
-
-    return null;
-  }
-
-  async function sendOTP(e: React.FormEvent) {
-    e.preventDefault();
-
-    const formatted = formatPhone(phone);
-
-    if (!formatted) {
+      formattedPhone = "+63" + cleaned.slice(1);
+    } else if (/^639\d{9}$/.test(cleaned)) {
+      formattedPhone = "+" + cleaned;
+    } else {
       setError("Enter a valid Philippine mobile number.");
+      return;
+    }
+
+    if (password.length < 12) {
+      setError("Use a password with at least 12 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -43,119 +48,123 @@ export default function RegisterPage() {
     setError("");
     setMessage("");
 
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: formatted,
-      options: {
-        shouldCreateUser: true,
-      },
-    });
+    try {
+      const { data, error: authError } =
+        await supabase.auth.signUp({
+          phone: formattedPhone,
+          password,
+        });
 
-    setLoading(false);
+      if (authError) {
+        setError(authError.message);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
+      if (data.session) {
+        router.replace("/dashboard");
+        router.refresh();
+      } else {
+        setMessage(
+          "Account created. Complete any required verification before signing in."
+        );
+      }
+    } catch {
+      setError("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setPhone(formatted);
-    setStep("verify");
-    setMessage("Verification code sent to your phone.");
-  }
-
-  async function verifyOTP(e: React.FormEvent) {
-    e.preventDefault();
-
-    setLoading(true);
-    setError("");
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone,
-      token: otp,
-      type: "sms",
-    });
-
-    setLoading(false);
-
-    if (error) {
-      setError(error.message);
-      return;
-    }
-
-    if (!data.session) {
-      setError("Verification succeeded, but no session was created.");
-      return;
-    }
-
-    router.replace("/");
-    router.refresh();
   }
 
   return (
     <main className="unify-login">
-      <div className="unify-login-card">
+      <form
+        className="unify-login-card"
+        onSubmit={handleRegister}
+      >
         <div className="unify-login-logo">◆</div>
-
         <h1>UNIFY</h1>
-        <p>Register using your mobile number</p>
+        <p>Create your account</p>
 
         {error && (
-          <div className="unify-login-error">{error}</div>
+          <div className="unify-login-error" role="alert">
+            {error}
+          </div>
         )}
 
         {message && <p role="status">{message}</p>}
 
-        {step === "phone" ? (
-          <form onSubmit={sendOTP}>
-            <label htmlFor="phone">Mobile Number</label>
+        <label htmlFor="phone">Mobile Number</label>
+        <input
+          id="phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder="09123456789"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+        />
 
-            <input
-              id="phone"
-              type="tel"
-              autoComplete="tel"
-              placeholder="09123456789"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-            />
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Sending..." : "Send OTP"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={verifyOTP}>
-            <label htmlFor="otp">SMS Verification Code</label>
+<label htmlFor="password">Password</label>
 
-            <input
-              id="otp"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              required
-            />
+<div className="password-wrapper">
+  <input
+    id="password"
+    type={showPassword ? "text" : "password"}
+    autoComplete="new-password"
+    placeholder="Enter your password"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+  />
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Verifying..." : "Verify & Register"}
-            </button>
+  <button
+    type="button"
+    className="password-toggle"
+    onClick={() => setShowPassword(!showPassword)}
+    aria-label={showPassword ? "Hide password" : "Show password"}
+    aria-pressed={showPassword}
+  >
+    {showPassword ? "🙈" : "👁"}
+  </button>
+</div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setStep("phone");
-                setOtp("");
-                setMessage("");
-              }}
-            >
-              Change Number
-            </button>
-          </form>
-        )}
+<label htmlFor="confirm">Confirm Password</label>
 
-        <small>UNIFY — Virtual Investment Simulator</small>
-      </div>
+<div className="password-wrapper">
+  <input
+    id="confirm"
+    type={showConfirmPassword ? "text" : "password"}
+    autoComplete="new-password"
+    placeholder="Confirm your password"
+    value={confirmPassword}
+    onChange={(e) => setConfirmPassword(e.target.value)}
+    required
+  />
+
+  <button
+    type="button"
+    className="password-toggle"
+    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+    aria-label={
+      showConfirmPassword ? "Hide confirm password" : "Show confirm password"
+    }
+    aria-pressed={showConfirmPassword}
+  >
+    {showConfirmPassword ? "🙈" : "👁"}
+  </button>
+</div>
+
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Creating Account..." : "Register"}
+        </button>
+
+        <p>
+          Already have an account?{" "}
+          <Link href="/login">Login Here</Link>
+        </p>
+      </form>
     </main>
   );
 }
