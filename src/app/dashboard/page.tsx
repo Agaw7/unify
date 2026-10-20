@@ -470,10 +470,19 @@ if (b.error) {
   ]);
 
   if (sandboxWalletResult.error) {
-    console.error("Sandbox wallet error:", sandboxWalletResult.error.message);
-    setMessage("Unable to load sandbox remaining balance.");
+    console.error("Sandbox wallet error:", sandboxWalletResult.error);
+    setMessage(`Unable to load test balance: ${sandboxWalletResult.error.message}`);
+  } else if (!sandboxWalletResult.data) {
+    console.warn("No sandbox wallet found for:", id);
+    setMessage("Your test wallet was not found. Contact support.");
   } else {
-    setRemainingBalance(Number(sandboxWalletResult.data?.remaining_balance ?? 0));
+    const amount = Number(sandboxWalletResult.data.remaining_balance);
+    if (!Number.isFinite(amount)) {
+      setMessage("Invalid test wallet balance received.");
+    } else {
+      setRemainingBalance(amount);
+      console.log("UNIFY test balance loaded:", amount);
+    }
   }
 
   if (sandboxDepositResult.error) {
@@ -484,15 +493,18 @@ if (b.error) {
   }
 
   if (pr.error) {
-  console.error("Profile loading failed:", pr.error.message);
-  setMessage("Unable to load your profile.");
-} else if (!pr.data) {
-  console.warn("No profile found for authenticated user:", id);
-  setProfile(null);
-} else {
-  console.log("Profile loaded successfully");
-  setProfile(pr.data as Profile);
-}
+    console.error("UNIFY profile error:", pr.error);
+    setMessage(`Profile loading failed: ${pr.error.message}`);
+  } else if (!pr.data) {
+    setProfile(null);
+    setMessage("Member profile not found.");
+  } else {
+    const memberProfile = pr.data as Profile;
+    setProfile(memberProfile);
+    console.log("UNIFY profile loaded:", {
+      hasInviteCode: Boolean(memberProfile.invite_code),
+    });
+  }
 
   setMembers((m.data ?? []) as Member[]);
 
@@ -517,24 +529,6 @@ if (b.error) {
         }
 
         const user = data.user;
-
-        const { data: profile, error: profileError } =
-  await supabase
-    .from("profiles")
-    .select("invite_code")
-    .eq("id", user.id)
-    .maybeSingle();
-
-if (profileError) {
-  console.error("Invite code error:", profileError.message);
-}
-
-if (profile?.invite_code) {
-  const link = new URL("/register", window.location.origin);
-  link.searchParams.set("ref", profile.invite_code);
-
-  setInviteLink(link.toString());
-}
 
         setUserId(user.id);
 

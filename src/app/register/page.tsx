@@ -1,6 +1,6 @@
 
 "use client";
-
+import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -125,7 +125,7 @@ export default function RegisterPage() {
     aria-label={showPassword ? "Hide password" : "Show password"}
     aria-pressed={showPassword}
   >
-    {showPassword ? "🙈" : "👁"}
+    {showPassword ? <EyeOff size={21} /> : <Eye size={21} />}
   </button>
 </div>
 
@@ -151,7 +151,7 @@ export default function RegisterPage() {
     }
     aria-pressed={showConfirmPassword}
   >
-    {showConfirmPassword ? "🙈" : "👁"}
+    {showConfirmPassword ? <EyeOff size={21} /> : <Eye size={21} />}
   </button>
 </div>
 

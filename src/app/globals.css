@@ -2015,3 +2015,254 @@ button {
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 55px;
+}
+
+.password-wrapper .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #64748b;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.password-wrapper .password-toggle:hover {
+  color: #00bfff;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 55px;
+}
+
+.password-wrapper .password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+  padding: 0;
+
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.password-wrapper .password-toggle:hover {
+  color: #00bfff;
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.remember-option,
+.terms-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #dce8ff;
+  font-size: 14px;
+}
+
+.terms-option {
+  margin: 20px 0;
+}
+
+.remember-option input,
+.terms-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: #00bfff;
+}
+
+.text-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #35caff;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.unify-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(2, 12, 30, 0.6);
+  backdrop-filter: blur(7px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.unify-bottom-sheet {
+  width: 100%;
+  max-width: 600px;
+  max-height: 85dvh;
+  background: #fff;
+  color: #10213d;
+  border-radius: 28px 28px 0 0;
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sheet-handle {
+  width: 48px;
+  height: 5px;
+  background: #dce4f1;
+  border-radius: 20px;
+  margin: 0 auto;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sheet-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.sheet-header button {
+  background: #f0f4fc;
+  border: none;
+  border-radius: 12px;
+  padding: 10px;
+  color: #123c7d;
+}
+
+.sheet-content {
+  overflow-y: auto;
+  flex: 1;
+  line-height: 1.6;
+}
+
+.sheet-content h3 {
+  color: #123c7d;
+  margin: 22px 0 6px;
+}
+
+.sheet-content p {
+  margin: 0 0 12px;
+}
+
+.sheet-primary {
+  width: 100%;
+  min-height: 54px;
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-weight: 700;
+  font-size: 17px;
+  background: linear-gradient(180deg, #2168bb, #062d73);
+  cursor: pointer;
+}
+
+
+/* Compact Remember Me and Forgot Password */
+.unify-login .login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.unify-login .remember-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.unify-login .remember-option input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: #00cfff;
+}
+
+/* Small text links instead of blue buttons */
+.unify-login button.text-link {
+  display: inline;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #00d2ff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Compact Terms and Conditions */
+.unify-login .terms-option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 12px 0 16px;
+}
+
+.unify-login .terms-option .remember-option {
+  margin: 0;
+}
