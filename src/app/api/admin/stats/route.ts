@@ -183,7 +183,7 @@ if (!url || !anonKey || !serviceKey) {
     // Explicitly simulated payouts, NOT real verified GCash/Maya transfers.
 const sandboxPayouts = await all(
   "sandbox_withdrawal_payouts",
-  "id,withdrawal_request_id,transaction_id,user_id,amount,currency,status,is_simulated,created_at"
+  "id,withdrawal_request_id,transaction_id,amount,currency,status,created_at"
 );
     const withdrawalById = new Map(withdrawals.map((w) => [String(w.id), w]));
     const seenSandbox = new Set<string>();
