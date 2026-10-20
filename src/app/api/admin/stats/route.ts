@@ -180,33 +180,12 @@ if (!url || !anonKey || !serviceKey) {
       }
     }
 
-    // Explicitly simulated payouts, NOT real verified GCash/Maya transfers.
-const sandboxPayouts = await all(
-  "sandbox_withdrawal_payouts",
-  "id,withdrawal_request_id,transaction_id,amount,currency,status,created_at"
-);
-    const withdrawalById = new Map(withdrawals.map((w) => [String(w.id), w]));
-    const seenSandbox = new Set<string>();
-    let simulatedPaidCents = 0;
-    let simulatedPaidCount = 0;
-    for (const payout of sandboxPayouts) {
-      const withdrawalId = String(payout.withdrawal_request_id);
-      if (seenSandbox.has(withdrawalId)) continue;
-      const withdrawal = withdrawalById.get(withdrawalId);
-      const tx = transactionById.get(String(payout.transaction_id));
-      if (!withdrawal || !tx || payout.is_simulated !== true ||
-          withdrawal.status !== "completed" || tx.status !== "completed" ||
-          tx.transaction_type !== "withdrawal" ||
-          String(withdrawal.transaction_id) !== String(payout.transaction_id) ||
-          String(tx.user_id) !== String(payout.user_id) ||
-          withdrawal.currency !== "PHP" || tx.currency !== "PHP" ||
-          payout.currency !== "PHP" || cents(payout.amount) <= 0 ||
-          cents(payout.amount) !== cents(withdrawal.amount) ||
-          cents(payout.amount) !== cents(tx.amount)) continue;
-      seenSandbox.add(withdrawalId);
-      simulatedPaidCents += cents(payout.amount);
-      simulatedPaidCount++;
-    }
+    // Simulated payout reporting is temporarily disabled until the
+    // sandbox_withdrawal_payouts schema is verified. This prevents
+    // unverified payout records from being reported as completed.
+    // No database records or balances are changed by this fallback.
+    const simulatedPaidCents = 0;
+    const simulatedPaidCount = 0;
 
     return NextResponse.json({
       currency: "PHP",
