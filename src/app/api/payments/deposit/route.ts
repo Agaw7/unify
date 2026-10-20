@@ -19,6 +19,13 @@ export async function POST(request: NextRequest) {
     const paymongoKey = process.env.PAYMONGO_SECRET_KEY;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
+    console.error("UNIFY DEPOSIT CONFIG CHECK:", {
+  supabaseUrl: Boolean(url),
+  supabaseAnonKey: Boolean(anonKey),
+  supabaseServiceKey: Boolean(serviceKey),
+  paymongoSecretKey: Boolean(paymongoKey),
+});
+
     if (!url || !anonKey || !serviceKey ||
         !paymongoKey || !appUrl) {
       return NextResponse.json(
