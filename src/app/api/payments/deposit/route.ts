@@ -9,6 +9,9 @@ export const runtime = "nodejs";
 
 type PaymentMethod = "gcash" | "maya";
 
+const fail = (message: string, status: number) =>
+  NextResponse.json({ error: message }, { status });
+
 export async function POST(request: NextRequest) {
   const transactionId: string | null = null;
 
@@ -20,19 +23,17 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
     console.error("UNIFY DEPOSIT CONFIG CHECK:", {
-  supabaseUrl: Boolean(url),
-  supabaseAnonKey: Boolean(anonKey),
-  supabaseServiceKey: Boolean(serviceKey),
-  paymongoSecretKey: Boolean(paymongoKey),
-});
+      supabaseUrl: Boolean(url),
+      supabaseAnonKey: Boolean(anonKey),
+      supabaseServiceKey: Boolean(serviceKey),
+      paymongoSecretKey: Boolean(paymongoKey),
+      appUrl: Boolean(appUrl),
+    });
 
-    if (!url || !anonKey || !serviceKey ||
-        !paymongoKey || !appUrl) {
-      return NextResponse.json(
-        { error: "Missing server configuration." },
-        { status: 500 }
-      );
+    if (!url || !anonKey || !serviceKey || !paymongoKey || !appUrl) {
+      return fail("Missing server configuration.", 500);
     }
+    console.log("UNIFY deposit: environment check passed");
 
     if (!paymongoKey.startsWith("sk_test_")) {
       return NextResponse.json(
