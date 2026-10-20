@@ -1,20 +1,14 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    "Missing Supabase environment variables."
-  );
-}
-
-if (
-  !supabaseUrl.startsWith("https://") ||
-  !supabaseUrl.endsWith(".supabase.co")
-) {
-  throw new Error("Invalid Supabase URL.");
+  throw new Error("Missing Supabase environment variables.");
 }
 
 if (/[\r\n]/.test(supabaseKey)) {
