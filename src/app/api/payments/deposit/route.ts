@@ -30,9 +30,16 @@ export async function POST(request: NextRequest) {
       appUrl: Boolean(appUrl),
     });
 
-    if (!url || !anonKey || !serviceKey || !paymongoKey || !appUrl) {
-      return fail("Missing server configuration.", 500);
-    }
+ if (!url || !anonKey || !serviceKey || !paymongoKey) {
+  console.error("UNIFY DEPOSIT MISSING VARIABLES:", {
+    url: !url,
+    anonKey: !anonKey,
+    serviceKey: !serviceKey,
+    paymongoKey: !paymongoKey,
+  });
+
+  return fail("Missing deposit API configuration (v2).", 500);
+}
     console.log("UNIFY deposit: environment check passed");
 
     if (!paymongoKey.startsWith("sk_test_")) {
@@ -137,8 +144,54 @@ if (authError || !auth.user) {
       );
     }
 
-    const baseUrl = new URL(appUrl);
-    const centavos = Math.round(amount * 100);
+
+
+const configuredAppUrl =
+  process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+const vercelAppUrl =
+  process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+
+const rawAppUrl =
+  configuredAppUrl ||
+  vercelAppUrl;
+
+if (!rawAppUrl) {
+  return fail(
+    "Missing application URL configuration.",
+    500
+  );
+}
+
+const normalizedUrl =
+  /^https?:\/\//i.test(rawAppUrl)
+    ? rawAppUrl
+    : `https://${rawAppUrl}`;
+
+let baseUrl: URL;
+
+try {
+  baseUrl = new URL(normalizedUrl);
+
+  if (
+    baseUrl.protocol !== "https:" &&
+    baseUrl.hostname !== "localhost"
+  ) {
+    return fail(
+      "Invalid application URL configuration.",
+      500
+    );
+  }
+} catch {
+  return fail(
+    "Invalid application URL configuration.",
+    500
+  );
+}
+
+const centavos = Math.round(amount * 100);
+
+
 
     // PayMongo calls Maya "paymaya" in the API.
     const paymongoMethod =
