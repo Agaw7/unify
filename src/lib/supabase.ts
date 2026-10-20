@@ -5,28 +5,32 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing public Supabase environment variables.");
+  throw new Error(
+    "Missing Supabase environment variables."
+  );
 }
 
 if (
   !supabaseUrl.startsWith("https://") ||
   !supabaseUrl.endsWith(".supabase.co")
 ) {
-  throw new Error("Invalid NEXT_PUBLIC_SUPABASE_URL configuration.");
+  throw new Error("Invalid Supabase URL.");
 }
 
-if (
-  supabaseKey.includes("\n") ||
-  supabaseKey.includes("\r") ||
-  /[^\x21-\x7E]/.test(supabaseKey)
-) {
-  throw new Error("Invalid Supabase public key formatting.");
+if (/[\r\n]/.test(supabaseKey)) {
+  throw new Error(
+    "Supabase public key contains a newline. Check environment variables."
+  );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseKey,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
+);
