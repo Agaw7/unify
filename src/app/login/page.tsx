@@ -64,67 +64,103 @@ export default function LoginPage() {
     }
   }
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (loading) return;
-    if (!agreed) {
-      setError("Please agree to the Terms & Conditions.");
-      return;
-    }
 
-    const formattedPhone = formatPhone(phone);
-    if (!formattedPhone) {
-      setError("Enter a valid Philippine mobile number.");
-      return;
-    }
+async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
 
-    setLoading(true);
-    setError("");
-    try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
+  if (loading) return;
+
+  if (!agreed) {
+    setError("Please agree to the Terms & Conditions.");
+    return;
+  }
+
+  const formattedPhone = formatPhone(phone);
+
+  if (!formattedPhone) {
+    setError("Enter a valid Philippine mobile number.");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    const { data, error: authError } =
+      await supabase.auth.signInWithPassword({
         phone: formattedPhone,
         password,
       });
 
-      if (authError) {
-        console.error("UNIFY authentication failed:", {
-          message: authError.message,
-          code: authError.code,
-          status: authError.status,
-        });
+    if (authError) {
+      console.error("UNIFY Supabase authentication error:", {
+        message: authError.message,
+        code: authError.code,
+        status: authError.status,
+        name: authError.name,
+      });
 
-        if (authError.message.toLowerCase().includes("fetch")) {
-          setError("Unable to connect to the authentication server.");
-        } else {
-          setError("Unable to sign in. Check your mobile number and password.");
-        }
-        return;
+      const errorMessage = authError.message.toLowerCase();
+
+      if (
+        errorMessage.includes("fetch") ||
+        errorMessage.includes("network")
+      ) {
+        setError(
+          "Cannot reach Supabase Authentication. Check your internet connection and Supabase configuration."
+        );
+      } else if (authError.status === 429) {
+        setError("Too many login attempts. Please try again later.");
+      } else if (
+        errorMessage.includes("invalid login credentials")
+      ) {
+        setError("Incorrect mobile number or password.");
+      } else if (
+        errorMessage.includes("phone not confirmed")
+      ) {
+        setError("Please verify your mobile number first.");
+      } else {
+        setError(`Login failed: ${authError.message}`);
       }
 
-      if (!data.session) {
-        setError("Sign-in did not return a session. Check account verification.");
-        return;
-      }
-
-      try {
-        if (rememberMe) {
-          localStorage.setItem("unify_remembered_phone", phone);
-        } else {
-          localStorage.removeItem("unify_remembered_phone");
-        }
-      } catch {
-        // Authentication succeeds even when local storage is unavailable.
-      }
-
-      router.replace("/dashboard");
-      router.refresh();
-    } catch (error) {
-      console.error("Login request failed:", error);
-      setError("Unable to connect to authentication. Please try again.");
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    if (!data.session) {
+      setError(
+        "Sign-in did not return a session. Check account verification."
+      );
+      return;
+    }
+
+    try {
+      if (rememberMe) {
+        localStorage.setItem(
+          "unify_remembered_phone",
+          phone
+        );
+      } else {
+        localStorage.removeItem(
+          "unify_remembered_phone"
+        );
+      }
+    } catch {
+      // Authentication succeeds even if browser storage is unavailable.
+    }
+
+    router.replace("/dashboard");
+    router.refresh();
+  } catch (err) {
+    console.error("UNIFY unexpected login error:", err);
+
+    setError(
+      "An unexpected login error occurred. Check the browser console."
+    );
+  } finally {
+    setLoading(false);
   }
+}
+
 
   return (
     <main className="unify-login">
