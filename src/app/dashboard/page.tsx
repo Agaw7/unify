@@ -199,7 +199,9 @@ export default function HomePage() {
   
   const [balance, setBalance] = useState(0);
   const [remainingBalance, setRemainingBalance] = useState(0);
-  const [sandboxDepositBalance, setSandboxDepositBalance] = useState(0);
+  // Display the existing credited PayMongo Test Mode wallet.
+  // This is a temporary read-only display mapping; do not credit funds here.
+  const sandboxDepositBalance = balance;
   
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -457,17 +459,11 @@ if (b.error) {
     console.warn("UNIFY wallet account not found for user:", id);
     setMessage("Wallet account not found. Please contact support.");
   }
-  // Read-only sandbox balances. Never combine with the existing wallet_accounts balance.
-  const [sandboxWalletResult, sandboxDepositResult] = await Promise.all([
-    supabase.from("sandbox_wallets")
-      .select("remaining_balance")
-      .eq("user_id", id)
-      .maybeSingle(),
-    supabase.from("sandbox_deposit_balances")
-      .select("balance")
-      .eq("user_id", id)
-      .maybeSingle(),
-  ]);
+  // Remaining Balance stays separate from the existing deposit wallet.
+  const sandboxWalletResult = await supabase.from("sandbox_wallets")
+    .select("remaining_balance")
+    .eq("user_id", id)
+    .maybeSingle();
 
   if (sandboxWalletResult.error) {
     console.error("Sandbox wallet error:", sandboxWalletResult.error);
@@ -483,13 +479,6 @@ if (b.error) {
       setRemainingBalance(amount);
       console.log("UNIFY test balance loaded:", amount);
     }
-  }
-
-  if (sandboxDepositResult.error) {
-    console.error("Sandbox deposit balance error:", sandboxDepositResult.error.message);
-    setMessage("Unable to load sandbox deposit balance.");
-  } else {
-    setSandboxDepositBalance(Number(sandboxDepositResult.data?.balance ?? 0));
   }
 
   if (pr.error) {
