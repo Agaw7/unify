@@ -1,8 +1,6 @@
 
 "use client";
 
-
-import Walletbalance from "@/components/WalletBalance";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 

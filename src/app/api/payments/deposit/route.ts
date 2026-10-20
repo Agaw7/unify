@@ -3,13 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { constants } from "buffer";
 
 export const runtime = "nodejs";
 
 type PaymentMethod = "gcash" | "maya";
 
 export async function POST(request: NextRequest) {
-  let transactionId: string | null = null;
+  const transactionId: string | null = null;
 
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -127,8 +128,6 @@ if (authError || !auth.user) {
         { status: 500 }
       );
     }
-
-    transactionId = tx.id;
 
     const baseUrl = new URL(appUrl);
     const centavos = Math.round(amount * 100);

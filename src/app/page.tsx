@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -198,6 +199,7 @@ export default function HomePage() {
   
   const [balance, setBalance] = useState(0);
   const [remainingBalance, setRemainingBalance] = useState(0);
+  const [sandboxDepositBalance, setSandboxDepositBalance] = useState(0);
   
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -477,7 +479,9 @@ if (b.error) {
   if (sandboxDepositResult.error) {
     console.error("Sandbox deposit balance error:", sandboxDepositResult.error.message);
     setMessage("Unable to load sandbox deposit balance.");
-  } 
+  } else {
+    setSandboxDepositBalance(Number(sandboxDepositResult.data?.balance ?? 0));
+  }
 
   setProfile(pr.data as Profile | null);
 
@@ -813,18 +817,10 @@ if (b.error) {
     }
 
     window.location.reload();
-
   }
-
-  const sumType = (type: string) =>
-
-    transactions
-
-      .filter(t => t.type === type)
-
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-  const getProduct = (id: string) =>
+  
+  
+    const getProduct = (id: string) =>
 
     products.find(p => String(p.id) === String(id));
 
@@ -968,6 +964,7 @@ if (b.error) {
     </div>
     <div className="unify-balance-card">
       <span>Deposit Balance · Test Mode</span>
+      <h2>{peso(sandboxDepositBalance)}</h2>
     
       <p>Sandbox test deposits · Not withdrawable</p>
     </div>
@@ -1232,12 +1229,6 @@ if (b.error) {
 
                 const duration = product?.duration_days ?? 100;
 
-               (
-
-                  start.getTime() + duration * 86400000
-
-                );
-
                 const elapsed = Math.max(
 
                   0,
@@ -1489,6 +1480,7 @@ if (b.error) {
     </div>
     <div className="unify-balance-card">
       <span>Deposit Balance · Test Mode</span>
+      <h2>{peso(sandboxDepositBalance)}</h2>
       
       <p>Sandbox test deposits · Not withdrawable</p>
     </div>
@@ -2026,7 +2018,7 @@ function ProductCard({
 
         <span>
 
-          Projected total: {peso(amount + earnings)}
+          Illustrative daily amount: {peso(earnings)}
 
         </span>
 
