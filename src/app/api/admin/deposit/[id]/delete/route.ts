@@ -48,6 +48,12 @@ export async function DELETE(
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     const paymongoKey = process.env.PAYMONGO_SECRET_KEY;
 
+    console.error("UNIFY configuration check:", {
+  url: Boolean(url),
+  anonKey: Boolean(anonKey),
+  serviceKey: Boolean(serviceKey),
+  paymongoKey: Boolean(paymongoKey),
+});
     if (!url || !anonKey || !serviceKey || !paymongoKey) {
       return fail("Missing server configuration.", 500);
     }
