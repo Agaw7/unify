@@ -85,8 +85,24 @@ export default function LoginPage() {
         phone: formattedPhone,
         password,
       });
-      if (authError || !data.session) {
-        setError("Unable to sign in. Check your mobile number and password.");
+
+      if (authError) {
+        console.error("UNIFY authentication failed:", {
+          message: authError.message,
+          code: authError.code,
+          status: authError.status,
+        });
+
+        if (authError.message.toLowerCase().includes("fetch")) {
+          setError("Unable to connect to the authentication server.");
+        } else {
+          setError("Unable to sign in. Check your mobile number and password.");
+        }
+        return;
+      }
+
+      if (!data.session) {
+        setError("Sign-in did not return a session. Check account verification.");
         return;
       }
 
@@ -102,8 +118,9 @@ export default function LoginPage() {
 
       router.replace("/dashboard");
       router.refresh();
-    } catch {
-      setError("Unable to log in. Please try again.");
+    } catch (error) {
+      console.error("Login request failed:", error);
+      setError("Unable to connect to authentication. Please try again.");
     } finally {
       setLoading(false);
     }
