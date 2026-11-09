@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Download } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
+import { isCatalogProduct, productDetails, productDisplayName } from '@/lib/product-presentation';
 import styles from './manual-deposit.module.css';
 
 type Method = {
@@ -12,9 +13,10 @@ type Method = {
   label: string;
   qr: string;
   instructions: string;
-  referenceLabel: string;
 };
 type Configuration = { methods: Method[]; approvalPaused: boolean };
+type MarketProduct = { id: string; name: string; price: number };
+const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
 
 async function authorizedFetch(path: string, init?: RequestInit) {
   const { data, error } = await supabase.auth.getSession();
@@ -26,6 +28,8 @@ async function authorizedFetch(path: string, init?: RequestInit) {
 
 export default function ManualQrDeposit({ initialAmount }: { initialAmount: number }) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
+  const [marketAmounts, setMarketAmounts] = useState<MarketProduct[] | null>(null);
+  const [amount, setAmount] = useState('');
   const [proof, setProof] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -50,8 +54,21 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
       .catch(cause => {
         if (active) setError(cause instanceof Error ? cause.message : 'Unable to load payment instructions.');
       });
+    void authorizedFetch('/api/investments')
+      .then(async response => {
+        if (!response.ok) throw new Error('Unable to load Market amounts.');
+        const result: { products: MarketProduct[] } = await response.json();
+        const choices = result.products.filter(product =>
+          isCatalogProduct(product.name) && Number.isInteger(product.price) &&
+          product.price >= 30_000 && product.price <= 5_000_000);
+        if (!active) return;
+        setMarketAmounts(choices);
+        const initial = choices.find(product => product.price === Math.round(initialAmount * 100)) ?? choices[0];
+        setAmount(initial ? String(initial.price / 100) : '');
+      })
+      .catch(() => { if (active) setMarketAmounts([]); });
     return () => { active = false; };
-  }, []);
+  }, [initialAmount]);
 
   useEffect(() => {
     if (!proof) { setPreviewUrl(''); return; }
@@ -76,7 +93,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || submitted || !proof || !method) return;
+    if (busy || submitted || !proof || !method || !amount) return;
     const form = new FormData(event.currentTarget);
     form.set('method', method.id);
     form.set('receipt', proof);
@@ -122,10 +139,17 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
       <form className={styles.form} onSubmit={submit}>
         <div className={styles.sectionTitle}><span>02</span><div><h2>Payment details</h2><p>Your wallet is credited after an administrator verifies the payment.</p></div></div>
         <fieldset disabled={busy || submitted || !method || !configuration?.methods.length}>
-          <label className={styles.fieldLabel} htmlFor="deposit-amount">Deposit amount (PHP)</label>
-          <div className={styles.amountInput}><span>₱</span><input id="deposit-amount" className={styles.input} name="amount" type="number" min="300" max="50000" step="0.01" defaultValue={initialAmount} required onChange={() => { idempotencyKey.current = null; }} /></div>
-          <label className={styles.fieldLabel} htmlFor="deposit-reference">{method?.referenceLabel ?? 'Payment reference number'}</label>
-          <input id="deposit-reference" className={styles.input} name="reference" minLength={5} maxLength={72} pattern="[A-Za-z0-9-]{5,72}" autoComplete="off" required onChange={() => { idempotencyKey.current = null; }} />
+          <label className={styles.fieldLabel} htmlFor="deposit-amount">Deposit amount</label>
+          <select id="deposit-amount" className={styles.input} name="amount" value={amount} required
+            onChange={event => { setAmount(event.target.value); idempotencyKey.current = null; }}>
+            {!amount && <option value="">{marketAmounts === null ? 'Loading Market amounts…' : 'No Market amounts available'}</option>}
+            {marketAmounts?.map(product => {
+              const tier = productDetails(product.name)?.tier;
+              return <option key={product.id} value={product.price / 100}>
+                {tier ? `Tier ${tier} · ` : ''}{productDisplayName(product.name)} · {peso.format(product.price / 100)}
+              </option>;
+            })}
+          </select>
           <label className={styles.fieldLabel} htmlFor="deposit-receipt">Payment screenshot <span>PNG, JPG, JPEG · max 5 MB</span></label>
           <input id="deposit-receipt" className={styles.fileInput} type="file" accept="image/png,image/jpeg,.jpg,.jpeg"
             onChange={event => { chooseProof(event.target.files?.[0]); event.currentTarget.value = ''; }} disabled={busy || submitted} />
@@ -134,7 +158,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
             <div><span>{proof?.name}</span><button type="button" onClick={() => { setProof(null); idempotencyKey.current = null; }} disabled={busy}>Remove</button><label htmlFor="deposit-receipt">Replace</label></div>
           </div> : <label className={styles.upload} htmlFor="deposit-receipt"><strong>Choose payment screenshot</strong><small>PNG, JPG, or JPEG · maximum 5 MB</small></label>}
           <label className={styles.attestation}><input type="checkbox" name="attest" required /><span>I confirm these details and screenshot are accurate. I understand the request stays pending until an administrator verifies the payment in the merchant account.</span></label>
-          <button className={styles.submit} type="submit" disabled={busy || !proof || !method}>{busy ? 'Submitting…' : 'Submit Deposit Request'}</button>
+          <button className={styles.submit} type="submit" disabled={busy || !proof || !method || !amount}>{busy ? 'Submitting…' : 'Submit Deposit Request'}</button>
         </fieldset>
         {error && <p className={styles.error} role="alert">{error}</p>}
         {notice && <p className={styles.notice} role="status">{notice}{requestId && <><br />Request ID: <strong>{requestId}</strong><br />Status: <strong>{status}</strong></>}</p>}

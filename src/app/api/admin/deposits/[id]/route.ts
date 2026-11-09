@@ -35,7 +35,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         typeof body.paymentReference !== 'string' || !/^[A-Z0-9-]{5,72}$/.test(body.paymentReference)) {
       throw new MoneyError('Confirm the received payment and enter its reference from the merchant account history');
     }
-    if (manual.instapay_reference !== `PALAWAN-${body.paymentReference}` &&
+    if (!/^PALAWAN-REQUEST-[A-F0-9]{64}$/.test(manual.instapay_reference) &&
+        manual.instapay_reference !== `PALAWAN-${body.paymentReference}` &&
         manual.instapay_reference !== `GCASH-${body.paymentReference}`) {
       throw new MoneyError('The verified merchant reference does not match the submitted deposit request');
     }

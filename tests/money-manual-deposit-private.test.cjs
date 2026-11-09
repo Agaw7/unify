@@ -21,7 +21,7 @@ test('manual deposit screenshots are private and verified credits remain atomic'
     for (const name of ['03_real_money', '04_payment_operations', '15_qrph_live_deposits',
       '16_withdrawal_only_verification', '17_live_withdrawal_modes', '18_funded_live_plans',
       '19_purchase_wallet_registration_bonus', '32_manual_qrph_deposits', '37_manual_gcash_deposits',
-      '39_manual_palawan_deposits', '46_manual_deposit_private_receipts']) {
+      '39_manual_palawan_deposits', '46_manual_deposit_private_receipts', '51_palawan_screenshot_deposits']) {
       await db.exec(readFileSync(`database/${name}.sql`, 'utf8'));
     }
 
@@ -31,8 +31,9 @@ test('manual deposit screenshots are private and verified credits remain atomic'
     async function submit(user, reference) {
       const key = randomUUID();
       const path = `${user}/${key}/${'a'.repeat(64)}.png`;
+      const requestReference = reference ?? 'PALAWAN-REQUEST-' + (user + key).replaceAll('-', '').toUpperCase();
       const id = (await query(`select money_submit_manual_qrph_private(
-        $1,30000,$2,$3,$4) id`, [user, key, reference, path]))[0].id;
+        $1,30000,$2,$3,$4) id`, [user, key, requestReference, path]))[0].id;
       return { id, path, key };
     }
 
@@ -61,6 +62,12 @@ test('manual deposit screenshots are private and verified credits remain atomic'
     await assert.rejects(query("select money_approve_gcash_deposit($1,$2,'123456789')", [rejected.id, admin]), /already linked or reviewed/);
     assert.equal((await query('select status from money_transactions where id=$1', [rejected.id]))[0].status, 'rejected');
     assert.equal((await query('select deposit_available from money_wallets where user_id=$1', [rejectedMember]))[0].deposit_available, 0);
+
+    const screenshotOnly = await submit(rejectedMember);
+    await assert.rejects(query("select money_approve_palawan_deposit($1,$2,'123456789')", [screenshotOnly.id, admin]), /reference already credited/);
+    await query("select money_approve_palawan_deposit($1,$2,'987654321')", [screenshotOnly.id, admin]);
+    await query("select money_approve_palawan_deposit($1,$2,'987654321')", [screenshotOnly.id, admin]);
+    assert.equal((await query('select deposit_available from money_wallets where user_id=$1', [rejectedMember]))[0].deposit_available, 30000);
 
     await assert.rejects(db.exec(`set role authenticated;
       select * from manual_qrph_deposits;

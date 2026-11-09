@@ -105,7 +105,7 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
     setNotice('');
     setConfirm(false);
     setReason('');
-    setPaymentReference(deposit.submittedReference?.replace(/^(PALAWAN|GCASH)-/, '') ?? '');
+    setPaymentReference(deposit.submittedReference?.replace(/^PALAWAN-REQUEST-[A-F0-9]{64}$/, '').replace(/^(PALAWAN|GCASH)-/, '') ?? '');
     setReceivedAt('');
     setSelectedId(deposit.id);
   }
@@ -190,7 +190,7 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
               <div><dt>Phone Number</dt><dd>{selected.member.phone ?? 'Unavailable'}</dd></div>
               <div><dt>Deposit Request ID</dt><dd>{selected.id}</dd></div>
               <div><dt>Payment Method</dt><dd>{paymentMethod(selected)}</dd></div>
-              <div><dt>Submitted Reference</dt><dd>{selected.submittedReference ?? 'Unavailable'}</dd></div>
+              <div><dt>Submitted Reference</dt><dd>{selected.submittedReference?.replace(/^PALAWAN-REQUEST-[A-F0-9]{64}$/, 'Screenshot only') ?? 'Unavailable'}</dd></div>
               <div><dt>Deposit Amount</dt><dd>{currency(selected.amount)}</dd></div>
               <div><dt>Request Date</dt><dd>{dateTime(selected.created_at)}</dd></div>
               <div><dt>Status</dt><dd>{selected.status}</dd></div>

@@ -54,7 +54,9 @@ export default function ManualQrDepositReview({ id, onVerified }: { id: string; 
   return <div className="space-y-2 rounded-lg border border-slate-600 p-3">
     <button type="button" disabled={busy} className="text-cyan-200" onClick={() => void review(false)}>View manual deposit receipt</button>
     {proof && <>
-      <p>{receivingAccount} reference · {proof.instapay_reference.slice(palawan ? 8 : 6)}</p>
+      <p>{/^PALAWAN-REQUEST-[A-F0-9]{64}$/.test(proof.instapay_reference)
+        ? 'Screenshot-only deposit'
+        : `${receivingAccount} reference · ${proof.instapay_reference.slice(palawan ? 8 : 6)}`}</p>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="max-h-80 max-w-full object-contain" src={proof.receipt} alt="Member deposit receipt" />
       {receivingAccount && <p>Match the amount and reference in your {receivingAccount} transaction history before approving.</p>}

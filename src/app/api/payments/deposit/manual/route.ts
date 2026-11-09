@@ -82,7 +82,7 @@ export function POST(request: NextRequest) {
     if (!palawan && !gcash) throw new MoneyError('Manual deposits are unavailable', 503);
     const form = await request.formData();
     const key = form.get('key');
-    const reference = String(form.get('reference') ?? '').trim().toUpperCase();
+    const submittedReference = String(form.get('reference') ?? '').trim().toUpperCase();
     const receipt = form.get('receipt');
     const selectedMethod = form.get('method');
     if (selectedMethod !== 'palawan' && selectedMethod !== 'gcash') throw new MoneyError('Choose an available payment method');
@@ -90,11 +90,17 @@ export function POST(request: NextRequest) {
       throw new MoneyError('The selected payment method is not configured for manual deposits', 503);
     }
     const prefix = selectedMethod === 'palawan' ? 'PALAWAN-' : 'GCASH-';
-    if (form.get('attest') !== 'on' || !uuid(key) || !/^[A-Z0-9-]{5,72}$/.test(reference) || /^(GCASH|PALAWAN)-/.test(reference) ||
-        prefix.length + reference.length > 80 || !(receipt instanceof File) ||
+    if (form.get('attest') !== 'on' || !uuid(key) || !(receipt instanceof File) ||
         !['image/png', 'image/jpeg'].includes(receipt.type) || receipt.size < 8 || receipt.size > 5 * 1024 * 1024) {
-      throw new MoneyError('Enter the payment reference and attach a PNG or JPEG screenshot up to 5 MB');
+      throw new MoneyError('Confirm the deposit details and attach a PNG or JPEG screenshot up to 5 MB');
     }
+    const screenshotOnly = selectedMethod === 'palawan' && !submittedReference;
+    if (!screenshotOnly && (!/^[A-Z0-9-]{5,72}$/.test(submittedReference) || /^(GCASH|PALAWAN|REQUEST)-/.test(submittedReference))) {
+      throw new MoneyError('Enter a valid payment reference');
+    }
+    const reference = screenshotOnly
+      ? 'REQUEST-' + (user.id + key).replaceAll('-', '').toUpperCase()
+      : submittedReference;
     let amount: number;
     try { amount = centavos(Number(form.get('amount')), 30000); }
     catch { throw new MoneyError('Enter an amount from ₱300 to ₱50,000'); }
