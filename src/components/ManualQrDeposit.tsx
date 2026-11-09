@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Download } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
-import { isCatalogProduct, productDetails, productDisplayName } from '@/lib/product-presentation';
+import { isCatalogProduct } from '@/lib/product-presentation';
 import styles from './manual-deposit.module.css';
 
 type Method = {
@@ -15,7 +15,7 @@ type Method = {
   instructions: string;
 };
 type Configuration = { methods: Method[]; approvalPaused: boolean };
-type MarketProduct = { id: string; name: string; price: number };
+type MarketProduct = { name: string; price: number };
 const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
 
 async function authorizedFetch(path: string, init?: RequestInit) {
@@ -28,7 +28,7 @@ async function authorizedFetch(path: string, init?: RequestInit) {
 
 export default function ManualQrDeposit({ initialAmount }: { initialAmount: number }) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
-  const [marketAmounts, setMarketAmounts] = useState<MarketProduct[] | null>(null);
+  const [marketAmounts, setMarketAmounts] = useState<number[] | null>(null);
   const [amount, setAmount] = useState('');
   const [proof, setProof] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -58,13 +58,14 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
       .then(async response => {
         if (!response.ok) throw new Error('Unable to load Market amounts.');
         const result: { products: MarketProduct[] } = await response.json();
-        const choices = result.products.filter(product =>
+        const choices = [...new Set(result.products.filter(product =>
           isCatalogProduct(product.name) && Number.isInteger(product.price) &&
-          product.price >= 30_000 && product.price <= 5_000_000);
+          product.price >= 30_000 && product.price <= 5_000_000).map(product => product.price))]
+          .sort((a, b) => a - b);
         if (!active) return;
         setMarketAmounts(choices);
-        const initial = choices.find(product => product.price === Math.round(initialAmount * 100)) ?? choices[0];
-        setAmount(initial ? String(initial.price / 100) : '');
+        const initial = choices.find(price => price === Math.round(initialAmount * 100)) ?? choices[0];
+        setAmount(initial ? String(initial / 100) : '');
       })
       .catch(() => { if (active) setMarketAmounts([]); });
     return () => { active = false; };
@@ -143,12 +144,9 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
           <select id="deposit-amount" className={styles.input} name="amount" value={amount} required
             onChange={event => { setAmount(event.target.value); idempotencyKey.current = null; }}>
             {!amount && <option value="">{marketAmounts === null ? 'Loading Market amounts…' : 'No Market amounts available'}</option>}
-            {marketAmounts?.map(product => {
-              const tier = productDetails(product.name)?.tier;
-              return <option key={product.id} value={product.price / 100}>
-                {tier ? `Tier ${tier} · ` : ''}{productDisplayName(product.name)} · {peso.format(product.price / 100)}
-              </option>;
-            })}
+            {marketAmounts?.map(price => (
+              <option key={price} value={price / 100}>{peso.format(price / 100)}</option>
+            ))}
           </select>
           <label className={styles.fieldLabel} htmlFor="deposit-receipt">Payment screenshot <span>PNG, JPG, JPEG · max 5 MB</span></label>
           <input id="deposit-receipt" className={styles.fileInput} type="file" accept="image/png,image/jpeg,.jpg,.jpeg"
