@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { Download } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
 import styles from './manual-deposit.module.css';
@@ -25,7 +26,6 @@ async function authorizedFetch(path: string, init?: RequestInit) {
 
 export default function ManualQrDeposit({ initialAmount }: { initialAmount: number }) {
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
-  const [methodId, setMethodId] = useState<Method['id'] | ''>('');
   const [proof, setProof] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -35,7 +35,9 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const idempotencyKey = useRef<string | null>(null);
-  const method = configuration?.methods.find(item => item.id === methodId);
+  const method = configuration?.approvalPaused
+    ? undefined
+    : configuration?.methods.find(item => item.id === 'palawan');
 
   useEffect(() => {
     let active = true;
@@ -43,10 +45,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
       .then(async response => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error ?? 'Unable to load payment instructions.');
-        if (active) {
-          setConfiguration(result);
-          setMethodId(result.methods[0]?.id ?? '');
-        }
+        if (active) setConfiguration(result);
       })
       .catch(cause => {
         if (active) setError(cause instanceof Error ? cause.message : 'Unable to load payment instructions.');
@@ -106,23 +105,18 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
     </header>
     <div className={styles.layout}>
       <section className={styles.instructions}>
-        <div className={styles.sectionTitle}><span>01</span><div><h1>Deposit funds</h1><p>Pay through a listed payment method and submit your receipt for verification.</p></div></div>
-        {!configuration && !error && <p className={styles.loading}>Loading configured payment methods…</p>}
-        {configuration && !method && <p className={styles.paused}>Manual deposit requests are currently unavailable. No payment instructions are configured.</p>}
+        <div className={styles.sectionTitle}><span>01</span><div><h1>Scan to deposit</h1><p>Pay using the AUREVIA PalawanPay QR.</p></div></div>
+        {!configuration && !error && <p className={styles.loading}>Loading PalawanPay QR…</p>}
+        {configuration && !method && <p className={styles.paused}>PalawanPay deposits are currently unavailable.</p>}
         {method && <>
-          <label className={styles.fieldLabel} htmlFor="deposit-method">Payment method</label>
-          <select id="deposit-method" name="method-select" className={styles.input} value={methodId}
-            onChange={event => { setMethodId(event.target.value as Method['id']); idempotencyKey.current = null; }}
-            disabled={busy || submitted}>
-            {configuration?.methods.map(item => <option value={item.id} key={item.id}>{item.label}</option>)}
-          </select>
           <div className={styles.merchantCard}>
-            <div><h2>{method.label} payment instructions</h2><p>{method.instructions}</p></div>
             <Image className={styles.qr} src={method.qr} alt={`Configured AUREVIA ${method.label} payment QR`} width={340} height={340} unoptimized />
-            <p className={styles.caution}>Before paying, confirm the recipient shown in your payment app is the authorized AUREVIA merchant. Do not send funds to a different recipient.</p>
+            <a className={styles.download} href={method.qr} download="AUREVIA-PalawanPay-QR.jpg">
+              <Download size={16} aria-hidden="true" /> Download QR
+            </a>
+            <p className={styles.caution}>Confirm the recipient in your payment app before sending.</p>
           </div>
         </>}
-        {configuration?.approvalPaused && <p className={styles.paused}>Live payment approval is paused. A submission remains pending and will not credit a wallet unless the existing authorized review workflow is enabled.</p>}
       </section>
 
       <form className={styles.form} onSubmit={submit}>
@@ -144,7 +138,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
         </fieldset>
         {error && <p className={styles.error} role="alert">{error}</p>}
         {notice && <p className={styles.notice} role="status">{notice}{requestId && <><br />Request ID: <strong>{requestId}</strong><br />Status: <strong>{status}</strong></>}</p>}
-        {submitted && <Link className={styles.historyLink} href="/money">View deposit status and history</Link>}
+        <Link className={styles.historyLink} href="/deposit/history">View deposit history</Link>
       </form>
     </div>
   </main>;
