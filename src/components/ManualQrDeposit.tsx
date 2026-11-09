@@ -106,7 +106,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
     </header>
     <div className={styles.layout}>
       <section className={styles.instructions}>
-        <div className={styles.sectionTitle}><span>01</span><div><h1>Manual Deposit</h1><p>Submit payment details for secure administrator review.</p></div></div>
+        <div className={styles.sectionTitle}><span>01</span><div><h1>Deposit funds</h1><p>Pay through a listed payment method and submit your receipt for verification.</p></div></div>
         {!configuration && !error && <p className={styles.loading}>Loading configured payment methods…</p>}
         {configuration && !method && <p className={styles.paused}>Manual deposit requests are currently unavailable. No payment instructions are configured.</p>}
         {method && <>
@@ -126,7 +126,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
       </section>
 
       <form className={styles.form} onSubmit={submit}>
-        <div className={styles.sectionTitle}><span>02</span><div><h2>Payment details</h2><p>Your request is not a wallet credit.</p></div></div>
+        <div className={styles.sectionTitle}><span>02</span><div><h2>Payment details</h2><p>Your wallet is credited after an administrator verifies the payment.</p></div></div>
         <fieldset disabled={busy || submitted || !method || !configuration?.methods.length}>
           <label className={styles.fieldLabel} htmlFor="deposit-amount">Deposit amount (PHP)</label>
           <div className={styles.amountInput}><span>₱</span><input id="deposit-amount" className={styles.input} name="amount" type="number" min="300" max="50000" step="0.01" defaultValue={initialAmount} required onChange={() => { idempotencyKey.current = null; }} /></div>

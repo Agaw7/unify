@@ -18,16 +18,18 @@ function load(relative, stubs = {}) {
   return loaded.exports;
 }
 
-test('deposit page remains paused and rejects sandbox URLs', async () => {
-  const Paused = () => null;
+test('deposit page opens manual payment and rejects sandbox URLs', async () => {
   const page = load('src/app/deposit/page.tsx', {
-    '@/components/PaymentPaused': { __esModule: true, default: Paused },
-    'next/navigation': { notFound: () => { throw new Error('notFound'); } },
+    'next/navigation': {
+      notFound: () => { throw new Error('notFound'); },
+      redirect: url => { throw new Error(url); },
+    },
   });
   await assert.rejects(page.default({ searchParams: Promise.resolve({ mode: 'test' }) }), /notFound/);
-  for (const params of [{}, { mode: 'live' }]) {
-    assert.equal((await page.default({ searchParams: Promise.resolve(params) })).type, Paused);
-  }
+  await assert.rejects(page.default({ searchParams: Promise.resolve({}) }),
+    error => error.message === '/deposit/checkout?mode=live&payment=manual');
+  await assert.rejects(page.default({ searchParams: Promise.resolve({ mode: 'live', amount: '500' }) }),
+    error => error.message === '/deposit/checkout?mode=live&payment=manual&amount=500');
 });
 
 class MoneyError extends Error {
