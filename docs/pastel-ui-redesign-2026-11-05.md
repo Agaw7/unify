@@ -1,0 +1,12 @@
+# Reference-inspired UNIFY UI — 2026-11-05
+
+Reference inspected: https://preview-sandbox--6aec79ddaa7172fb1adcc127.base44.app/?ref=SPR6AEC7 . Adopted visual traits: lavender/blush/cream gradients, plum typography, rounded light cards, pill navigation, soft shadows and original decorative sprout artwork. Reference product names, prices, simulated coins, referral rules and email/Google authentication were not adopted. UNIFY remains mobile-number/password login.
+
+Presentation files: src/app/ui-theme.css (new scoped theme); src/app/layout.tsx (theme import/body class); src/components/WelcomeArtwork.tsx (new decorative SVG); src/app/login/page.tsx and src/app/register/page.tsx (decorative aside); src/components/legacy/Dashboard.tsx (decorative hero artwork); src/components/deposit.module.css (pastel presentation overrides). Existing product images, account values, forms, labels indicating simulation/holds, and transaction functions are retained.
+
+No database migration, environment change, financial operation or API change. The isolated release overlays only the seven listed presentation files onto the previous production release. SHA-256 comparisons verified that its API/shared backend files match the previous release. Local workspace has unrelated earlier changes, which are not included.
+
+Validation: TypeScript produced no errors; nine login-session/deposit regression tests passed. Login and a local visual-only dashboard fixture were inspected at phone (390x844 requested) and desktop (1280x900 requested) widths. The fixture hides balances and is not part of deployment. Full authenticated dashboard verification requires the user's login; no credentials were requested or entered. No registration, deposit, purchase, claim or payout was submitted.
+
+Backup: backups/ui-before-pastel-2026-11-05 contains the existing edited presentation files. Release: backups/pastel-ui-release-2026-11-05. Rollback: promote prior deployment dpl_DCy3zn9dB6MuBCTUvKWAe6DMuRut in Vercel, or restore the saved presentation files and remove the theme import/body class. No financial records need rollback.
+Production deployment dpl_Chy3sMo6NEeGom7ubWvpUhZURWxi reached Ready and canonical alias updated. Production phone-number login visually verified; mobile DOM measured width 390 and content width 390 (no horizontal overflow). Saved desktop/mobile screenshots. Temporary local preview fixture removed; temporary viewport override reset. No actual login or financial action performed.

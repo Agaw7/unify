@@ -1,0 +1,2 @@
+2026-10-24: Assets UI updated in src/components/LiveInvestments.tsx. Single portfolio heading, descriptive subtitle, accessible refresh button, centered empty-state card with existing lucide icons, responsive spacing, dark blue/cyan palette. No financial behavior or database changes. TypeScript validation passed. Isolated release backups/assets-ui-release-2026-10-24. Rollback: promote prior deployment dpl_5Cpa9Cw8pGGj4j9u6bFNypBzDDjY.
+Production build passed (42 seconds); deployment dpl_CgjKzb2kPQYroqjqpJWfz2CFP2Mx Ready and aliased to https://unify-woad.vercel.app.

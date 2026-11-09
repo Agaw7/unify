@@ -1,0 +1,10 @@
+[
+  "src/components/legacy/Dashboard.tsx",
+  "src/components/LiveInvestments.tsx",
+  "src/components/RealWalletSummary.tsx",
+  "src/app/api/investments/route.ts",
+  "src/app/investments/page.tsx",
+  "src/app/products/page.tsx",
+  "src/app/simulation-portfolio/page.tsx",
+  "src/app/simulation-products/page.tsx"
+]

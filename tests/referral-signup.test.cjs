@@ -1,0 +1,43 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {PGlite}=require('@electric-sql/pglite');
+test('signup records a direct referral once and rejects invalid inviters',async()=>{
+ const db=new PGlite();
+ try {
+  await db.exec(`create role anon; create role authenticated; create schema auth;
+   create table auth.users(id uuid primary key,raw_user_meta_data jsonb default '{}');
+   create table public.profiles(id uuid primary key,invite_code text unique,created_at timestamptz default now());
+   create table public.team_members(id uuid primary key,invited_by uuid references profiles(id),full_name text,created_at timestamptz);
+   insert into auth.users values('11111111-1111-4111-8111-111111111111','{}');
+   insert into profiles(id,invite_code) values('11111111-1111-4111-8111-111111111111','ABCDEF123456');`);
+  const migration=fs.readFileSync(path.join(__dirname,'../database/07_signup_referrals.sql'),'utf8');
+  await db.exec(migration);await db.exec(migration);
+  const shortMigration=fs.readFileSync(path.join(__dirname,'../database/10_short_referral_codes.sql'),'utf8');
+  await db.exec(shortMigration);await db.exec(shortMigration);
+  const short=(await db.query("select resolve_invite_code('ABCDEF123456') as code")).rows[0].code;
+  assert.match(short,/^[A-Z0-9]{6}$/);
+  assert.equal((await db.query('select resolve_invite_code($1) as code',[short.toLowerCase()])).rows[0].code,short);
+  assert.equal((await db.query("select resolve_invite_code('UNKNOWN') as code")).rows[0].code,null);
+  await db.exec(`insert into auth.users values('22222222-2222-4222-8222-222222222222','{"referral_code":" abcdef123456 "}');
+   insert into profiles(id,invite_code) values('22222222-2222-4222-8222-222222222222','MEMBER123456');`);
+  const rows=(await db.query('select id,invited_by from team_members')).rows;
+  assert.equal(rows.length,1);assert.equal(rows[0].invited_by,'11111111-1111-4111-8111-111111111111');
+  await db.exec(`update auth.users set raw_user_meta_data='{}' where id='22222222-2222-4222-8222-222222222222'`);
+  assert.equal(Number((await db.query('select count(*) from team_members')).rows[0].count),1);
+  await db.query('insert into auth.users values($1,$2::jsonb)',['55555555-5555-4555-8555-555555555555',JSON.stringify({referral_code:short})]);
+  await db.exec("insert into profiles(id,invite_code) values('55555555-5555-4555-8555-555555555555','SHORTLINK123')");
+  assert.equal((await db.query("select invited_by from team_members where id='55555555-5555-4555-8555-555555555555'")).rows[0].invited_by,'11111111-1111-4111-8111-111111111111');
+  const codes=(await db.query('select short_invite_code from profiles')).rows.map(row=>row.short_invite_code);
+  assert.ok(codes.every(code=>/^[A-Z0-9]{6}$/.test(code)));
+  assert.equal(new Set(codes).size,codes.length);
+  await db.exec(`insert into auth.users values('33333333-3333-4333-8333-333333333333','{}');
+   insert into profiles(id,invite_code) values('33333333-3333-4333-8333-333333333333','ORGANIC12345');
+   insert into auth.users values('44444444-4444-4444-8444-444444444444','{"referral_code":"UNKNOWN12345"}');`);
+  await assert.rejects(db.exec(`insert into profiles(id,invite_code) values('44444444-4444-4444-8444-444444444444','OTHER1234567')`),/Invalid invitation/);
+  await db.exec(`update auth.users set raw_user_meta_data='{"referral_code":"SELF12345678"}' where id='44444444-4444-4444-8444-444444444444'`);
+  await assert.rejects(db.exec(`insert into profiles(id,invite_code) values('44444444-4444-4444-8444-444444444444','SELF12345678')`),/Invalid invitation/);
+  assert.equal(Number((await db.query('select count(*) from team_members')).rows[0].count),2);
+ } finally {await db.close();}
+});

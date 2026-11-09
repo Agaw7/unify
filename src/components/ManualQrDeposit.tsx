@@ -1,0 +1,151 @@
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { supabase } from '@/lib/supabase';
+import styles from './manual-deposit.module.css';
+
+type Method = {
+  id: 'palawan' | 'gcash';
+  label: string;
+  qr: string;
+  instructions: string;
+  referenceLabel: string;
+};
+type Configuration = { methods: Method[]; approvalPaused: boolean };
+
+async function authorizedFetch(path: string, init?: RequestInit) {
+  const { data, error } = await supabase.auth.getSession();
+  if (error || !data.session) throw new Error('Sign in to continue.');
+  const headers = new Headers(init?.headers);
+  headers.set('authorization', ['Bearer', data.session.access_token].join(' '));
+  return fetch(path, { ...init, headers, cache: 'no-store' });
+}
+
+export default function ManualQrDeposit({ initialAmount }: { initialAmount: number }) {
+  const [configuration, setConfiguration] = useState<Configuration | null>(null);
+  const [methodId, setMethodId] = useState<Method['id'] | ''>('');
+  const [proof, setProof] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [requestId, setRequestId] = useState('');
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const idempotencyKey = useRef<string | null>(null);
+  const method = configuration?.methods.find(item => item.id === methodId);
+
+  useEffect(() => {
+    let active = true;
+    void authorizedFetch('/api/payments/deposit/manual/config')
+      .then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error ?? 'Unable to load payment instructions.');
+        if (active) {
+          setConfiguration(result);
+          setMethodId(result.methods[0]?.id ?? '');
+        }
+      })
+      .catch(cause => {
+        if (active) setError(cause instanceof Error ? cause.message : 'Unable to load payment instructions.');
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!proof) { setPreviewUrl(''); return; }
+    const url = URL.createObjectURL(proof);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [proof]);
+
+  function chooseProof(file?: File) {
+    setError('');
+    setNotice('');
+    if (!file) { setProof(null); idempotencyKey.current = null; return; }
+    if (!['image/png', 'image/jpeg'].includes(file.type) || file.size < 8 || file.size > 5 * 1024 * 1024) {
+      setError('Choose a PNG, JPG, or JPEG image up to 5 MB.');
+      setProof(null);
+      idempotencyKey.current = null;
+      return;
+    }
+    setProof(file);
+    idempotencyKey.current = null;
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy || submitted || !proof || !method) return;
+    const form = new FormData(event.currentTarget);
+    form.set('method', method.id);
+    form.set('receipt', proof);
+    idempotencyKey.current ??= crypto.randomUUID();
+    form.set('key', idempotencyKey.current);
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      const response = await authorizedFetch('/api/payments/deposit/manual', { method: 'POST', body: form });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? 'Unable to submit the deposit request.');
+      setRequestId(result.id);
+      setStatus(result.status ?? 'pending');
+      setNotice(result.message ?? 'Deposit request submitted.');
+      setSubmitted(true);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Unable to submit the deposit. Retry with the same details.');
+    } finally { setBusy(false); }
+  }
+
+  return <main className={styles.page}>
+    <header className={styles.pageHeader}>
+      <Link href="/dashboard" className={styles.backLink}>← Back to dashboard</Link>
+      <span className={styles.brand}>AUREVIA <small>MEMBER DEPOSIT</small></span>
+    </header>
+    <div className={styles.layout}>
+      <section className={styles.instructions}>
+        <div className={styles.sectionTitle}><span>01</span><div><h1>Manual Deposit</h1><p>Submit payment details for secure administrator review.</p></div></div>
+        {!configuration && !error && <p className={styles.loading}>Loading configured payment methods…</p>}
+        {configuration && !method && <p className={styles.paused}>Manual deposit requests are currently unavailable. No payment instructions are configured.</p>}
+        {method && <>
+          <label className={styles.fieldLabel} htmlFor="deposit-method">Payment method</label>
+          <select id="deposit-method" name="method-select" className={styles.input} value={methodId}
+            onChange={event => { setMethodId(event.target.value as Method['id']); idempotencyKey.current = null; }}
+            disabled={busy || submitted}>
+            {configuration?.methods.map(item => <option value={item.id} key={item.id}>{item.label}</option>)}
+          </select>
+          <div className={styles.merchantCard}>
+            <div><h2>{method.label} payment instructions</h2><p>{method.instructions}</p></div>
+            <Image className={styles.qr} src={method.qr} alt={`Configured AUREVIA ${method.label} payment QR`} width={340} height={340} unoptimized />
+            <p className={styles.caution}>Before paying, confirm the recipient shown in your payment app is the authorized AUREVIA merchant. Do not send funds to a different recipient.</p>
+          </div>
+        </>}
+        {configuration?.approvalPaused && <p className={styles.paused}>Live payment approval is paused. A submission remains pending and will not credit a wallet unless the existing authorized review workflow is enabled.</p>}
+      </section>
+
+      <form className={styles.form} onSubmit={submit}>
+        <div className={styles.sectionTitle}><span>02</span><div><h2>Payment details</h2><p>Your request is not a wallet credit.</p></div></div>
+        <fieldset disabled={busy || submitted || !method || !configuration?.methods.length}>
+          <label className={styles.fieldLabel} htmlFor="deposit-amount">Deposit amount (PHP)</label>
+          <div className={styles.amountInput}><span>₱</span><input id="deposit-amount" className={styles.input} name="amount" type="number" min="300" max="50000" step="0.01" defaultValue={initialAmount} required onChange={() => { idempotencyKey.current = null; }} /></div>
+          <label className={styles.fieldLabel} htmlFor="deposit-reference">{method?.referenceLabel ?? 'Payment reference number'}</label>
+          <input id="deposit-reference" className={styles.input} name="reference" minLength={5} maxLength={72} pattern="[A-Za-z0-9-]{5,72}" autoComplete="off" required onChange={() => { idempotencyKey.current = null; }} />
+          <label className={styles.fieldLabel} htmlFor="deposit-receipt">Payment screenshot <span>PNG, JPG, JPEG · max 5 MB</span></label>
+          <input id="deposit-receipt" className={styles.fileInput} type="file" accept="image/png,image/jpeg,.jpg,.jpeg"
+            onChange={event => { chooseProof(event.target.files?.[0]); event.currentTarget.value = ''; }} disabled={busy || submitted} />
+          {previewUrl ? <div className={styles.preview}>
+            <Image src={previewUrl} alt="Payment screenshot preview" width={720} height={480} unoptimized />
+            <div><span>{proof?.name}</span><button type="button" onClick={() => { setProof(null); idempotencyKey.current = null; }} disabled={busy}>Remove</button><label htmlFor="deposit-receipt">Replace</label></div>
+          </div> : <label className={styles.upload} htmlFor="deposit-receipt"><strong>Choose payment screenshot</strong><small>PNG, JPG, or JPEG · maximum 5 MB</small></label>}
+          <label className={styles.attestation}><input type="checkbox" name="attest" required /><span>I confirm these details and screenshot are accurate. I understand the request stays pending until an administrator verifies the payment in the merchant account.</span></label>
+          <button className={styles.submit} type="submit" disabled={busy || !proof || !method}>{busy ? 'Submitting…' : 'Submit Deposit Request'}</button>
+        </fieldset>
+        {error && <p className={styles.error} role="alert">{error}</p>}
+        {notice && <p className={styles.notice} role="status">{notice}{requestId && <><br />Request ID: <strong>{requestId}</strong><br />Status: <strong>{status}</strong></>}</p>}
+        {submitted && <Link className={styles.historyLink} href="/money">View deposit status and history</Link>}
+      </form>
+    </div>
+  </main>;
+}

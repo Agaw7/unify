@@ -1,10 +1,16 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import "./ui-theme.css";
 
 export const metadata: Metadata = {
-  title: "UNIFY",
-  description: "UNIFY Investment Simulator",
+  title: "AUREVIA",
+  description: "AUREVIA Investment Simulator",
+  icons: {
+    icon: [
+      { url: '/aurevia-icon.png', type: 'image/png' },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -14,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="unify-pastel">{children}</body>
     </html>
   );
 }

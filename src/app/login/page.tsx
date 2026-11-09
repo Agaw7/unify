@@ -1,10 +1,13 @@
 "use client";
+import AureviaLogo from '@/components/AureviaLogo';
+import ThemeWelcome from "@/components/WelcomeArtwork";
 
 import { Eye, EyeOff, X, LockKeyhole } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { watchLoginSession } from "@/lib/login-session-navigation";
 
 function formatPhone(value: string): string | null {
   const cleaned = value.replace(/\D/g, "");
@@ -15,6 +18,7 @@ function formatPhone(value: string): string | null {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [checkingSession, setCheckingSession] = useState(true);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +30,17 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const termsCloseRef = useRef<HTMLButtonElement>(null);
   const forgotCloseRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    return watchLoginSession(window,
+      async () => {
+        const { data } = await supabase.auth.getSession();
+        return Boolean(data.session);
+      },
+      () => router.replace('/dashboard'),
+      () => setCheckingSession(false),
+    );
+  }, [router]);
 
   useEffect(() => {
     try {
@@ -93,7 +108,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
       });
 
     if (authError) {
-      console.error("UNIFY Supabase authentication error:", {
+      console.error("AUREVIA Supabase authentication error:", {
         message: authError.message,
         code: authError.code,
         status: authError.status,
@@ -148,10 +163,10 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
       // Authentication succeeds even if browser storage is unavailable.
     }
 
-    router.replace("/dashboard");
-    router.refresh();
+    // Replace the actual login history entry, including on mobile browsers.
+    window.location.replace("/dashboard");
   } catch (err) {
-    console.error("UNIFY unexpected login error:", err);
+    console.error("AUREVIA unexpected login error:", err);
 
     setError(
       "An unexpected login error occurred. Check the browser console."
@@ -162,11 +177,16 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
 }
 
 
+  if (checkingSession) {
+    return <main className="unify-login"><p role="status">Checking your session…</p></main>;
+  }
+
   return (
     <main className="unify-login">
+      <ThemeWelcome/>
       <form className="unify-login-card" onSubmit={handleLogin}>
-        <div className="unify-login-logo">◆</div>
-        <h1>UNIFY</h1>
+        <AureviaLogo className="aurevia-login-logo" />
+        <h1>AUREVIA</h1>
         <p>Sign in to your account</p>
 
         {error && <div className="unify-login-error" role="alert">{error}</div>}
@@ -251,7 +271,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
             Register Here
           </Link>
         </p>
-        <small>UNIFY</small>
+        <small>AUREVIA</small>
       </form>
 
       {showTerms && (
@@ -282,17 +302,15 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
             </div>
             <div className="sheet-content" id="terms-description">
               <h3>1. Eligibility</h3>
-              <p>You must be at least 18 years old to register for UNIFY.</p>
+              <p>You must be at least 18 years old to register for AUREVIA.</p>
               <h3>2. Account &amp; Security</h3>
               <p>Keep your password confidential. Do not share your account credentials.</p>
               <h3>3. Registration Bonus</h3>
-              <p>Eligible new members receive a one-time ₱30 simulated registration bonus. This is not real money and cannot be withdrawn.</p>
-              <h3>4. Simulated Wallet</h3>
-              <p>Test-mode balances and earnings are for simulation purposes only.</p>
-              <h3>5. Deposits &amp; Withdrawals</h3>
-              <p>Any real-money payment features are separate from the simulated wallet and subject to applicable legal and provider requirements.</p>
-              <h3>6. Privacy &amp; Support</h3>
-              <p>Contact official UNIFY support for account assistance or disputes. Review the platform privacy policy for how your personal information is handled.</p>
+              <p>Eligible new members receive a one-time ₱20 registration bonus when business funding is available.</p>
+              <h3>4. Payments</h3>
+              <p>Payment collection and withdrawals are currently paused pending independent authorization and provider eligibility verification.</p>
+              <h3>5. Privacy &amp; Support</h3>
+              <p>Contact official AUREVIA support for account assistance or disputes. Review the platform privacy policy for how your personal information is handled.</p>
             </div>
             <button
               type="button"
@@ -337,7 +355,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
             <div className="sheet-content" id="forgot-description">
               <LockKeyhole size={36} aria-hidden="true" />
               <p>To reset your password, your account ownership must be verified.</p>
-              <p>Phone-number password recovery is not available until a secure SMS verification provider or another verified recovery method is configured. Contact official UNIFY support for assistance. Never share your password or verification codes.</p>
+              <p>Phone-number password recovery is not available until a secure SMS verification provider or another verified recovery method is configured. Contact official AUREVIA support for assistance. Never share your password or verification codes.</p>
             </div>
             <button
               type="button"

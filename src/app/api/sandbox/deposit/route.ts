@@ -1,7 +1,5 @@
+import { NextResponse } from 'next/server';
 
-import { NextRequest } from "next/server";
-import { handleSandboxTransfer } from "@/lib/sandbox-api";
-
-export async function POST(request: NextRequest) {
-  return handleSandboxTransfer(request, "deposit");
+export function POST() {
+  return NextResponse.json({ error: 'Sandbox transactions are no longer available.' }, { status: 404 });
 }

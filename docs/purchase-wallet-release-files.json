@@ -1,0 +1,11 @@
+[
+  "src/components/RealWalletSummary.tsx",
+  "src/components/BusinessBudget.tsx",
+  "src/components/DepositPage.tsx",
+  "src/app/api/money/route.ts",
+  "src/app/api/money/registration-bonus/route.ts",
+  "src/app/api/payments/deposit/route.ts",
+  "src/app/money/page.tsx",
+  "src/app/admin/page.tsx",
+  "src/app/admin/business-budget/page.tsx"
+]

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { Copy, Users, Check, UserPlus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import MemberAvatar from "@/components/MemberAvatar";
 
 type Member = {
   id: string;
@@ -26,7 +27,7 @@ export default function TeamPage({
       const { data: profile, error: profileError } =
         await supabase
           .from("profiles")
-          .select("invite_code")
+          .select("invite_code,short_invite_code")
           .eq("id", userId)
           .single();
 
@@ -35,7 +36,7 @@ export default function TeamPage({
         return;
       }
 
-      setCode(profile?.invite_code || "");
+      setCode(profile?.short_invite_code || profile?.invite_code || "");
 
       const { data, error: membersError } = await supabase
         .from("team_members")
@@ -55,7 +56,7 @@ export default function TeamPage({
   }, [userId]);
 
   const inviteLink = code && typeof window !== "undefined"
-    ? `${window.location.origin}/?ref=${encodeURIComponent(code)}`
+    ? `${window.location.origin}/register?ref=${encodeURIComponent(code)}`
     : "";
 
   async function copyLink() {
@@ -72,7 +73,7 @@ export default function TeamPage({
     <div className="team-page">
       <div className="page-heading">
         <h2>My Team</h2>
-        <p>Invite friends to explore Vault Invest Demo.</p>
+        <p>Invite friends to explore AUREVIA.</p>
       </div>
 
       <section className="team-panel">
@@ -97,7 +98,7 @@ export default function TeamPage({
       <section className="team-stats-card">
         <div className="team-gradient">
           <Users size={26} />
-          <span>MY DEMO COMMUNITY</span>
+          <span>MY COMMUNITY</span>
           <h2>{members.length} Members</h2>
         </div>
         <div className="team-stat-grid">
@@ -133,11 +134,9 @@ export default function TeamPage({
         ) : (
           members.map(member => (
             <div className="member-row" key={member.id}>
-              <div className="member-avatar">
-                <Users size={19} />
-              </div>
+              <MemberAvatar />
               <div>
-                <strong>{member.full_name || "Demo Member"}</strong>
+                <strong>{member.full_name || "Member"}</strong>
                 <span>
                   Joined {new Date(member.created_at)
                     .toLocaleDateString()}

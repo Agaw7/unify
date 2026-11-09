@@ -1,6 +1,50 @@
 
 @import "tailwindcss";
 
+/* Tables become labelled record cards on phones, keeping actions in view. */
+.unify-admin-responsive { min-width: 0; overflow-wrap: anywhere; }
+.unify-admin-responsive button { white-space: normal; }
+.unify-admin-table td { overflow-wrap: anywhere; }
+@media (max-width: 700px) {
+  .unify-admin-responsive { padding: 16px 12px !important; }
+  .unify-admin-responsive > section { padding: 16px 12px !important; }
+  .unify-admin-responsive h1 { font-size: 24px !important; line-height: 1.3; }
+  .unify-admin-responsive button, .unify-admin-responsive a { min-height: 44px; max-width: 100%; }
+  .unify-admin-table { display: block; min-width: 0 !important; width: 100%; }
+  .unify-admin-table thead { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); }
+  .unify-admin-table tbody { display: grid; gap: 14px; width: 100%; }
+  .unify-admin-table tbody tr { display: block; min-width: 0; padding: 8px 12px; background: #0c1b2e; border: 1px solid #29425e; border-radius: 12px; }
+  .unify-admin-table td { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr); align-items: start; gap: 12px; padding: 12px 0 !important; border-bottom: 1px solid #29425e; min-width: 0; }
+  .unify-admin-table td::before { content: attr(data-label); color: #9bb5d1; font-size: 13px; font-weight: 600; }
+  .unify-admin-table td:last-child { border-bottom: 0 !important; }
+  .unify-admin-table td[data-label="Action"] { display: flex; flex-direction: column; align-items: stretch; }
+  .unify-admin-table td[data-label="Action"] button { width: 100%; margin-right: 0 !important; }
+  .unify-admin-table td > * { min-width: 0; max-width: 100%; }
+  .unify-admin-table td[colspan] { display: block; }
+  .unify-admin-table td[colspan]::before { content: none; }
+  .admin-page { overflow-wrap: anywhere; }
+  .admin-page .admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-page .admin-stat { min-width: 0; padding: 14px 12px; }
+  .admin-page .admin-stat h2 { font-size: clamp(20px, 5vw, 28px); }
+  .admin-page section a { max-width: 100%; white-space: normal; }
+}
+@media (min-width: 701px) and (max-width: 1000px) {
+  .admin-page .admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.deposit-history-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  gap: 4px;
+  color: #00d2ff;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.deposit-history-link:hover { text-decoration: underline; }
+
 :root {
   --green: #08b88a;
   --dark-green: #007e61;
@@ -32,13 +76,13 @@ button {
   cursor: pointer;
 }
 
-.vault-app {
+.UNIFY-app {
   min-height: 100vh;
   padding-bottom: 100px;
   background: linear-gradient(180deg, #f1fff8, #e7fff2);
 }
 
-.vault-header {
+.UNIFY-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -79,7 +123,7 @@ button {
   color: var(--muted);
 }
 
-.demo-label {
+.label {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -92,7 +136,7 @@ button {
   white-space: nowrap;
 }
 
-.vault-main {
+.UNIFY-main {
   max-width: 1100px;
   margin: 0 auto;
   padding: 30px 20px;
@@ -258,7 +302,7 @@ button {
 .team-stats-card,
 .team-members,
 .profile-menu,
-.demo-actions-panel {
+.actions-panel {
   background: white;
   border: 1px solid var(--border);
   border-radius: 24px;
@@ -366,7 +410,7 @@ button {
 
 .invest-now-button,
 .invite-button,
-.demo-confirm-button {
+.confirm-button {
   width: 100%;
   display: flex;
   align-items: center;
@@ -530,6 +574,24 @@ button {
 .member-status {
   color: #00a77c !important;
 }
+.member-avatar.member-avatar-unify { background: #ede6f4; border-radius: 16px; overflow: hidden; }
+.member-avatar-unify img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+.member-row.team-financial-member { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 18px; padding: 22px 0; }
+.team-financial-member > div:nth-child(2) { min-width: 0; }
+.team-financial-member .member-avatar { width: 64px; height: 64px; }
+.team-financial-member .team-member-deposit { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+.team-financial-member .team-member-deposit span { color: #c5d6e6; font-size: 13px; }
+.team-financial-member .team-member-deposit b { color: #fff; font-size: 22px; line-height: 1.3; }
+.team-financial-member .team-member-commission { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; }
+.team-financial-member .team-member-commission span { color: #c5d6e6; font-size: 13px; }
+.team-financial-member .team-member-commission strong { color: #5ce5ff; font-size: 26px; line-height: 1.3; }
+.team-financial-member .team-member-commission > span:last-child { color: #a9bed0; font-size: 12px; }
+@media (max-width: 520px) {
+  .member-row.team-financial-member { grid-template-columns: 48px minmax(0, 1fr); gap: 12px; }
+  .team-financial-member .member-avatar { width: 48px; height: 48px; }
+  .team-financial-member .team-member-commission { grid-column: 2; align-items: flex-start; text-align: left; border-top: 1px solid #29425e; padding-top: 12px; }
+}
 
 .transaction-list {
   background: white;
@@ -608,18 +670,18 @@ button {
   line-height: 1.6;
 }
 
-.demo-actions-panel h3 {
+.actions-panel h3 {
   margin: 0;
 }
 
-.demo-action-buttons {
+.action-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-top: 18px;
 }
 
-.demo-action-buttons button {
+.action-buttons button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -632,7 +694,7 @@ button {
   font-weight: 700;
 }
 
-.demo-action-buttons button:nth-child(2) {
+.action-buttons button:nth-child(2) {
   background: #e6f8f0;
   color: #007f60;
 }
@@ -653,7 +715,7 @@ button {
   border: none;
 }
 
-.demo-modal-overlay {
+.modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -664,7 +726,7 @@ button {
   padding: 20px;
 }
 
-.demo-modal {
+.modal {
   position: relative;
   width: 100%;
   max-width: 440px;
@@ -675,7 +737,7 @@ button {
   border-radius: 24px;
 }
 
-.demo-modal-close {
+.modal-close {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -683,7 +745,7 @@ button {
   background: transparent;
 }
 
-.demo-modal-icon {
+.modal-icon {
   width: 60px;
   height: 60px;
   display: flex;
@@ -694,11 +756,11 @@ button {
   color: #009c75;
 }
 
-.demo-modal h2 {
+.modal h2 {
   font-size: 24px;
 }
 
-.demo-modal-balance {
+.modal-balance {
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -708,13 +770,13 @@ button {
   background: #eafff3;
 }
 
-.demo-modal label {
+.modal label {
   display: block;
   margin: 12px 0;
   font-weight: 700;
 }
 
-.demo-modal input {
+.modal input {
   width: 100%;
   padding: 16px;
   border: 1px solid #c8e5da;
@@ -722,19 +784,19 @@ button {
   outline: none;
 }
 
-.demo-modal input:focus {
+.modal input:focus {
   border-color: #00a97e;
 }
 
-.demo-modal-warning,
-.demo-modal-description,
-.demo-minimum {
+.modal-warning,
+.modal-description,
+.minimum {
   color: #83949e;
   font-size: 13px;
   line-height: 1.6;
 }
 
-.demo-cancel-button {
+.cancel-button {
   width: 100%;
   margin-top: 12px;
   padding: 13px;
@@ -789,7 +851,7 @@ button {
 }
 
 @media (max-width: 700px) {
-  .vault-header {
+  .UNIFY-header {
     padding: 20px 16px;
   }
 
@@ -802,7 +864,7 @@ button {
     height: 40px;
   }
 
-  .vault-main {
+  .UNIFY-main {
     padding: 22px 15px;
   }
 
@@ -842,7 +904,7 @@ button {
 }
 
 @media (max-width: 390px) {
-  .demo-label {
+  .label {
     font-size: 9px;
     padding: 7px;
   }
@@ -851,7 +913,7 @@ button {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .demo-action-buttons {
+  .action-buttons {
     grid-template-columns: 1fr;
   }
 
@@ -899,7 +961,7 @@ button {
   }
 }
 
-/* Vault Invest Wallet Account */
+/* UNIFY Wallet Account */
 
 .wallet-account-card {
   background: #ffffff;
@@ -1098,7 +1160,7 @@ body {
   color: #FFFFFF;
 }
 
-.vault-app {
+.UNIFY-app {
   min-height: 100vh;
   background: linear-gradient(
     145deg,
@@ -1122,7 +1184,7 @@ button {
 
 /* UNIFY branding */
 
-.vault-header {
+.UNIFY-header {
   background: #0B1320;
   border-bottom: 1px solid #1E3A8A;
 }
@@ -1162,7 +1224,7 @@ button {
 .team-stats-card,
 .team-members,
 .profile-menu,
-.demo-actions-panel,
+.actions-panel,
 .wallet-account-card,
 .transaction-list {
   background: #0D1B2D;
@@ -1205,8 +1267,8 @@ button {
 
 .invest-now-button,
 .invite-button,
-.demo-confirm-button,
-.demo-action-buttons button {
+.confirm-button,
+.action-buttons button {
   background: linear-gradient(
     90deg,
     #00D2FF,
@@ -1273,19 +1335,19 @@ button {
 
 /* Modal */
 
-.demo-modal {
+.modal {
   background: #0D1B2D;
   border: 1px solid #38BDF8;
   color: #FFFFFF;
 }
 
-.demo-modal input {
+.modal input {
   background: #0B1320;
   border: 1px solid #1E3A8A;
   color: #FFFFFF;
 }
 
-.demo-modal input:focus {
+.modal input:focus {
   border-color: #00D2FF;
 }
 
@@ -1294,7 +1356,7 @@ button {
 ========================================== */
 
 @media (min-width: 701px) and (max-width: 1024px) {
-  .vault-main {
+  .UNIFY-main {
     padding: 24px;
   }
 
@@ -1317,11 +1379,11 @@ button {
 ========================================== */
 
 @media (max-width: 700px) {
-  .vault-app {
+  .UNIFY-app {
     padding-bottom: 95px;
   }
 
-  .vault-header {
+  .UNIFY-header {
     padding: 16px;
     gap: 8px;
   }
@@ -1347,12 +1409,12 @@ button {
     font-size: 10px;
   }
 
-  .demo-label {
+  .label {
     padding: 7px 9px;
     font-size: 9px;
   }
 
-  .vault-main {
+  .UNIFY-main {
     width: 100%;
     padding: 20px 14px;
   }
@@ -1516,7 +1578,7 @@ button {
 
   .team-panel,
   .team-members,
-  .demo-actions-panel {
+  .actions-panel {
     padding: 18px;
   }
 
@@ -1560,23 +1622,23 @@ button {
 
   /* Modal */
 
-  .demo-modal-overlay {
+  .modal-overlay {
     padding: 12px;
   }
 
-  .demo-modal {
+  .modal {
     width: 100%;
     max-width: 440px;
     padding: 20px;
     border-radius: 18px;
   }
 
-  .demo-modal input {
+  .modal input {
     padding: 14px;
     font-size: 16px;
   }
 
-  .demo-action-buttons {
+  .action-buttons {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -1608,7 +1670,7 @@ button {
 ========================================== */
 
 @media (max-width: 390px) {
-  .vault-main {
+  .UNIFY-main {
     padding: 15px 10px;
   }
 
@@ -1616,7 +1678,7 @@ button {
     font-size: 19px;
   }
 
-  .demo-label {
+  .label {
     font-size: 8px;
     padding: 6px;
   }
@@ -1941,7 +2003,34 @@ button {
   border: 1px solid #355277; border-radius: 12px;
   padding: 14px 16px; font-size: 16px; color: #fff; background: #091321;
 }
-.unify-modal-card .modal-balance { color: #cbd5e1; }
+.unify-registration-referral {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+  gap: 8px 16px; margin: 18px 0; padding: 14px 16px;
+  border: 1px solid #2c6079; border-radius: 12px; background: #102b40; color: #e2e8f0;
+}
+.unify-registration-referral strong { color: #5ce5ff; font-size: 20px; letter-spacing: 2px; font-family: monospace; }
+.unify-modal-card .modal-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  background: #102b40;
+  border: 1px solid #2c6079;
+  color: #e2e8f0;
+}
+.unify-modal-card .modal-balance > span { font-size: 14px; font-weight: 600; }
+.unify-modal-card .modal-balance > strong { color: #5ce5ff; font-size: 28px; line-height: 1.25; }
+.unify-modal-card .purchase-balance-details {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid #2c6079;
+  font-size: 14px;
+}
+.unify-modal-card .purchase-balance-details > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.unify-modal-card .purchase-balance-details b { color: #fff; }
+.unify-modal-card .purchase-balance-details small { color: #b9d1e3; font-size: 13px; line-height: 1.5; }
 .unify-modal-card .modal-description, .unify-modal-card .minimum { color: #cbd5e1; margin: 0; }
 .unify-modal-card .unify-modal-confirm,
 .unify-modal-card .unify-modal-cancel {

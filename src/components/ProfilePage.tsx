@@ -44,15 +44,15 @@ export default function ProfilePage({
 
   async function logout() {
     const { error } = await supabase.auth.signOut();
-    if (!error) window.location.reload();
+    if (!error) window.location.replace("/login");
   }
 
   const menuItems = [
-    { label: "Demo Ranking", icon: Trophy, page: "ranking" },
+    { label: "Ranking", icon: Trophy, page: "ranking" },
     { label: "Virtual Wallet", icon: Wallet, page: "wallet" },
     { label: "Simulated Earnings", icon: TrendingUp, page: "assets" },
-    { label: "Demo Deposit", icon: Wallet, page: "wallet" },
-    { label: "Demo Withdraw", icon: Wallet, page: "wallet" },
+    { label: "Deposit", icon: Wallet, page: "wallet" },
+    { label: "Withdraw", icon: Wallet, page: "wallet" },
     { label: "Transaction History", icon: History, page: "wallet" }
   ];
 
@@ -60,7 +60,7 @@ export default function ProfilePage({
     <div className="profile-page">
       <div className="page-heading">
         <h2>My Profile</h2>
-        <p>Manage your Vault Invest demo account.</p>
+        <p>Manage your AUREVIA account.</p>
       </div>
 
       <div className="profile-banner">
@@ -68,8 +68,8 @@ export default function ProfilePage({
           <UserRound size={36} />
         </div>
         <div className="profile-details">
-          <span>DEMO ACCOUNT</span>
-          <h3>{name || "Vault Member"}</h3>
+          <span>ACCOUNT</span>
+          <h3>{name || "AUREVIA Member"}</h3>
           <p>{email}</p>
           <div className="verification-status">
             <ShieldCheck size={15} />
@@ -103,11 +103,6 @@ export default function ProfilePage({
           <ChevronRight size={20} />
         </button>
       </div>
-
-      <p className="profile-disclaimer">
-        Vault Invest is an educational investment simulator.
-        No real deposits, withdrawals, or investment returns.
-      </p>
     </div>
   );
 }

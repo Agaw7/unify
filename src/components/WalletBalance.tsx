@@ -30,7 +30,7 @@ export default function WalletBalance() {
       return;
     }
 
-    // Fetch balance from UNIFY Supabase database.
+    // Fetch balance from AUREVIA Supabase database.
     const { data, error: walletError } = await supabase
       .from("wallet_accounts")
       .select("balance, currency")
@@ -54,7 +54,7 @@ export default function WalletBalance() {
   return (
     <div className="rounded-xl bg-slate-900 p-6 text-white">
       <p className="text-sm text-gray-400">
-        UNIFY Wallet Balance
+        AUREVIA Wallet Balance
       </p>
 
       {loading ? (

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { activeAuthUsers } from "@/lib/active-auth-users";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,15 +24,22 @@ export async function GET(request: NextRequest) {
   const { data: profile, error: profileError } = await adminClient.from("profiles").select("role").eq("id", authData.user.id).maybeSingle();
   if (profileError) return NextResponse.json({ error: "Unable to verify admin permissions." }, { status: 500 });
   if (profile?.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (request.nextUrl.searchParams.get("hideRecords") === "true") {
+    return NextResponse.json({ members: [], recordsHidden: true }, { headers: { "Cache-Control": "no-store" } });
+  }
 
   const { data: profiles, error: listError } = await adminClient.from("profiles")
-    .select("id, role, invite_code, created_at").order("created_at", { ascending: false }).limit(500);
+    .select("id, role, invite_code, short_invite_code, created_at").order("created_at", { ascending: false }).limit(500);
   if (listError) return NextResponse.json({ error: "Unable to retrieve members." }, { status: 500 });
 
-  const members = await Promise.all((profiles ?? []).map(async (p) => {
-    const { data } = await adminClient.auth.admin.getUserById(p.id);
-    return { id: p.id, phone: data.user?.phone ?? null, role: p.role ?? "user", invite_code: p.invite_code ?? null, created_at: p.created_at ?? null };
-  }));
+  const active = await activeAuthUsers(adminClient).catch(() => null);
+  if (!active) return NextResponse.json({ error: "Unable to retrieve active members." }, { status: 503 });
+
+  const members = (profiles ?? []).flatMap((p) => {
+    const account = active.get(p.id);
+    if (!account) return [];
+    return [{ id: p.id, phone: account.phone ?? null, role: p.role ?? "user", invite_code: p.short_invite_code ?? p.invite_code ?? null, created_at: p.created_at ?? null }];
+  });
 
   return NextResponse.json({ members }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -1,0 +1,393 @@
+/* Presentation only. Payment, identity, authentication and ledger behavior live elsewhere. */
+.unify-pastel {
+  --ink:#48204f; --ink-soft:#775d80; --plum:#54265e; --pink:#b9699a;
+  --line:#eadff0; --surface:#fffafef0; --mint:#328168;
+  --green:#328168; --cyan:#83549a; --dark:#48204f; --muted:#806b87;
+  --background:#faf4ff; --border:#eadff0;
+  background:radial-gradient(ellipse at 12% 12%,#f2dcfb 0,transparent 48%),radial-gradient(ellipse at 90% 50%,#ffe8ef 0,transparent 46%),#faf6fd!important;
+  color:var(--ink); font-family:'Trebuchet MS','Arial Rounded MT Bold',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; color-scheme:light;
+}
+.unify-pastel button,.unify-pastel input,.unify-pastel select {font-family:inherit}
+.unify-pastel button:focus-visible,.unify-pastel a:focus-visible {outline:3px solid #a57bb9;outline-offset:4px}
+.unify-pastel a {text-underline-offset:4px}
+.unify-pastel .UNIFY-app {background:transparent;color:var(--ink)}
+.unify-pastel .UNIFY-header {background:#fff9fece;backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding-block:18px}
+.unify-pastel .brand h1 {color:var(--ink);font-size:21px;letter-spacing:-.8px}
+.unify-pastel .brand-logo,.unify-pastel .unify-login-logo {background:var(--plum);color:#fff;border-radius:18px;box-shadow:0 6px 18px #54265e18}
+.unify-pastel .UNIFY-header .label {color:var(--plum);background:#f0e4f6;border-color:var(--line)}
+.unify-pastel .UNIFY-main {max-width:1120px;padding-top:32px;padding-bottom:118px}
+.unify-pastel h1,.unify-pastel h2,.unify-pastel h3 {color:var(--ink);letter-spacing:-.6px}
+.unify-pastel .welcome {position:relative;isolation:isolate;overflow:hidden;border:1px solid #ffffffb3;border-radius:30px;padding:36px;background:linear-gradient(120deg,#f2e1fa,#fbe9f1 65%,#fff3d9);box-shadow:0 14px 36px #63366c0b;margin-bottom:26px;min-height:210px}
+.unify-pastel .welcome>span {display:inline-block;padding:7px 12px;border-radius:30px;background:#ffffffb8;color:#825d8e;font-size:10px;font-weight:700;letter-spacing:2px}
+.unify-pastel .welcome h2 {font-size:clamp(29px,4.2vw,48px);font-weight:800;line-height:1.12;margin:20px 0 12px;max-width:70%;color:var(--ink)}
+.unify-pastel .welcome p {color:var(--ink-soft);font-size:15px;margin:0}
+.welcome-art {position:absolute;right:32px;bottom:15px;width:180px;opacity:.95;z-index:-1}
+.welcome-art svg{width:100%;height:auto}
+.unify-pastel .section-heading {margin:30px 0 18px}
+.unify-pastel .section-heading h3 {font-size:24px;font-weight:800}
+.unify-pastel .section-heading button {color:var(--plum);background:#fff9fe;border:1px solid var(--line);border-radius:30px;padding:9px 14px;font-size:12px}
+.unify-pastel .investment-card,.unify-pastel .team-panel,.unify-pastel .team-stats-card,.unify-pastel .team-members,.unify-pastel .profile-menu,.unify-pastel .actions-panel,.unify-pastel .wallet-account-card,.unify-pastel .transaction-list {background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:24px;box-shadow:0 8px 25px #54265e08}
+.unify-pastel .investment-card {padding:22px;transition:transform .2s,box-shadow .2s}
+.unify-pastel .investment-card:hover{transform:translateY(-3px);box-shadow:0 16px 30px #54265e12}
+.unify-pastel .product-image-box {border-radius:18px;background:#f6edf9;border:1px solid #f0e7f5}
+.unify-pastel .product-image {mix-blend-mode:multiply}
+.unify-pastel .product-description,.unify-pastel .product-stats span,.unify-pastel .product-footer,.unify-pastel .simulation-note,.unify-pastel .wallet-detail-label {color:var(--ink-soft)}
+.unify-pastel .product-stats>div,.unify-pastel .product-footer {border-color:var(--line)}
+.unify-pastel .green,.unify-pastel .member-status {color:var(--mint)!important}
+.unify-pastel .invest-now-button,.unify-pastel .invite-button,.unify-pastel .confirm-button,.unify-pastel .action-buttons button,.unify-pastel .sheet-primary {background:var(--plum);color:#fff;border-radius:16px;box-shadow:0 8px 18px #54265e18;font-weight:700;border:none}
+.unify-pastel button:disabled{opacity:.5}
+.unify-pastel .unify-balance-card {background:transparent;border-color:var(--line);padding:24px}
+.unify-pastel .unify-balance-card>span {font-size:12px;font-weight:700;color:var(--ink-soft)}
+.unify-pastel .unify-balance-card h2 {color:var(--ink)!important;font-size:38px;letter-spacing:-1.8px;margin:10px 0}
+.unify-pastel .unify-balance-card p {color:var(--ink-soft);font-size:12px}
+.unify-pastel .unify-wallet-summary {display:grid;grid-template-columns:1fr 1fr;gap:14px;background:linear-gradient(125deg,#f4e9fa,#fff9f0);border-radius:24px;padding:10px}
+.unify-pastel .duration-badge {background:#f3e6f8;color:#90639d;border-radius:12px}
+.unify-pastel .wallet-history-header,.unify-pastel .wallet-history-item,.unify-pastel .transaction-item {border-color:var(--line);color:var(--ink)}
+.unify-pastel .wallet-history-header p,.unify-pastel .wallet-history-item p,.unify-pastel .deposit-history-link {color:var(--ink-soft)}
+.unify-pastel .bottom-nav {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:#fffbfff0;border:1px solid var(--line);border-radius:24px;box-shadow:0 8px 35px #63366c14;backdrop-filter:blur(20px);bottom:14px;left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 28px),620px);padding:8px;gap:4px}
+.unify-pastel .bottom-nav button {color:#705a76;border-radius:17px;min-height:54px;min-width:0;padding-inline:3px;white-space:nowrap}
+.unify-pastel .bottom-nav button.active {color:#ffd67e;background:#481f55;font-weight:700}
+.unify-pastel .aurevia-announcement-overlay {
+  position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;
+  overflow-y:auto;padding:16px;background:#302039a8;backdrop-filter:blur(8px);
+}
+.unify-pastel .aurevia-announcement {
+  position:relative;width:min(100%,460px);max-height:calc(100dvh - 32px);overflow-y:auto;
+  margin:auto;padding:clamp(22px,6vw,34px);border:1px solid #d6bd8255;border-radius:30px;
+  background:linear-gradient(145deg,#5b3263 0%,#48204f 58%,#38203e 100%);
+  color:#fffaf2;box-shadow:0 28px 80px #21152a66;
+}
+.unify-pastel .aurevia-announcement-close {
+  position:absolute;top:14px;right:14px;display:grid;place-items:center;width:40px;height:40px;
+  padding:0;border:0;border-radius:50%;background:#ffffff14;color:#f4dfae;transition:background .2s,color .2s;
+}
+.unify-pastel .aurevia-announcement-close:hover {background:#ffffff24;color:#fffaf2}
+.unify-pastel .aurevia-announcement-icon {
+  display:grid;place-items:center;width:64px;height:64px;margin:0 auto 16px;overflow:hidden;
+  border:2px solid #d6bd82;border-radius:20px;background:#f4eafa;box-shadow:0 8px 22px #c59b4f35;
+}
+.unify-pastel .aurevia-announcement-icon img {width:100%;height:100%;object-fit:cover}
+.unify-pastel .aurevia-announcement-eyebrow {
+  color:#f0d58f;font-size:11px;font-weight:800;letter-spacing:.22em;text-align:center;
+}
+.unify-pastel .aurevia-announcement-title {
+  margin:8px 0 0;color:#fffaf2!important;font-size:clamp(23px,6vw,29px);font-weight:800;
+  letter-spacing:-.7px;line-height:1.2;text-align:center;
+}
+.unify-pastel .aurevia-announcement-description {
+  max-width:370px;margin:12px auto 0;color:#e8dce9;font-size:14px;line-height:1.7;text-align:center;
+}
+.unify-pastel .aurevia-announcement-links {display:grid;gap:12px;margin-top:24px}
+.unify-pastel .aurevia-announcement-link {
+  display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;
+  padding:15px 16px;border:1px solid #ffffff24;border-radius:19px;background:#ffffff0d;
+  color:#fffaf2;text-decoration:none;transition:border-color .2s,background .2s,transform .2s;
+}
+.unify-pastel a.aurevia-announcement-link:hover {
+  border-color:#d6bd82;background:#ffffff18;transform:translateY(-1px);
+}
+.unify-pastel .aurevia-announcement-link-label {
+  display:block;color:#f0d58f;font-size:10px;font-weight:800;letter-spacing:.14em;
+}
+.unify-pastel .aurevia-announcement-url {
+  display:block;margin-top:5px;overflow-wrap:anywhere;color:#fffaf2;font-size:14px;font-weight:600;line-height:1.5;
+}
+.unify-pastel .aurevia-announcement-link>svg {flex-shrink:0;color:#f0d58f}
+.unify-pastel .aurevia-announcement-badge {
+  flex-shrink:0;padding:5px 10px;border:1px solid #e8d8ae;border-radius:999px;
+  color:#f0d58f;font-size:10px;font-weight:800;letter-spacing:.06em;
+}
+.unify-pastel .aurevia-announcement-primary {
+  display:flex;align-items:center;justify-content:center;gap:9px;min-height:52px;margin-top:20px;
+  padding:12px 16px;border-radius:17px;background:linear-gradient(100deg,#e7c982,#cda95d);
+  color:#48204f!important;font-size:14px;font-weight:800;text-decoration:none;
+  box-shadow:0 8px 20px #c59b4f30;transition:filter .2s,transform .2s;
+}
+.unify-pastel .aurevia-announcement-primary:hover {filter:brightness(1.04);transform:translateY(-1px)}
+.unify-pastel .aurevia-announcement-dismiss {
+  width:100%;min-height:46px;margin-top:9px;padding:11px 16px;border:1px solid #ffffff20;
+  border-radius:16px;background:#ffffff0d;color:#e8dce9;font-size:14px;font-weight:700;
+  transition:background .2s,color .2s;
+}
+.unify-pastel .aurevia-announcement-dismiss:hover {background:#ffffff18;color:#fffaf2}
+.unify-pastel .page-heading h2 {color:var(--ink);font-weight:800}
+.unify-pastel .page-heading p {color:var(--ink-soft)}
+.unify-pastel .team-gradient,.unify-pastel .profile-banner,.unify-pastel .balance-card,.unify-pastel .portfolio-summary {background:linear-gradient(120deg,#ede0f8,#fbe6ef,#fff0d6);border-color:var(--line);color:var(--ink)}
+.unify-pastel .team-gradient h2,.unify-pastel .team-stat-grid strong,.unify-pastel .profile-banner h2 {color:var(--plum)}
+.unify-pastel .team-stat-grid {background:#fff9fe;border-color:var(--line)}
+.unify-pastel .team-stat-grid span,.unify-pastel .team-member-deposit span,.unify-pastel .team-member-commission span,.unify-pastel .team-member-commission>span:last-child,.unify-pastel .member-info p {color:var(--ink-soft)!important}
+.unify-pastel .team-member-deposit b,.unify-pastel .team-member-commission strong {color:var(--plum)!important}
+.unify-pastel .team-level-tabs,.unify-pastel .team-level-tab {background:#f6edf9;border-color:var(--line);color:var(--ink-soft)}
+.unify-pastel .team-level-tab.active,.unify-pastel .team-level-tabs button.active {background:var(--plum);color:#fff}
+.unify-pastel .team-member,.unify-pastel .profile-menu button {color:var(--ink);border-color:var(--line)}
+.unify-pastel .unify-task-card,.unify-pastel .unify-task-info {background:#fffafe;border-color:var(--line);color:var(--ink);border-radius:22px;box-shadow:0 6px 20px #54265e05}
+.unify-pastel .unify-task-info p,.unify-pastel .unify-task-description span {color:var(--ink-soft)}
+.unify-pastel .unify-task-icon {background:#f0e1f7;color:var(--plum)}
+.unify-pastel .unify-task-progress {background:#f0e7f4}
+.unify-pastel .unify-task-progress>div {background:#ad78be}
+.unify-pastel .unify-task-reward strong {color:var(--mint)}
+.unify-pastel .unify-task-reward button {background:#eee4f3;color:var(--plum)}
+.unify-pastel .unify-login {background:transparent;display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,450px);align-items:center;gap:70px;max-width:1120px;margin:0 auto;padding:64px 40px;min-height:100svh;color:var(--ink)}
+.theme-welcome {padding:12px;max-width:480px}
+.theme-welcome .theme-kicker {font-size:11px;letter-spacing:2.5px;font-weight:700;color:#9a6ba6}
+.theme-welcome h2 {font-size:clamp(38px,4.5vw,58px);font-weight:800;line-height:1.08;margin:22px 0;color:var(--ink)}
+.theme-welcome h2 em {font-style:normal;color:#af689b}
+.theme-welcome p {font-size:16px;line-height:1.8;color:var(--ink-soft);max-width:350px}
+.theme-welcome-art{position:relative;width:210px;height:180px;margin:26px 0;background:linear-gradient(135deg,#eddafa,#ffe7ee);border-radius:70px 70px 35px 35px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #ffffffaa}
+.theme-welcome-art svg{width:120px;height:120px}
+.theme-welcome-art::after{content:'AUREVIA';position:absolute;bottom:15px;right:-18px;background:#fffafeee;box-shadow:0 6px 12px #54265e0c;border-radius:20px;padding:7px 15px;color:var(--plum);font-size:12px;font-weight:800;transform:rotate(-8deg)}
+.unify-pastel .unify-login-card {width:100%;max-width:450px;background:#fffcffed;border:1px solid #fff;border-radius:30px;padding:36px;box-shadow:0 22px 60px #63366c12;color:var(--ink)}
+.unify-pastel .unify-login-card h1 {font-size:29px;color:var(--ink);letter-spacing:-1px}
+.unify-pastel .unify-login-card>p {color:var(--ink-soft);font-size:14px}
+.unify-pastel .unify-login-card label {color:var(--ink-soft);font-size:13px}
+.unify-pastel .unify-login-card input:not([type=checkbox]) {background:#fbf7fd;color:var(--ink);border:1px solid #e7dcee;border-radius:14px;min-height:50px;box-shadow:none}
+.unify-pastel input::placeholder {color:#a391ab}
+.unify-pastel .unify-login-card input:focus {outline-color:#b18cc3;border-color:#b18cc3}
+.unify-pastel .unify-login-card button[type=submit] {background:var(--plum);color:#fff;border-radius:16px;min-height:51px;box-shadow:0 7px 16px #54265e1c}
+.unify-pastel .text-link,.unify-pastel .unify-login-card a {color:var(--plum)}
+.unify-pastel .unify-login-card .text-link,.unify-pastel .unify-login-card a {color:var(--plum)!important}
+.unify-pastel .unify-login-card .login-footer,.unify-pastel .unify-login-card>div:last-child {color:var(--ink-soft)}
+.unify-pastel .password-toggle {color:#8e709b!important}
+.unify-pastel .unify-registration-referral {background:#f4e8fa;color:var(--plum);border-color:var(--line)}
+.unify-pastel .unify-bottom-sheet,.unify-pastel .modal {background:#fffafe;color:var(--ink);border-color:var(--line)}
+.unify-pastel .sheet-content,.unify-pastel .sheet-header {color:var(--ink-soft)}
+.unify-pastel .notice,.unify-pastel .unify-login-error {background:#fff0ef;border:1px solid #f2d1ce;color:#a9474e;border-radius:16px}
+/* Shared Tailwind-based account/admin screens retain their existing structure. */
+.unify-pastel [class*="bg-[#0"],.unify-pastel [class*="bg-[#10"] {background:#fffafe!important;color:var(--ink)!important}
+.unify-pastel .bg-slate-900,.unify-pastel .bg-slate-800 {background:#f4ebf8!important;color:var(--ink)!important}
+.unify-pastel .text-white {color:var(--ink)!important}
+.unify-pastel .text-slate-300,.unify-pastel .text-slate-400 {color:var(--ink-soft)!important}
+.unify-pastel .text-cyan-300,.unify-pastel .text-cyan-200 {color:var(--plum)!important}
+.unify-pastel .text-emerald-400 {color:var(--mint)!important}
+.unify-pastel .text-amber-200 {color:#95652a!important}
+.unify-pastel .border-slate-700 {border-color:var(--line)!important}
+.unify-pastel .bg-cyan-400,.unify-pastel .bg-blue-600,.unify-pastel .bg-emerald-500 {background:var(--plum)!important;color:#fff!important}
+.unify-pastel .live-assets .assets-heading h2 {color:var(--ink)!important}
+.unify-pastel .live-assets .assets-heading p,.unify-pastel .live-assets .assets-empty p {color:var(--ink-soft)!important}
+.unify-pastel .live-assets .assets-eyebrow {color:#a276b0!important}
+.unify-pastel .live-assets .assets-empty {background:linear-gradient(135deg,#f2e6fa,#fff8f2)!important;border-color:var(--line)!important;box-shadow:0 14px 35px #63366c08!important}
+.unify-pastel .live-assets .assets-empty h3 {color:var(--plum)!important}
+.unify-pastel .live-assets .assets-empty-icon,.unify-pastel .live-assets .assets-cycle,.unify-pastel .live-assets .assets-refresh {background:#fffafed9!important;color:var(--plum)!important;border-color:#e7d5ef!important}
+.unify-pastel .admin-page {background:transparent;color:var(--ink)}
+.unify-pastel .admin-header,.unify-pastel .admin-header p,.unify-pastel .admin-stat span {color:var(--ink-soft)}
+.unify-pastel .admin-stat,.unify-pastel .admin-page>section {background:#fffcff!important;border:1px solid var(--line)!important;border-radius:24px;box-shadow:0 8px 25px #54265e08}
+.unify-pastel .admin-stat svg {color:#ae7ab8}
+.unify-pastel .admin-page p[style],.unify-pastel .admin-page h2[style] {color:var(--ink-soft)!important}
+.unify-pastel .admin-page section a {background:var(--plum)!important;color:#fff!important;border-radius:15px!important}
+/* Legacy inline admin styles and dark form utilities need the same light surface. */
+.unify-pastel .unify-admin-responsive {background:transparent!important;color:var(--ink)!important;color-scheme:light}
+.unify-pastel .unify-admin-responsive>section,
+.unify-pastel .unify-admin-responsive div:has(>.unify-admin-table) {background:#fffafe!important;color:var(--ink)!important;border:1px solid var(--line)!important;border-radius:22px;box-shadow:0 8px 25px #54265e08}
+.unify-pastel .unify-admin-table {background:#fffafe!important;color:var(--ink)!important}
+.unify-pastel .unify-admin-table tbody tr {background:#fffafe!important;border-color:var(--line)!important}
+.unify-pastel .unify-admin-table td {color:var(--ink)!important;border-color:var(--line)!important}
+.unify-pastel .unify-admin-table th {background:#f4eaf9;color:#694773!important;border-color:var(--line)!important;font-weight:700}
+.unify-pastel .unify-admin-table td::before {color:#795a84!important}
+.unify-pastel .unify-admin-responsive p:not([role=alert]),
+.unify-pastel .unify-admin-responsive small {color:#775d80!important}
+.unify-pastel .unify-admin-responsive a {color:var(--plum)!important}
+.unify-pastel .unify-admin-responsive button {background:var(--plum)!important;color:#fff!important;border-radius:13px!important}
+.unify-pastel .unify-admin-responsive button:is([style*="#EF4444"],[style*="239, 68, 68"]) {background:#b83b51!important;color:#fff!important}
+.unify-pastel .unify-admin-responsive a[style*="background"] {background:#eee1f5!important;color:var(--plum)!important}
+.unify-pastel .bg-slate-950 {background:#faf4fd!important;color:var(--ink)!important}
+.unify-pastel :is(input,select,textarea):not([type=checkbox]):not([type=radio]) {background:#faf5fd!important;color:#48204f!important;border-color:#d7c3e1!important;color-scheme:light}
+.unify-pastel :is(input,textarea)::placeholder {color:#826c8d!important;opacity:1}
+.unify-pastel select option {background:#fffafe!important;color:#48204f!important}
+.unify-pastel :is(input,select,textarea):focus-visible {outline:2px solid #9863ad;outline-offset:2px}
+.unify-pastel input:is([type=checkbox],[type=radio]) {accent-color:#744284}
+.unify-pastel .bg-cyan-950 {background:#eddef6!important;color:#54265e!important}
+.unify-pastel .bg-cyan-950 .text-slate-300 {color:#65456f!important}
+.unify-pastel .border-cyan-400 {border-color:#a778b9!important}
+.unify-pastel .text-slate-200 {color:#72557f!important}
+.unify-pastel [role=alert]:not(.bg-red-950) {color:#a03548!important}
+.unify-pastel .bg-red-950,.unify-pastel .bg-emerald-950 {background:#fff0ef!important;color:#a03548!important;border-color:#e5b1b9!important}
+.unify-pastel .bg-red-950 .text-red-200,.unify-pastel .text-red-300 {color:#a03548!important}
+.unify-pastel .text-red-200 {color:#a03548!important}
+.unify-pastel .text-cyan-100 {color:#54265e!important}
+.unify-pastel .bg-emerald-950 {background:#edf7f1!important;color:#28684e!important;border-color:#b8d9c6!important}
+.unify-pastel .text-emerald-200,.unify-pastel .text-emerald-300 {color:#28684e!important}
+@media(max-width:700px){
+ .unify-pastel .unify-login{grid-template-columns:1fr;gap:22px;padding:28px 20px 40px;max-width:470px;align-content:start}
+ .theme-welcome{padding:0;text-align:center;max-width:none}.theme-welcome h2{font-size:32px;margin:12px 0}.theme-welcome p{display:none}.theme-welcome-art{display:none}.theme-welcome .theme-kicker{font-size:9px}
+ .unify-pastel .unify-login-card{padding:28px 24px;border-radius:26px}.unify-pastel .UNIFY-main{padding-top:22px}
+ .unify-pastel .welcome{padding:25px 22px;min-height:195px;border-radius:25px}.unify-pastel .welcome h2{max-width:75%;font-size:33px}.welcome-art{right:0;width:130px;bottom:12px;opacity:.72}
+ .unify-pastel .investment-card{padding:16px;border-radius:22px}.unify-pastel .unify-balance-card{padding:20px}.unify-pastel .unify-balance-card h2{font-size:34px}
+ .unify-pastel .unify-wallet-summary{grid-template-columns:1fr;gap:10px;padding:0;background:transparent}
+ .unify-pastel .bottom-nav{bottom:10px;padding-bottom:max(8px,env(safe-area-inset-bottom));border-radius:22px}
+}
+@media(prefers-reduced-motion:reduce){.unify-pastel *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Prominent merchant wallet above admin statistics. */
+.unify-pastel .admin-page .admin-wallet-highlight {width:100%;margin-bottom:24px;padding:clamp(24px,4vw,40px);background:linear-gradient(120deg,#f0def7,#fff4fb)!important;}
+.unify-pastel .admin-page .admin-wallet-highlight span {font-size:clamp(22px,4vw,32px);font-weight:700;color:var(--ink);}
+.unify-pastel .admin-page .admin-wallet-highlight h2 {font-size:clamp(36px,7vw,56px);font-weight:800;overflow-wrap:anywhere;}
+
+/* Keep admin totals paired by day, lifetime and members. */
+.unify-pastel .admin-page .admin-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+
+/* User-supplied AUREVIA brand image, centered on the emblem. */
+.aurevia-logo {position:relative;display:inline-block;width:80px;height:80px;flex-shrink:0;overflow:hidden;border-radius:20px;vertical-align:middle;}
+.aurevia-login-logo {width:120px;height:120px;margin:0 auto 14px;display:block;}
+.aurevia-header-logo {width:54px;height:54px;border-radius:14px;}
+.aurevia-home-logo {width:180px;height:180px;border-radius:28px;}
+.aurevia-profile-logo {width:80px;height:80px;}
+.unify-pastel .profile-avatar:has(.aurevia-logo) {padding:0;overflow:hidden;background:transparent;}
+@media(max-width:480px){.aurevia-home-logo{width:130px;height:130px}.aurevia-login-logo{width:100px;height:100px}}
+
+.welcome-art .aurevia-home-logo {width:100%;height:auto;aspect-ratio:1;}
+
+/* World product collection: photo-first cards with readable live amounts. */
+.unify-pastel .investment-card.aurevia-world-card{padding:0;overflow:hidden;border:3px solid #fff;border-radius:30px;background:#fbf6ff;min-width:0;}
+.world-product-image{width:100%;height:auto;aspect-ratio:2.05;object-fit:cover;display:block;}
+.world-product-body{padding:clamp(18px,3vw,30px);}
+.world-product-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;}
+.world-country{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#98729d;margin:0 0 10px;}
+.unify-pastel .world-product-heading h3{font-size:clamp(23px,3vw,34px);line-height:1.2;color:#4d2059;margin:0;font-weight:800;}
+.world-mascot{position:relative;flex:0 0 60px;text-align:center;}.world-bunny{font-size:46px;}.world-symbol{position:absolute;right:-4px;bottom:-8px;width:30px;height:30px;border-radius:50%;background:white;display:grid;place-items:center;box-shadow:0 4px 10px #54265e12;}
+.world-description{color:#755c7c;font-size:15px;line-height:1.8;margin:24px 0;}
+.world-amounts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.world-amounts>div{background:#ffffffb8;border-radius:22px;padding:18px 5px;text-align:center;min-width:0;}
+.world-amounts strong{display:block;color:#4d2059;font-size:clamp(15px,2vw,23px);overflow-wrap:anywhere;font-weight:800;}
+.world-amounts span{display:block;color:#937e98;font-size:10px;letter-spacing:.7px;margin-top:8px;}
+.world-terms{font-size:11px;line-height:1.6;color:#856d8b;margin:16px 0;}
+@media(max-width:480px){.world-product-body{padding:20px 16px}.world-amounts{gap:6px}.world-amounts>div{border-radius:18px;padding:16px 4px}.world-amounts strong{font-size:16px}.world-amounts span{font-size:9px;letter-spacing:0}.world-country{font-size:10px}.world-description{font-size:14px}}
+
+.home-wallet-label { display: flex; align-items: center; gap: 8px; color: #f0e2f4; font-weight: 600; }
+.home-wallet-label button { display: grid; place-items: center; padding: 8px; min-width: 36px; min-height: 36px; color: #dbe5f5; background: transparent; border: 0; border-radius: 8px; cursor: pointer; }
+.unify-pastel .home-wallet h2 { margin: 0 0 20px; color: #fff; font-size: clamp(32px, 8vw, 54px); font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.home-wallet-earning { margin: -8px 0 18px; color: #dbe5f5; font-size: 14px; }
+.home-wallet-earning strong { color: #ffe0a2; font-variant-numeric: tabular-nums; }
+.home-wallet-breakdown { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 16px; border-radius: 22px; background: #ffffff13; }
+.home-wallet-breakdown dt,.home-wallet-breakdown small { color: #f0e2f4; font-size: 13px; }
+.home-wallet-breakdown dd { margin: 4px 0 0; color: #fff; font-weight: 750; font-size: 18px; overflow-wrap: anywhere; }
+.unify-pastel .home-wallet p { margin: 12px 0 0; color: #dbe5f5; }
+
+/* Profile layout and wallet shortcuts. */
+.member-profile,.home-dashboard,.unify-pastel .team-page { margin: 0 auto; padding: clamp(14px, 4vw, 22px); border-radius: 24px; background: #f7eefb; color: var(--ink); }
+.member-profile { max-width: 640px; }
+.home-dashboard { max-width: 960px; }
+.member-identity { display: flex; align-items: center; gap: 15px; padding: 4px 2px 22px; }
+.aurevia-logo.member-brand-avatar { width: 62px; height: 62px; border-radius: 50%; border: 3px solid #fff; outline: 2px solid #ad83b7; background: #ede6f4; }
+.unify-pastel .member-identity h2 { margin: 0; color: var(--ink); font-size: clamp(20px, 5vw, 26px); font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.member-contact { display: flex; align-items: center; gap: 4px; color: var(--ink-soft); }
+.member-identity small { color: var(--ink-soft); }
+.member-profile-edit { margin-left: auto; flex-shrink: 0; }
+.member-identity button,.member-wallet-label button { display: inline-grid; place-items: center; min-width: 36px; min-height: 36px; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.member-wallet,.home-wallet,.unify-pastel .team-page .team-gradient { padding: clamp(16px, 5vw, 26px); border-radius: 28px; background: radial-gradient(ellipse at top right,#8c5a9b,transparent 70%),linear-gradient(145deg,#512b61,#281632 75%); color: #fff; box-shadow: 0 10px 22px #54265e24; }
+.member-wallet-label { font-size: 14px; display: flex; align-items: center; gap: 6px; color: #f0e2f4; font-weight: 600; }
+.member-wallet-amount { display: block; color: #fff; font-size: clamp(32px,8vw,52px); line-height: 1.15; font-weight: 800; overflow-wrap: anywhere; }
+.member-wallet-stats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 12px; font-size: 13px; color: #f0e2f4; }
+.member-wallet-stats b { color: #fff; }
+.member-wallet-stats span:last-child b { color: #ffe0a2; }
+.member-wallet-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 20px; }
+.member-wallet-actions a { display: flex; justify-content: center; align-items: center; gap: 8px; min-height: 48px; padding: 8px; border: 1px solid #ffffff38; border-radius: 999px; background: #ffffff20; color: #fff; font-weight: 750; text-decoration: none; }
+.member-wallet-actions a:first-child { background: #fff0cb; color: #48204f; }
+.member-menu-group { margin-top: 24px; }
+.member-menu-group h3 { margin: 0 0 8px 6px; font-size: 14px; color: var(--ink-soft); }
+.member-menu-list { border: 1px solid var(--line); border-radius: 22px; background: #fff; padding: 0 14px; box-shadow: 0 4px 12px #54265e12; }
+.member-menu-list > :is(button,a) { display: grid; grid-template-columns: 42px minmax(0,1fr) 16px; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 10px 0; border: 0; background: transparent; color: var(--ink); text-decoration: none; text-align: left; font-weight: 650; cursor: pointer; }
+.member-menu-list > :is(button,a) + :is(button,a) { border-top: 1px solid #efe4f2; }
+.member-menu-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(140deg,#c29ace,#784582); color: #fff; }
+.member-menu-group[data-group="Activities"] .member-menu-icon { background: linear-gradient(140deg,#e2bf7f,#9a6028); }
+.member-menu-group[data-group="Services"] .member-menu-icon { background: linear-gradient(140deg,#bc85b9,#794478); }
+.member-profile-detail h2 { margin: 16px 0; font-size: 24px; font-weight: 800; }
+.member-profile-back { border: 0; background: transparent; color: var(--plum); cursor: pointer; font-weight: 700; }
+.member-profile-detail form,.member-profile-detail label { display: grid; gap: 10px; }
+.member-profile-detail form { gap: 16px; padding: 16px; background: #fff; border-radius: 18px; }
+.member-profile-detail input { width: 100%; padding: 12px; background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; }
+.member-cashout { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-bottom: 8px; padding: 12px; border-radius: 14px; background: #fff; }
+.member-cashout small { grid-column: 1 / -1; }
+
+.member-menu-group[data-group="Settings"] .member-menu-list > :first-child .member-menu-icon { background: linear-gradient(140deg,#bc9dc4,#704a7c); }
+.member-menu-icon { box-shadow: 0 5px 11px #54265e26; }
+.member-profile button:focus-visible,.member-profile a:focus-visible { outline: 2px solid #ad83b7; outline-offset: 3px; }
+
+.home-reward-shortcuts { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:20px 0; }
+.home-reward-shortcuts button { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:82px;padding:8px 4px;border:1px solid var(--line);border-radius:20px;background:#fffafef0;color:var(--ink);font-size:clamp(11px,2.8vw,14px);font-weight:700;cursor:pointer; }
+
+.home-reward-panel { padding:16px 18px; border:1px solid var(--line); border-radius:22px; background:#fffafef0; }
+
+.home-reward-panel-header { display:flex;align-items:center;justify-content:space-between;gap:8px; }
+.home-reward-panel form,.home-reward-panel label { display:grid;gap:10px; }
+.home-reward-panel input { width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);padding:12px; }
+
+/* Team shares Profile surfaces and wallet styling. */
+.unify-pastel .team-page { max-width: 640px; }
+.unify-pastel .team-page .team-gradient { border-radius: 22px 22px 0 0; text-align: left; }
+.unify-pastel .team-page .team-gradient h2 { color: #fff; font-weight: 800; overflow-wrap: anywhere; }
+.unify-pastel .team-page .team-gradient :is(p,span,svg) { color: #f0e2f4; }
+.unify-pastel .team-page .team-stat-grid { border-radius: 0 0 22px 22px; }
+.unify-pastel .team-page .team-stat-grid > div { min-width: 0; overflow-wrap: anywhere; }
+.unify-pastel .team-page .friend-list-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.unify-pastel .friend-list-row .member-avatar { width: 40px; height: 40px; }
+.unify-pastel .friend-list-identity,
+.unify-pastel .friend-list-earned { display: grid; gap: 3px; }
+.unify-pastel .friend-list-row span { font-size: 12px; color: var(--ink-soft); }
+.unify-pastel .friend-list-earned { text-align: right; }
+.unify-pastel .friend-list-earned strong { color: var(--plum); overflow-wrap: anywhere; }
+.unify-pastel .aurevia-invite-label { display: block; margin-bottom: 6px; color: var(--ink-soft); font-size: 13px; }
+.unify-pastel .aurevia-invite-controls { display: flex; flex-wrap: wrap; gap: 10px; }
+.unify-pastel .aurevia-invite-controls input {
+  flex: 1 1 210px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f7eefb;
+  color: var(--plum);
+}
+.unify-pastel .aurevia-invite .invite-button { display: inline-flex; width: auto; min-height: 44px; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; }
+@media (max-width: 440px) {
+  .unify-pastel .aurevia-invite .invite-button { width: 100%; }
+}
+.unify-pastel .team-page .unify-level-tabs { background: #f3e8f8; border-color: var(--line); }
+.unify-pastel .team-page .unify-level-tabs button { color: var(--plum); }
+.unify-pastel .team-page .unify-level-tabs button.active { background: var(--plum); color: #fff; box-shadow: none; }
+.unify-pastel .team-page .unify-level-meta,.unify-pastel .team-page .simulation-note { color: var(--ink-soft); }
+.unify-pastel .team-page .team-financial-member { background: #fffafef0; border: 1px solid var(--line); border-radius: 18px; padding: 12px; margin-bottom: 10px; }
+.unify-pastel .team-page .team-empty { color: var(--plum); background: #f7eefb; border-radius: 18px; }
+
+.member-password-field { display:grid;gap:10px; }
+.member-password-input { position:relative; }
+.member-profile-detail .member-password-input input { padding-right:52px; }
+.member-password-input button { position:absolute;inset:3px 3px 3px auto;display:grid;place-items:center;width:42px;border:0;border-radius:9px;color:var(--plum);background:transparent;cursor:pointer; }
+.unify-pastel .manual-payment-page .manual-payment-action { background:var(--plum)!important; color:#fff!important; border-color:var(--plum)!important; }
+
+/* Compact floating reward dialogs and Friends surfaces. */
+.home-reward-dialog { width:min(390px,calc(100vw - 32px)); max-height:calc(100dvh - 40px); margin:auto; padding:0; border:0; background:transparent; color:var(--ink); overflow:visible; }
+.home-reward-dialog::backdrop { background:#2b15394d; backdrop-filter:blur(5px); }
+.home-reward-dialog .home-reward-panel { padding:24px; border-radius:26px; background:#fffaff; border:1px solid #eadff0; box-shadow:0 24px 75px #3e204b33; overflow:auto; max-height:calc(100dvh - 40px); }
+.home-reward-dialog .home-reward-panel-header { margin-bottom:20px; }
+.home-reward-dialog h3 { margin:0; font-size:20px; font-weight:750; }
+.home-reward-dialog .home-reward-panel-header button { display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:50%;color:#775d80;background:#f4eaf8;cursor:pointer; }
+.home-reward-dialog .invest-now-button { min-height:46px; width:100%; margin-top:8px; color:#fff; }
+.home-reward-dialog input { height:48px; min-width:0; }
+.home-check-in-result { display:grid;justify-items:center;gap:12px;text-align:center; }
+.home-check-in-icon { display:grid;place-items:center;width:68px;height:68px;border-radius:24px;background:#f0e2f7;color:#744284; }
+.home-check-in-icon.has-error { background:#fff0ef;color:#a03548; }
+.home-reward-message { margin:14px 0 0;color:#28684e;line-height:1.6;font-size:14px;text-align:center; }
+.home-reward-error { margin:14px 0 0;color:#a03548;line-height:1.6;font-size:14px;text-align:center; }
+.reward-spinner { animation:reward-turn 1s linear infinite; }
+@keyframes reward-turn { to { transform:rotate(360deg); } }
+.unify-pastel .team-page .unify-level-members { padding:20px;border-radius:26px;background:#fffaff;border:1px solid #eadff0;box-shadow:0 12px 35px #54265e12; }
+.unify-pastel .team-page .unify-level-members .section-heading { margin:0 0 15px; }
+.unify-pastel .team-page .unify-level-members .section-heading h3 { font-size:19px; }
+.unify-pastel .team-page .unify-level-members .section-heading>span { font-size:12px;color:var(--ink-soft); }
+.unify-pastel .team-page .unify-level-meta { margin-bottom:10px;font-size:12px; }
+.unify-pastel .team-page .friend-list-row { margin-top:9px;padding:13px 12px;border:1px solid #efe5f3;border-radius:17px;background:#fff;gap:10px;box-shadow:0 3px 12px #54265e05; }
+@media(prefers-reduced-motion:reduce){.reward-spinner{animation:none}}
+
+.unify-pastel .admin-business-breakdown { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;border-top:1px solid #d9c2e3;padding-top:20px;margin-top:20px; }
+.admin-business-breakdown dt { font-size:13px;color:#775d80;line-height:1.5; }
+.admin-business-breakdown dd { margin:7px 0 0;font-size:23px;font-weight:750;color:#54265e;overflow-wrap:anywhere; }
+.unify-pastel .admin-wallet-highlight .admin-business-note { margin-top:18px;font-size:12px;line-height:1.6;color:#775d80; }
+.unify-pastel .admin-wallet-highlight .admin-budget-link { display:inline-flex;margin-top:15px;padding:10px 15px;background:#54265e;color:#fff;border-radius:13px;font-size:13px;text-decoration:none;font-weight:700; }
+@media(max-width:520px){.unify-pastel .admin-business-breakdown{grid-template-columns:1fr;gap:12px}.admin-business-breakdown>div{display:flex;align-items:center;justify-content:space-between;gap:15px}.admin-business-breakdown dd{margin:0;font-size:20px}}

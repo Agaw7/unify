@@ -1,0 +1,9 @@
+[
+  "src/app/layout.tsx",
+  "src/app/ui-theme.css",
+  "src/app/login/page.tsx",
+  "src/app/register/page.tsx",
+  "src/components/WelcomeArtwork.tsx",
+  "src/components/legacy/Dashboard.tsx",
+  "src/components/deposit.module.css"
+]

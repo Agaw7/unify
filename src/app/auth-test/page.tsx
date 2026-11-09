@@ -31,7 +31,7 @@ export default function AuthTestPage() {
       minHeight: "100vh",
       padding: 40,
     }}>
-      <h1>UNIFY Authentication Test</h1>
+      <h1>AUREVIA Authentication Test</h1>
 
       <h2>{status}</h2>
 

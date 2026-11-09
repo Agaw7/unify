@@ -1,0 +1,9 @@
+[
+  "src/components/RealWalletSummary.tsx",
+  "src/components/BusinessBudget.tsx",
+  "src/components/RegistrationBonusAdmin.tsx",
+  "src/app/api/money/route.ts",
+  "src/app/api/admin/registration-bonuses/route.ts",
+  "src/app/admin/money/page.tsx",
+  "src/app/register/page.tsx"
+]

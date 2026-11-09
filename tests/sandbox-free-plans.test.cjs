@@ -1,0 +1,40 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const {PGlite}=require('@electric-sql/pglite');
+const admin='11111111-1111-4111-8111-111111111111',member='22222222-2222-4222-8222-222222222222',other='33333333-3333-4333-8333-333333333333',product='44444444-4444-4444-8444-444444444444',key='55555555-5555-4555-8555-555555555555';
+test('free welcome plans require an admin, grant only once, preserve balances and roll back failed grants',async()=>{
+ const db=new PGlite();
+ try{
+  await db.exec(`create role anon;create role authenticated;create role service_role;create schema auth;
+   create function auth.uid() returns uuid language sql as $$select null::uuid$$;
+   create table profiles(id uuid primary key,role text);
+   create table investment_products(id uuid primary key,price numeric,daily_income numeric);
+   create table demo_investments(id uuid primary key default gen_random_uuid(),user_id uuid,product_id uuid,amount numeric,daily_income numeric);
+   create table wallet_accounts(user_id uuid primary key,balance numeric);
+   create table sandbox_wallets(user_id uuid primary key,remaining_balance numeric);
+   insert into profiles values('${admin}','admin'),('${member}','user'),('${other}','user');
+   insert into investment_products values('${product}',200,50);
+   insert into wallet_accounts values('${member}',500);insert into sandbox_wallets values('${member}',30);`);
+  const sql=fs.readFileSync(path.join(__dirname,'../database/12_admin_free_plans.sql'),'utf8');await db.exec(sql);await db.exec(sql);
+  const grant=(actor=admin,target=member,requestKey=key,note='Welcome')=>db.query('select grant_sandbox_free_plan($1,$2,$3,$4,$5) as result',[actor,target,product,requestKey,note]);
+  await assert.rejects(grant(member),/Administrator required/);
+  await db.exec('set role authenticated');await assert.rejects(grant(),/permission denied/);await db.exec('reset role');
+  await db.exec('set role service_role');
+  const first=(await grant()).rows[0].result;assert.equal(first.replayed,false);
+  const replay=(await grant()).rows[0].result;assert.equal(replay.replayed,true);assert.equal(replay.investment_id,first.investment_id);
+  await assert.rejects(grant(admin,member,'66666666-6666-4666-8666-666666666666'),/already received/);
+  await assert.rejects(grant(admin,other,key),/different details/);
+  await db.exec('reset role');
+  assert.equal(Number((await db.query('select count(*) from demo_investments')).rows[0].count),1);
+  const gift=(await db.query('select * from demo_investments')).rows[0];
+  assert.equal(gift.acquisition_type,'admin_free_plan');assert.equal(Number(gift.daily_income),50);assert.equal(gift.user_id,member);
+  assert.equal(Number((await db.query('select balance from wallet_accounts')).rows[0].balance),500);
+  assert.equal(Number((await db.query('select remaining_balance from sandbox_wallets')).rows[0].remaining_balance),30);
+  await db.exec("alter table sandbox_free_plan_grants add constraint test_grant_failure check(note<>'fail')");
+  await assert.rejects(grant(admin,other,'77777777-7777-4777-8777-777777777777','fail'));
+  assert.equal(Number((await db.query('select count(*) from demo_investments')).rows[0].count),1);
+  assert.equal((await db.query('select granted_by from sandbox_free_plan_grants')).rows[0].granted_by,admin);
+ }finally{await db.close();}
+});

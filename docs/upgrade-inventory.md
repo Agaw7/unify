@@ -1,0 +1,390 @@
+# Repository inventory — 2026-10-24
+
+Generated from local source. Presence does not establish runtime correctness.
+
+## Pages
+
+- `src\app\admin\business-budget\page.tsx`
+- `src\app\admin\free-plans\page.tsx`
+- `src\app\admin\money\page.tsx`
+- `src\app\admin\overview\page.tsx`
+- `src\app\admin\page.tsx`
+- `src\app\admin\transactions\page.tsx`
+- `src\app\admin\users\page.tsx`
+- `src\app\auth-test\page.tsx`
+- `src\app\dashboard\page.tsx`
+- `src\app\deposit\checkout\page.tsx`
+- `src\app\deposit\history\page.tsx`
+- `src\app\deposit\page.tsx`
+- `src\app\login\page.tsx`
+- `src\app\money\page.tsx`
+- `src\app\page.tsx`
+- `src\app\products\page.tsx`
+- `src\app\register\page.tsx`
+- `src\app\sanbox-claims\page.tsx`
+- `src\app\team\page.tsx`
+- `src\app\transactions\page.tsx`
+- `src\app\wallet\page.tsx`
+- `src\app\withdraw\page.tsx`
+
+## API handlers
+
+- `src\app\api\admin\business-budget\route.ts` — GET, POST
+- `src\app\api\admin\deposit\[id]\delete\route.ts` — DELETE
+- `src\app\api\admin\deposit\[id]\verify\route.ts` — POST
+- `src\app\api\admin\free-plans\route.ts` — GET, POST
+- `src\app\api\admin\live-summary\route.ts` — GET
+- `src\app\api\admin\money\operations\route.ts` — GET, POST
+- `src\app\api\admin\money\readiness\route.ts` — GET
+- `src\app\api\admin\money\route.ts` — GET, POST
+- `src\app\api\admin\money\settings\route.ts` — GET, POST
+- `src\app\api\admin\overview\route.ts` — GET
+- `src\app\api\admin\payout-stats\route.ts` — GET
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts` — POST
+- `src\app\api\admin\stats\route.ts` — GET
+- `src\app\api\admin\users\route.ts` — GET
+- `src\app\api\admin\withdraw\[id]\approve\route.ts` — POST
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts` — POST
+- `src\app\api\admin\withdrawal-settings\route.ts` — GET, POST
+- `src\app\api\investments\route.ts` — GET, POST
+- `src\app\api\jobs\reconcile-payments\route.ts` — GET
+- `src\app\api\money\route.ts` — GET, POST
+- `src\app\api\money\verification\route.ts` — POST
+- `src\app\api\payments\deposit\route.ts` — GET, POST
+- `src\app\api\payments\history\route.ts` — GET
+- `src\app\api\payments\webhook\route.ts` — POST
+- `src\app\api\payments\webhooks\paymongo\route.ts` — POST
+- `src\app\api\payments\withdraw\route.ts` — POST, GET
+- `src\app\api\sandbox\claims\claims\route.ts` — POST
+- `src\app\api\sandbox\claims\route.ts` — GET
+- `src\app\api\sandbox\deposit\route.ts` — POST
+- `src\app\api\sandbox\withdraw\route.ts` — POST
+- `src\app\api\team\route.ts` — GET
+- `src\app\api\withdrawals\sandbox\route.ts` — GET, POST
+- `src\app\payments\deposits\route.ts` — POST
+- `src\app\payments\transactions\route.ts` — GET
+- `src\app\payments\webhooks\paymongo\route.ts` — POST
+- `src\app\payments\withdrawals\request\route.ts` — POST
+- `src\app\payments\withdrawals\status\route.ts` — GET
+
+## Components
+
+- `src\components\BankAccounts.tsx`
+- `src\components\BusinessBudget.tsx`
+- `src\components\CheckoutQRCode.tsx`
+- `src\components\deposit.module.css`
+- `src\components\DepositPage.tsx`
+- `src\components\legacy\AdminHome.tsx`
+- `src\components\legacy\AdminOverview.tsx`
+- `src\components\legacy\AdminTransactions.tsx`
+- `src\components\legacy\AuthTest.tsx`
+- `src\components\legacy\Claims.tsx`
+- `src\components\legacy\Dashboard.tsx`
+- `src\components\legacy\FreePlans.tsx`
+- `src\components\legacy\Products.tsx`
+- `src\components\legacy\Transactions.tsx`
+- `src\components\legacy\Wallet.tsx`
+- `src\components\legacy\Withdraw.tsx`
+- `src\components\LiveAdminHome.tsx`
+- `src\components\LiveDashboard.tsx`
+- `src\components\LiveFreePlans.tsx`
+- `src\components\LiveInvestments.tsx`
+- `src\components\LiveTeam.tsx`
+- `src\components\LiveWithdrawalSettings.tsx`
+- `src\components\MemberAvatar.tsx`
+- `src\components\MemberVerification.tsx`
+- `src\components\MoneyAdminMFA.tsx`
+- `src\components\MoneyOperations.tsx`
+- `src\components\MoneyReadiness.tsx`
+- `src\components\ProfilePage.tsx`
+- `src\components\TeamPage.tsx`
+- `src\components\WalletBalance.tsx`
+- `src\components\WithdrawalModeSettings.tsx`
+
+## Simulation terminology occurrences
+
+Keep simulation labels on simulation funds and actions. Live implementation files describe a separate wallet; a string match alone is not permission to relabel. Archive, tests and SQL identifiers are implementation vocabulary.
+
+- `src\app\admin\free-plans\page.tsx:60`: <header className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="flex items-center gap-3 text-2xl font-bold"><Gift className="text-cyan-300" />Free Welcome Plan</h1><p className="mt-2 text-slate-300">Give 
+- `src\app\admin\free-plans\page.tsx:69`: {member && product && <div className="space-y-2 rounded-xl border border-cyan-800 bg-cyan-950 p-4"><p>{member.phone ?? member.id.slice(0, 8)} · {product.name}</p><p className="text-xl font-bold text-cyan-200">Free · No balance ded
+- `src\app\admin\free-plans\page.tsx:73`: <p className="text-sm text-slate-300">One welcome free plan per member. Grants do not count as deposits or earn referral commissions. Simulated earnings only; no real-money payout.</p>
+- `src\app\admin\overview\page.tsx:21`: "Sandbox Deposits",
+- `src\app\admin\overview\page.tsx:22`: "Sandbox Withdrawals",
+- `src\app\admin\page.tsx:130`: title: "PayMongo Test Balance",
+- `src\app\admin\page.tsx:168`: title: "Simulated Paid Withdrawals",
+- `src\app\admin\page.tsx:253`: credit. This is a <strong>sandbox ledger report</strong>, not a
+- `src\app\admin\page.tsx:278`: Manage member accounts and review sandbox deposits, withdrawal
+- `src\app\admin\transactions\page.tsx:23`: source: "sandbox" | "legacy";
+- `src\app\admin\transactions\page.tsx:109`: source === "sandbox" ? '/api/admin/sandbox-withdrawals/${encodeURIComponent(id)}' : '/api/admin/withdraw/${encodeURIComponent(id)}/approve',
+- `src\app\admin\transactions\page.tsx:116`: ...(source === "sandbox" ? { body: JSON.stringify({ action: "approve" }) } : {}),
+- `src\app\admin\transactions\page.tsx:140`: "SIMULATION ONLY: Mark this withdrawal as simulated paid? No GCash/Maya money will be sent."
+- `src\app\admin\transactions\page.tsx:149`: source === "sandbox" ? '/api/admin/sandbox-withdrawals/${encodeURIComponent(id)}' : '/api/admin/withdraw/${encodeURIComponent(id)}/simulate-complete',
+- `src\app\admin\transactions\page.tsx:151`: ...(source === "sandbox" ? { body: JSON.stringify({ action: "complete" }) } : {}) }
+- `src\app\admin\transactions\page.tsx:155`: setMessage(result.message || "Simulated payout completed; no real money sent.");
+- `src\app\admin\transactions\page.tsx:176`: const response = await fetch('/api/admin/sandbox-withdrawals/${encodeURIComponent(id)}', {
+- `src\app\admin\transactions\page.tsx:190`: "Expire this PayMongo sandbox checkout and cancel the pending deposit?"
+- `src\app\admin\transactions\page.tsx:226`: setMessage("Sandbox deposit cancelled successfully.");
+- `src\app\admin\transactions\page.tsx:288`: Review sandbox deposits, withdrawals, and payment history.
+- `src\app\admin\transactions\page.tsx:437`: {withdrawal.source === 'sandbox' && <small style={{ display: 'block', color: '#9BAFC7', marginTop: 4 }}>{withdrawal.processing_mode === 'automatic' ? 'Automatic · Test Mode' : 'Admin approval'}</small>}
+- `src\app\admin\transactions\page.tsx:440`: {withdrawal.source === 'sandbox' && ['reserved', 'processing'].includes(withdrawal.status) && (
+- `src\app\admin\transactions\page.tsx:465`: {busyId === withdrawal.id ? "Processing..." : "Mark Simulated Paid"}
+- `src\app\admin\transactions\page.tsx:468`: <span>Simulated paid · No real transfer</span>
+- `src\app\api\admin\business-budget\route.ts:15`: if(b.action!=='fund' || !uuid(b.key) || typeof b.reference!=='string' || !/^[A-Za-z0-9][A-Za-z0-9 ._/-]{4,119}$/.test(b.reference.trim()) || b.confirmed!==true)throw new MoneyError('Supply the funding reference and confirm this al
+- `src\app\api\admin\deposit\[id]\delete\route.ts:42`: if (!uuidPattern.test(id)) {
+- `src\app\api\admin\deposit\[id]\delete\route.ts:62`: return fail("PayMongo sandbox mode required.", 403);
+- `src\app\api\admin\deposit\[id]\delete\route.ts:345`: message: "Sandbox checkout expired and deposit cancelled.",
+- `src\app\api\admin\deposit\[id]\delete\route.ts:350`: return fail("Unable to cancel sandbox deposit.", 500);
+- `src\app\api\admin\deposit\[id]\verify\route.ts:25`: if (!uuidPattern.test(id)) {
+- `src\app\api\admin\deposit\[id]\verify\route.ts:39`: return errorResponse("PayMongo Test Mode is required.", 500);
+- `src\app\api\admin\deposit\[id]\verify\route.ts:271`: console.log("Admin sandbox deposit reconciliation:", result);
+- `src\app\api\admin\free-plans\route.ts:22`: return json({grant:data,message:'Free test plan added to the member’s portfolio. No balance was deducted.'});
+- `src\app\api\admin\money\operations\route.ts:45`: if(review.kind==='ownership' && b.status==='approved' && (typeof b.bic!=='string' || !/^[A-Z0-9]{8}([A-Z0-9]{3})?$/.test(b.bic))) throw new MoneyError('Verified receiving institution BIC required');
+- `src\app\api\admin\money\readiness\route.ts:38`: if (matches.length === 1 && !record(matches[0].attributes).secret_key && typeof matches[0].id === 'string' && /^hook_[A-Za-z0-9]+$/.test(matches[0].id)) {
+- `src\app\api\admin\overview\route.ts:192`: ...(sandboxWithdrawalsResult.data ?? []).map(w => ({ ...w, source: "sandbox" })),
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:23`: console.error('Simulated withdrawal rejection failed', { code: error.code, message: error.message });
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:26`: return json({ success: true, simulated: true, ...data,
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:30`: !process.env.PAYMONGO_SECRET_KEY?.startsWith('sk_test_'))) throw new MoneyError('Sandbox simulation is disabled.', 403);
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:35`: // simulated balance; neither approval nor completion debits it again.
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:39`: console.error('Simulated withdrawal status update failed', { code: error.code, message: error.message });
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:40`: throw new MoneyError('Unable to update simulated withdrawal.', 409);
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:48`: return json({ success: true, simulated: true, status: to,
+- `src\app\api\admin\sandbox-withdrawals\[id]\route.ts:49`: message: action === 'approve' ? 'Simulated withdrawal approved for processing.' : 'Marked as simulated paid. No real GCash/Maya transfer occurred.' });
+- `src\app\api\admin\stats\route.ts:145`: console.error("UNIFY sandbox stats error:", error);
+- `src\app\api\admin\stats\route.ts:148`: { error: "Unable to load sandbox statistics." },
+- `src\app\api\admin\stats\route.ts:183`: // Simulated payout reporting is temporarily disabled until the
+- `src\app\api\admin\stats\route.ts:193`: mode: "sandbox",
+- `src\app\api\admin\stats\route.ts:202`: // Frontend displays the sandbox total with an explicit simulated label.
+- `src\app\api\admin\stats\route.ts:215`: note: "Sandbox payout totals are simulations only. No GCash/Maya funds are sent.",
+- `src\app\api\admin\stats\route.ts:218`: console.error("UNIFY sandbox stats error:", error);
+- `src\app\api\admin\stats\route.ts:220`: { error: "Unable to load sandbox statistics." },
+- `src\app\api\admin\withdraw\[id]\approve\route.ts:23`: if (!uuidPattern.test(id)) {
+- `src\app\api\admin\withdraw\[id]\approve\route.ts:161`: console.log("UNIFY sandbox withdrawal approval:", {
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:12`: return NextResponse.json({ error: "Sandbox simulation is disabled." }, { status: 403 });
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:15`: if (!uuidPattern.test(id)) {
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:48`: console.error("Sandbox withdrawal completion:", error.code, error.message);
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:51`: return NextResponse.json({ success: true, result, simulated: true,
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:53`: ? "Already marked as simulated paid. No real transfer occurred."
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:54`: : "Simulated payout completed. No real GCash/Maya transfer occurred."
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:57`: console.error("Sandbox payout endpoint error:", error);
+- `src\app\api\admin\withdraw\[id]\simulate-complete\route.ts:58`: return NextResponse.json({ error: "Unable to complete simulated payout." }, { status: 500 });
+- `src\app\api\admin\withdrawal-settings\route.ts:4`: import { sandboxPayoutsEnabled } from '@/lib/sandbox-withdrawals';
+- `src\app\api\admin\withdrawal-settings\route.ts:28`: if (body.mode === 'automatic' && !sandboxPayoutsEnabled()) throw new MoneyError('Enable sandbox payout simulation on the server before selecting Automatic.', 409);
+- `src\app\api\admin\withdrawal-settings\route.ts:31`: return json({ settings: data, message: 'Withdrawal mode saved for new test requests.' });
+- `src\app\api\jobs\reconcile-payments\route.ts:5`: import { reconcileSandboxDeposits } from '@/lib/sandbox-deposit';
+- `src\app\api\jobs\reconcile-payments\route.ts:16`: const sandbox = await reconcileSandboxDeposits(database());
+- `src\app\api\jobs\reconcile-payments\route.ts:17`: if (!process.env.PAYMONGO_LIVE_SECRET_KEY?.startsWith('sk_live_')) return json({ sandbox });
+- `src\app\api\jobs\reconcile-payments\route.ts:18`: return json({ ...await runReconciliation(), sandbox });
+- `src\app\api\money\route.ts:32`: if (!['gcash','maya'].includes(String(body.method)) || typeof body.accountName !== 'string' || body.accountName.trim().length<2 || body.accountName.trim().length>100 || typeof body.accountNumber !== 'string' || !/^09\d{9}$/.test(b
+- `src\app\api\money\route.ts:72`: if (typeof checkout.id !== 'string' || !/^cs_[A-Za-z0-9]+$/.test(checkout.id) || attributes.livemode !== true || typeof attributes.checkout_url !== 'string') throw new MoneyError('Invalid live checkout response',502);
+- `src\app\api\money\verification\route.ts:9`: if(typeof b.evidenceReference!=='string' || !/^[A-Za-z0-9][A-Za-z0-9 ._:/-]{4,119}$/.test(b.evidenceReference.trim()) || b.confirmed!==true) throw new MoneyError('Enter your secure review case reference (5–120 characters) and conf
+- `src\app\api\payments\deposit\route.ts:8`: import { confirmSandboxDeposit, reconcileSandboxDeposits } from '@/lib/sandbox-deposit';
+- `src\app\api\payments\deposit\route.ts:21`: const mode = request.nextUrl.searchParams.get('mode') ?? 'test';
+- `src\app\api\payments\deposit\route.ts:22`: if (mode !== 'test' && mode !== 'live') throw new MoneyError('Invalid wallet mode');
+- `src\app\api\payments\deposit\route.ts:43`: catch { console.error('Pending sandbox deposits need reconciliation retry'); }
+- `src\app\api\payments\deposit\route.ts:45`: const [wallet, simulated] = await Promise.all([
+- `src\app\api\payments\deposit\route.ts:50`: if (!simulated.error) available = Number(simulated.data?.remaining_balance ?? 0);
+- `src\app\api\payments\deposit\route.ts:61`: if (mode === 'test' && data.status === 'pending') {
+- `src\app\api\payments\deposit\route.ts:73`: console.error('Automatic sandbox deposit verification needs retry');
+- `src\app\api\payments\deposit\route.ts:111`: { error: "PayMongo test key required." },
+- `src\app\api\payments\deposit\route.ts:248`: name: "UNIFY Sandbox Wallet Credit",
+- `src\app\api\payments\deposit\route.ts:249`: description: "Test wallet credit",
+- `src\app\api\payments\deposit\route.ts:265`: description: "UNIFY sandbox payment",
+- `src\app\api\payments\history\route.ts:7`: const mode = request.nextUrl.searchParams.get('mode') ?? 'test';
+- `src\app\api\payments\history\route.ts:10`: if (!['test', 'live'].includes(mode) || !['deposit', 'withdrawal'].includes(kind) || !/^[1-9]\d{0,4}$/.test(pageText)) throw new MoneyError('Invalid history page');
+- `src\app\api\payments\webhook\route.ts:12`: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+- `src\app\api\payments\webhook\route.ts:16`: // Verify PayMongo's test-mode webhook signature.
+- `src\app\api\payments\webhook\route.ts:43`: if (!/^[a-f0-9]{64}$/i.test(signature)) {
+- `src\app\api\payments\webhook\route.ts:84`: console.error("Missing or invalid sandbox configuration");
+- `src\app\api\payments\webhook\route.ts:323`: // Step 9: Atomically credit the verified sandbox deposit.
+- `src\app\api\payments\webhook\route.ts:348`: console.log("UNIFY verified sandbox deposit processed");
+- `src\app\api\payments\webhooks\paymongo\route.ts:17`: if (typeof event.id !== 'string' || !/^evt_[A-Za-z0-9]+$/.test(event.id)) throw new MoneyError('Invalid event ID');
+- `src\app\api\payments\webhooks\paymongo\route.ts:26`: if (typeof transferId !== 'string' || !/^tr_[A-Za-z0-9]+$/.test(transferId)) throw new MoneyError('Invalid transfer event');
+- `src\app\api\payments\withdraw\route.ts:54`: // POST: Reserve a sandbox withdrawal.
+- `src\app\api\payments\withdraw\route.ts:90`: !uuidPattern.test(paymentAccountId) ||
+- `src\app\api\payments\withdraw\route.ts:92`: !uuidPattern.test(idempotencyKey)
+- `src\app\api\payments\withdraw\route.ts:145`: message: "Sandbox withdrawal reserved for review.",
+- `src\app\api\sandbox\claims\claims\route.ts:7`: return NextResponse.json({error:"Sandbox claim mode is disabled"},{status:403});
+- `src\app\api\sandbox\claims\claims\route.ts:18`: if(typeof id!=="string"||!uuid.test(id)) return NextResponse.json({error:"Invalid investment ID"},{status:400});
+- `src\app\api\sandbox\deposit\route.ts:3`: import { handleSandboxTransfer } from "@/lib/sandbox-api";
+- `src\app\api\sandbox\withdraw\route.ts:3`: import { handleSandboxTransfer } from "@/lib/sandbox-api";
+- `src\app\api\withdrawals\sandbox\route.ts:4`: import { sandboxPayoutsEnabled } from '@/lib/sandbox-withdrawals';
+- `src\app\api\withdrawals\sandbox\route.ts:24`: const expected = ['Automatic sandbox simulation is disabled', 'Insufficient simulated Remaining Balance', 'Select a valid saved GCash or Maya account', 'Sandbox wallet not found', 'Request key reused with different details'];
+- `src\app\auth-test\page.tsx:34`: <h1>UNIFY Authentication Test</h1>
+- `src\app\deposit\history\page.tsx:13`: const [mode, setMode] = useState('test');
+- `src\app\deposit\history\page.tsx:36`: <div className="flex flex-wrap gap-2" aria-label="Payment history filters">{[['test', 'deposit', 'Test deposits'], ['live', 'deposit', 'PHP deposits'], ['test', 'withdrawal', 'Test withdrawals'], ['live', 'withdrawal', 'PHP withdr
+- `src\app\deposit\history\page.tsx:37`: <p className="text-sm text-slate-400">{mode === 'test' ? 'Simulated ${label} only.' : withdrawals ? 'Real PHP withdrawal requests and payout statuses.' : 'Real PHP deposits; paid funds may remain held for settlement.'} All statuse
+- `src\app\login\page.tsx:12`: if (/^09\d{9}$/.test(cleaned)) return "+63" + cleaned.slice(1);
+- `src\app\login\page.tsx:13`: if (/^639\d{9}$/.test(cleaned)) return "+" + cleaned;
+- `src\app\login\page.tsx:306`: <p>Eligible new members receive a one-time ₱30 simulated registration bonus. This is not real money and cannot be withdrawn.</p>
+- `src\app\login\page.tsx:307`: <h3>4. Simulated Wallet</h3>
+- `src\app\login\page.tsx:308`: <p>Test-mode balances and earnings are for simulation purposes only.</p>
+- `src\app\login\page.tsx:310`: <p>Any real-money payment features are separate from the simulated wallet and subject to applicable legal and provider requirements.</p>
+- `src\app\money\page.tsx:58`: <header><Link href="/dashboard" className="text-blue-300">← Dashboard</Link><h1 className="mt-4 text-3xl font-bold">PHP wallet</h1><p className="mt-2 text-slate-400">Verified deposits and withdrawals. Simulated earnings stay in yo
+- `src\app\payments\deposits\route.ts:46`: // STEP 3: Validate PayMongo test mode
+- `src\app\payments\deposits\route.ts:54`: "Invalid PayMongo configuration. A test secret key is required.",
+- `src\app\payments\deposits\route.ts:98`: // STEP 7: Temporary configuration test
+- `src\app\payments\deposits\route.ts:109`: paymongoMode: "test",
+- `src\app\payments\webhooks\paymongo\route.ts:31`: const signature = parts.te; // PayMongo Test Mode signature
+- `src\app\payments\webhooks\paymongo\route.ts:32`: if (!timestamp || !signature || !/^\d+$/.test(timestamp)) return false;
+- `src\app\payments\webhooks\paymongo\route.ts:41`: if (!/^[a-f0-9]{64}$/i.test(signature)) return false;
+- `src\app\payments\webhooks\paymongo\route.ts:72`: // This endpoint deliberately accepts sandbox/test events only.
+- `src\app\payments\webhooks\paymongo\route.ts:73`: if ((process.env.PAYMONGO_MODE ?? "test") !== "test") {
+- `src\app\payments\webhooks\paymongo\route.ts:74`: return NextResponse.json({ error: "UNIFY webhook requires PayMongo Test Mode" }, { status: 500 });
+- `src\app\payments\webhooks\paymongo\route.ts:97`: !/^cs_/.test(checkoutId) ||
+- `src\app\payments\webhooks\paymongo\route.ts:99`: !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reference) ||
+- `src\app\payments\webhooks\paymongo\route.ts:139`: // RPC must enforce idempotency, amount verification, and test-only crediting atomically.
+- `src\app\payments\withdrawals\request\route.ts:55`: !/^09[0-9]{9}$/.test(destination) ||
+- `src\app\payments\withdrawals\request\route.ts:57`: !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idempotencyKey)
+- `src\app\register\page.tsx:49`: if (/^09\d{9}$/.test(cleaned)) {
+- `src\app\register\page.tsx:51`: } else if (/^639\d{9}$/.test(cleaned)) {
+- `src\app\sanbox-claims\page.tsx:15`: if(!session.session)throw new Error("Log in to view simulated claims");
+- `src\app\sanbox-claims\page.tsx:16`: const res=await fetch("/api/sandbox/claims",{headers:{Authorization:'Bearer ${session.session.access_token}'},cache:"no-store"});
+- `src\app\sanbox-claims\page.tsx:27`: const res=await fetch("/api/sandbox/claims/claim",{method:"POST",headers:{Authorization:'Bearer ${session.session.access_token}',"Content-Type":"application/json"},body:JSON.stringify({investmentId})});
+- `src\app\sanbox-claims\page.tsx:34`: <h1>Simulated Daily Claims</h1>
+- `src\app\sanbox-claims\page.tsx:44`: <button disabled={i.claimableDays===0||busy!==null} onClick={()=>void claim(i.id)}>{busy===i.id?"Claiming...":"Claim available simulated credits"}</button>
+- `src\app\transactions\page.tsx:12`: Your sandbox transaction records will appear here
+- `src\app\wallet\page.tsx:91`: const response = await fetch('/api/sandbox/${type}', {
+- `src\app\wallet\page.tsx:109`: ? "Simulated deposit completed. No real money was received."
+- `src\app\wallet\page.tsx:110`: : "Simulated withdrawal completed. No real money was sent."
+- `src\app\withdraw\page.tsx:62`: moneyRequest('/api/withdrawals/sandbox'),
+- `src\app\withdraw\page.tsx:95`: setError("Insufficient simulated Remaining Balance.");
+- `src\app\withdraw\page.tsx:105`: const data = await moneyRequest('/api/withdrawals/sandbox', {
+- `src\app\withdraw\page.tsx:110`: ? 'Simulated withdrawal completed automatically. No real GCash/Maya transfer occurred.'
+- `src\app\withdraw\page.tsx:124`: <h1 className="text-2xl font-bold">UNIFY Simulated Withdrawal</h1>
+- `src\app\withdraw\page.tsx:126`: <p className="text-sm text-slate-400">Test Mode only. No real money is transferred.</p>
+- `src\app\withdraw\page.tsx:127`: {mode && <p className="text-sm text-cyan-200">Processing: {mode === 'automatic' ? 'Automatic simulated withdrawal' : 'Administrator approval required'}</p>}
+- `src\app\withdraw\page.tsx:131`: <p className="text-sm text-slate-400">Remaining Balance (simulated)</p>
+- `src\app\withdraw\page.tsx:134`: Includes simulated bonus, claimed daily credits and eligible simulated commissions.
+- `src\app\withdraw\page.tsx:135`: Deposit Balance is excluded. Minimum simulated withdrawal: ₱100.
+- `src\app\withdraw\page.tsx:140`: <h2 className="text-lg font-semibold">Request Simulated Withdrawal</h2>
+- `src\app\withdraw\page.tsx:167`: {submitting ? "Submitting..." : "Request Simulated Withdrawal"}
+- `src\app\withdraw\page.tsx:174`: <h2 className="text-lg font-semibold">Simulated Withdrawal History</h2>
+- `src\app\withdraw\page.tsx:176`: <p className="text-sm text-slate-400">No simulated withdrawal requests yet.</p>
+- `src\app\withdraw\page.tsx:184`: <p className="mt-1 text-sm text-slate-400">{item.payment_method?.toUpperCase() ?? "Sandbox"} · Simulated only</p>
+- `src\components\BankAccounts.tsx:51`: if (!/^09\d{9}$/.test(cleanNumber)) {
+- `src\components\CheckoutQRCode.tsx:16`: UNIFY Sandbox Payment
+- `src\components\CheckoutQRCode.tsx:19`: <p>Scan to open PayMongo Test Checkout</p>
+- `src\components\CheckoutQRCode.tsx:29`: Test Mode only — no real payment
+- `src\components\DepositPage.tsx:13`: type Mode = 'test' | 'live';
+- `src\components\DepositPage.tsx:22`: const formPath = mode === 'live' ? '/deposit?mode=live' : '/deposit?mode=test';
+- `src\components\DepositPage.tsx:78`: if (saved && typeof saved.id === 'string' && /^[0-9a-f-]{36}$/i.test(saved.id) && validDepositAmount(saved.amount) && (mode === 'live' ? saved.method === 'qrph' : ['gcash', 'maya'].includes(saved.method)) && typeof saved.status ==
+- `src\components\DepositPage.tsx:138`: if (sent && mode === 'test') {
+- `src\components\DepositPage.tsx:167`: <nav className={styles.modes} aria-label="Wallet type"><Link href="/deposit?mode=test" aria-current={mode === 'test' ? 'page' : undefined}>Test wallet</Link><Link href="/deposit?mode=live" aria-current={mode === 'live' ? 'page' : 
+- `src\components\DepositPage.tsx:168`: <section className={styles.balance} aria-label="Wallet balance"><div className={styles.balanceGlow} /><span className={styles.balanceLabel}>{mode === 'test' ? 'SIMULATED WALLET' : 'PHP WALLET'}</span><strong>{peso(snapshot?.balanc
+- `src\components\DepositPage.tsx:169`: <div className={styles.modeNotice}><ShieldCheck size={17} /><p>{mode === 'test' ? 'Test mode · simulated funds only. No real money is transferred.' : 'PHP deposits stay held until settlement review. Payment confirmation is automat
+- `src\components\DepositPage.tsx:191`: {completed ? <><CircleCheck size={48} className={styles.success} /><h2 id="checkout-heading">Payment verified</h2><p>{mode === 'live' ? 'Your deposit is recorded and held for settlement review.' : 'Your simulated deposit has been 
+- `src\components\DepositPage.tsx:202`: <footer className={styles.footer}><ShieldCheck size={15} />UNIFY · {mode === 'test' ? 'Sandbox payments' : 'PHP wallet payments'}</footer>
+- `src\components\legacy\AdminHome.tsx:130`: title: "PayMongo Test Balance",
+- `src\components\legacy\AdminHome.tsx:168`: title: "Simulated Paid Withdrawals",
+- `src\components\legacy\AdminHome.tsx:253`: credit. This is a <strong>sandbox ledger report</strong>, not a
+- `src\components\legacy\AdminHome.tsx:278`: Manage member accounts and review sandbox deposits, withdrawal
+- `src\components\legacy\AdminOverview.tsx:21`: "Sandbox Deposits",
+- `src\components\legacy\AdminOverview.tsx:22`: "Sandbox Withdrawals",
+- `src\components\legacy\AdminTransactions.tsx:23`: source: "sandbox" | "legacy";
+- `src\components\legacy\AdminTransactions.tsx:109`: source === "sandbox" ? '/api/admin/sandbox-withdrawals/${encodeURIComponent(id)}' : '/api/admin/withdraw/${encodeURIComponent(id)}/approve',
+- `src\components\legacy\AdminTransactions.tsx:116`: ...(source === "sandbox" ? { body: JSON.stringify({ action: "approve" }) } : {}),
+- `src\components\legacy\AdminTransactions.tsx:140`: "SIMULATION ONLY: Mark this withdrawal as simulated paid? No GCash/Maya money will be sent."
+- `src\components\legacy\AdminTransactions.tsx:149`: source === "sandbox" ? '/api/admin/sandbox-withdrawals/${encodeURIComponent(id)}' : '/api/admin/withdraw/${encodeURIComponent(id)}/simulate-complete',
+- `src\components\legacy\AdminTransactions.tsx:151`: ...(source === "sandbox" ? { body: JSON.stringify({ action: "complete" }) } : {}) }
+- `src\components\legacy\AdminTransactions.tsx:155`: setMessage(result.message || "Simulated payout completed; no real money sent.");
+- `src\components\legacy\AdminTransactions.tsx:176`: const response = await fetch('/api/admin/sandbox-withdrawals/${encodeURIComponent(id)}', {
+- `src\components\legacy\AdminTransactions.tsx:190`: "Expire this PayMongo sandbox checkout and cancel the pending deposit?"
+- `src\components\legacy\AdminTransactions.tsx:226`: setMessage("Sandbox deposit cancelled successfully.");
+- `src\components\legacy\AdminTransactions.tsx:288`: Review sandbox deposits, withdrawals, and payment history.
+- `src\components\legacy\AdminTransactions.tsx:437`: {withdrawal.source === 'sandbox' && <small style={{ display: 'block', color: '#9BAFC7', marginTop: 4 }}>{withdrawal.processing_mode === 'automatic' ? 'Automatic · Test Mode' : 'Admin approval'}</small>}
+- `src\components\legacy\AdminTransactions.tsx:440`: {withdrawal.source === 'sandbox' && ['reserved', 'processing'].includes(withdrawal.status) && (
+- `src\components\legacy\AdminTransactions.tsx:465`: {busyId === withdrawal.id ? "Processing..." : "Mark Simulated Paid"}
+- `src\components\legacy\AdminTransactions.tsx:468`: <span>Simulated paid · No real transfer</span>
+- `src\components\legacy\AuthTest.tsx:34`: <h1>UNIFY Authentication Test</h1>
+- `src\components\legacy\Claims.tsx:15`: if(!session.session)throw new Error("Log in to view simulated claims");
+- `src\components\legacy\Claims.tsx:16`: const res=await fetch("/api/sandbox/claims",{headers:{Authorization:'Bearer ${session.session.access_token}'},cache:"no-store"});
+- `src\components\legacy\Claims.tsx:27`: const res=await fetch("/api/sandbox/claims/claim",{method:"POST",headers:{Authorization:'Bearer ${session.session.access_token}',"Content-Type":"application/json"},body:JSON.stringify({investmentId})});
+- `src\components\legacy\Claims.tsx:34`: <h1>Simulated Daily Claims</h1>
+- `src\components\legacy\Claims.tsx:44`: <button disabled={i.claimableDays===0||busy!==null} onClick={()=>void claim(i.id)}>{busy===i.id?"Claiming...":"Claim available simulated credits"}</button>
+- `src\components\legacy\Dashboard.tsx:195`: // Display the existing credited PayMongo Test Mode wallet.
+- `src\components\legacy\Dashboard.tsx:258`: setClaimFeedback("Unable to confirm your test wallet balance.");
+- `src\components\legacy\Dashboard.tsx:279`: ? 'Claimed ${result.claimed_days} simulated day(s): ${peso(
+- `src\components\legacy\Dashboard.tsx:281`: )}. Added to Remaining Balance (Test Mode).'
+- `src\components\legacy\Dashboard.tsx:282`: : "No new simulated days available."
+- `src\components\legacy\Dashboard.tsx:432`: // The sandbox purchase RPC writes to demo_investments.
+- `src\components\legacy\Dashboard.tsx:444`: status: "Simulated purchase",
+- `src\components\legacy\Dashboard.tsx:471`: console.error("Sandbox wallet error:", sandboxWalletResult.error);
+- `src\components\legacy\Dashboard.tsx:472`: setMessage('Unable to load test balance: ${sandboxWalletResult.error.message}');
+- `src\components\legacy\Dashboard.tsx:474`: console.warn("No sandbox wallet found for:", id);
+- `src\components\legacy\Dashboard.tsx:475`: setMessage("Your test wallet was not found. Contact support.");
+- `src\components\legacy\Dashboard.tsx:479`: setMessage("Invalid test wallet balance received.");
+- `src\components\legacy\Dashboard.tsx:482`: console.log("UNIFY test balance loaded:", amount);
+- `src\components\legacy\Dashboard.tsx:740`: setMessage(actionKind === "investment" ? "Insufficient combined test balance (Remaining + Deposit)." : "Insufficient balance.");
+- `src\components\legacy\Dashboard.tsx:779`: console.log("Sandbox investment created:", data);
+- `src\components\legacy\Dashboard.tsx:968`: <a href="/money" className="notice" style={{ display: 'block', color: '#93c5fd' }}>Open real PHP wallet — separate from simulated earnings</a>
+- `src\components\legacy\Dashboard.tsx:1016`: <span>Remaining Balance · Test Mode</span>
+- `src\components\legacy\Dashboard.tsx:1019`: <p>Includes the one-time ₱30 registration bonus · Simulated withdrawals only</p>
+- `src\components\legacy\Dashboard.tsx:1022`: <span>Deposit Balance · Test Mode</span>
+- `src\components\legacy\Dashboard.tsx:1025`: <p>Test purchases available · Not withdrawable</p>
+- `src\components\legacy\Dashboard.tsx:1181`: <span>Remaining Balance · Test Mode</span>
+- `src\components\legacy\Dashboard.tsx:1186`: <small>Daily credits claimed so far: {claimedTotal === null ? '—' : peso(claimedTotal)}. These are included in your test balance.</small>
+- `src\components\legacy\Dashboard.tsx:1187`: <small>Includes the one-time ₱30 registration bonus and other test wallet activity.</small>
+- `src\components\legacy\Dashboard.tsx:1194`: <p>No simulated purchases found in your portfolio.</p>
+- `src\components\legacy\Dashboard.tsx:1315`: <p className="simulation-note">Simulated credits only. Not real earnings or withdrawable funds.</p>
+- `src\components\legacy\Dashboard.tsx:1377`: <p>Simulated deposit commissions · L1 30% · L2 2% · L3 1%</p>
+- `src\components\legacy\Dashboard.tsx:1381`: <div><strong>{teamSummary ? peso(teamSummary.total_commission) : '—'}</strong><span>TEST COMMISSIONS</span></div>
+- `src\components\legacy\Dashboard.tsx:1407`: <span>{currentTeamLevel ? peso(currentTeamLevel.commission) : '—'} test rewards</span>
+- `src\components\legacy\Dashboard.tsx:1422`: <div className="team-member-deposit"><span>Verified test deposits</span><b>{member.verified_deposits == null ? '—' : peso(Number(member.verified_deposits))}</b></div>
+- `src\components\legacy\Dashboard.tsx:1426`: <span>Total test commission</span>
+- `src\components\legacy\Dashboard.tsx:1433`: <p className="simulation-note">Commissions are added to Remaining Balance after a verified test deposit. Pending deposits earn no commission. Up to 100 newest members are shown per level.</p>
+- `src\components\legacy\Dashboard.tsx:1457`: <span>Remaining Balance · Test Mode</span>
+- `src\components\legacy\Dashboard.tsx:1460`: <p>Includes the one-time ₱30 registration bonus · Simulated withdrawals only</p>
+- `src\components\legacy\Dashboard.tsx:1463`: <span>Deposit Balance · Test Mode</span>
+- `src\components\legacy\Dashboard.tsx:1466`: <p>Test purchases available · Not withdrawable</p>
+- `src\components\legacy\Dashboard.tsx:1738`: <span>{actionKind === "investment" ? "Available for test purchases" : "Available"}</span>
+- `src\components\legacy\FreePlans.tsx:60`: <header className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="flex items-center gap-3 text-2xl font-bold"><Gift className="text-cyan-300" />Free Welcome Plan</h1><p className="mt-2 text-slate-300">Give 
+- `src\components\legacy\FreePlans.tsx:69`: {member && product && <div className="space-y-2 rounded-xl border border-cyan-800 bg-cyan-950 p-4"><p>{member.phone ?? member.id.slice(0, 8)} · {product.name}</p><p className="text-xl font-bold text-cyan-200">Free · No balance ded
+- `src\components\legacy\FreePlans.tsx:73`: <p className="text-sm text-slate-300">One welcome free plan per member. Grants do not count as deposits or earn referral commissions. Simulated earnings only; no real-money payout.</p>
+- `src\components\legacy\Transactions.tsx:12`: Your sandbox transaction records will appear here
+- `src\components\legacy\Withdraw.tsx:62`: moneyRequest('/api/withdrawals/sandbox'),
+- `src\components\legacy\Withdraw.tsx:95`: setError("Insufficient simulated Remaining Balance.");
+- `src\components\legacy\Withdraw.tsx:105`: const data = await moneyRequest('/api/withdrawals/sandbox', {
+- `src\components\legacy\Withdraw.tsx:110`: ? 'Simulated withdrawal completed automatically. No real GCash/Maya transfer occurred.'
+- `src\components\legacy\Withdraw.tsx:124`: <h1 className="text-2xl font-bold">UNIFY Simulated Withdrawal</h1>
+- `src\components\legacy\Withdraw.tsx:126`: <p className="text-sm text-slate-400">Test Mode only. No real money is transferred.</p>
+- `src\components\legacy\Withdraw.tsx:127`: {mode && <p className="text-sm text-cyan-200">Processing: {mode === 'automatic' ? 'Automatic simulated withdrawal' : 'Administrator approval required'}</p>}
+- `src\components\legacy\Withdraw.tsx:131`: <p className="text-sm text-slate-400">Remaining Balance (simulated)</p>
+- `src\components\legacy\Withdraw.tsx:134`: Includes simulated bonus, claimed daily credits and eligible simulated commissions.
+- `src\components\legacy\Withdraw.tsx:135`: Deposit Balance is excluded. Minimum simulated withdrawal: ₱100.
+- `src\components\legacy\Withdraw.tsx:140`: <h2 className="text-lg font-semibold">Request Simulated Withdrawal</h2>
+- `src\components\legacy\Withdraw.tsx:167`: {submitting ? "Submitting..." : "Request Simulated Withdrawal"}
+- `src\components\legacy\Withdraw.tsx:174`: <h2 className="text-lg font-semibold">Simulated Withdrawal History</h2>
+- `src\components\legacy\Withdraw.tsx:176`: <p className="text-sm text-slate-400">No simulated withdrawal requests yet.</p>
+- `src\components\legacy\Withdraw.tsx:184`: <p className="mt-1 text-sm text-slate-400">{item.payment_method?.toUpperCase() ?? "Sandbox"} · Simulated only</p>
+- `src\components\ProfilePage.tsx:52`: { label: "Virtual Wallet", icon: Wallet, page: "wallet" },
+- `src\components\ProfilePage.tsx:53`: { label: "Simulated Earnings", icon: TrendingUp, page: "assets" },
+- `src\components\WithdrawalModeSettings.tsx:40`: <h2 className="flex items-center gap-2 text-xl font-semibold"><Settings2 className="text-cyan-300" />Withdrawal Settings <span className="rounded-full bg-cyan-950 px-3 py-1 text-xs text-cyan-200">Test Mode</span></h2>
+- `src\components\WithdrawalModeSettings.tsx:41`: <p className="text-sm text-slate-300">Choose how new simulated withdrawal requests are processed. Existing requests keep their original mode and status.</p>
+- `src\components\WithdrawalModeSettings.tsx:46`: <span><strong>{label(value)}</strong><span className="mt-1 block text-sm text-slate-300">{value === 'automatic' ? 'Eligible requests are marked simulated paid automatically. No real transfer occurs.' : 'New requests reserve the ba
+- `src\lib\business-budget.ts:11`: if(typeof w.id!=='string' || !/^wallet_[A-Za-z0-9]+$/.test(w.id))throw new MoneyError('Unexpected PayMongo wallet identifier',502);
+- `src\lib\deposit-checkout.ts:3`: export function resolveDepositMode(requested: string | undefined, liveEnabled: boolean): 'live' | 'test' {
+- `src\lib\deposit-checkout.ts:4`: if (requested === 'live' || requested === 'test') return requested;
+- `src\lib\deposit-checkout.ts:5`: return liveEnabled ? 'live' : 'test';
+- `src\lib\member-search.ts:11`: if (!member.phone || !/^[+\d\s().-]+$/.test(query)) return false;
+- `src\lib\money-operations.ts:14`: if(!/^ref_[A-Za-z0-9]+$/.test(reference)) throw new MoneyError('Invalid refund ID');
+- `src\lib\money-operations.ts:56`: if(typeof reference!=='string' || !/^dsp_[A-Za-z0-9]+$/.test(reference)) throw new MoneyError('Invalid dispute ID');
+- `src\lib\money-operations.ts:72`: if(!/^pay_[A-Za-z0-9]+$/.test(paymentId)) throw new MoneyError('Invalid payment ID');
+- `src\lib\money-operations.ts:97`: if(typeof response.id!=='string' || !/^ref_[A-Za-z0-9]+$/.test(response.id)) throw new MoneyError('Refund outcome unknown; reconcile before retrying',502);
+- `src\lib\money-payout.ts:14`: if(typeof transfer.id!=='string' || !/^tr_[A-Za-z0-9]+$/.test(transfer.id)) throw new MoneyError('Payout submitted; provider reference needs recovery',502);
+- `src\lib\money-server.ts:78`: if (!/^cs_[A-Za-z0-9]+$/.test(checkoutId)) throw new MoneyError('Invalid checkout ID');
+- `src\lib\money-server.ts:87`: if(!paid || typeof paid.id!=='string' || !/^pay_[A-Za-z0-9]+$/.test(paid.id)) throw new MoneyError('Verified payment ID missing',409);
+- `src\lib\money-server.ts:101`: if (!/^tr_[A-Za-z0-9]+$/.test(transferId)) throw new MoneyError('Invalid transfer ID');
+- `src\lib\money-validation.ts:3`: export const uuid = (value: unknown): value is string => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+- `src\lib\money-validation.ts:15`: if (!/^\d+$/.test(fields.t ?? '') || Math.abs(now / 1000 - Number(fields.t)) > 300 || !/^[a-f0-9]{64}$/i.test(fields.li ?? '')) return false;
+- `src\lib\payment-return-url.ts:9`: const target = new URL(/^https?:\/\//i.test(raw) ? raw : 'https://${raw}');
+- `src\lib\referral.ts:3`: return code && /^[A-Z0-9]{6,64}$/.test(code) ? code : null;
+- `src\lib\sandbox-api.ts:59`: !/^(?:0|[1-9]\d{0,6})(?:\.\d{1,2})?$/.test(raw)
+- `src\lib\sandbox-api.ts:89`: error.message.includes("Insufficient sandbox balance")
+- `src\lib\sandbox-api.ts:90`: ? "Insufficient sandbox balance."
+- `src\lib\sandbox-api.ts:91`: : "Sandbox transaction failed.";
+- `src\lib\sandbox-api.ts:101`: mode: "sandbox",
+- `src\lib\sandbox-deposit.ts:17`: !key?.startsWith('sk_test_') || !checkoutId || !/^cs_[A-Za-z0-9]+$/.test(checkoutId)) return false;
+- `src\lib\sandbox-deposit.ts:60`: if (error) throw new Error('Unable to load pending sandbox deposits');
+- `src\lib\supabase.ts:16`: if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(supabaseUrl)) {
+- `src\lib\supabase.ts:22`: if (/[\r\n]/.test(supabaseKey)) {
+- `src\lib\webhook-readiness.ts:12`: if (matches.length === 1 && typeof providerSecret === 'string' && providerSecret && !/[•*]/.test(providerSecret) && configuredSecret) {

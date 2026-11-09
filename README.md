@@ -73,6 +73,13 @@ UNIFY is designed to provide users with a centralized platform for managing acco
 - HTML and CSS
 - Git and GitHub
 
+## Real PHP wallet
+
+The separate live-payment module is available at `/money`, with operations at
+`/admin/money`. It is disabled by default. See [deployment and operations](docs/real-money.md)
+for the SQL migration, provider setup, security controls, testing, and remaining
+launch requirements. Existing sandbox balances are never converted to real funds.
+
 ## Development
 
 UNIFY is actively under development. Additional features, security improvements, testing, and integrations may be introduced in future updates.
