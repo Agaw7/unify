@@ -1,4 +1,5 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { moneyRequest } from '@/lib/money-client';
 
@@ -53,7 +54,7 @@ export default function MoneyOperations({ settlementOnly = false }: { settlement
     {data && (data.holds.length===0 ? <p>No deposits held for settlement.</p> : <>
       <label className="block">Settlement report reference<textarea className={input} value={reason} maxLength={500} onChange={e=>setReason(e.target.value)}/></label>
       {data.holds.map(h=><article className="space-y-2 rounded-lg bg-slate-900 p-3" key={h.transaction_id}>
-        <p>₱{(Number(h.remaining)/100).toFixed(2)} held</p>
+        <p>{formatPhp((Number(h.remaining)/100))} held</p>
         <p className="break-all text-sm">Deposit: {h.transaction_id}<br/>Customer: {h.money_transactions.user_id}<br/>External payment reference: {h.money_transactions.payment_id ?? 'Not linked'}</p>
         <button className={button} disabled={busy || reason.trim().length<5 || !h.money_transactions.payment_id} onClick={()=>{
           if(window.confirm('Approve this deposit using the settlement report you verified?')) void act({ action:'release',id:h.transaction_id });
@@ -87,7 +88,7 @@ export default function MoneyOperations({ settlementOnly = false }: { settlement
         <button className={button} disabled={busy || !id || reason.length<5} onClick={requestRefund}>Reserve refund for independent approval</button>
         <label className="block">Provider refund ID to reconcile / recover<input className={input} value={reference} onChange={e=>setReference(e.target.value)} placeholder="ref_…"/></label>
         <button className={button} disabled={busy || !reference} onClick={()=>void act({ action:'refund_verify',reference })}>Retrieve and verify refund</button>
-        {data.adjustments.map(a=><article className="rounded-lg bg-slate-900 p-3" key={a.id}><p>{a.kind} · ₱{(Number(a.amount)/100).toFixed(2)} · {a.status}</p><p className="break-all text-sm">Case: {a.id}<br/>Deposit: {a.transaction_id}<br/>Provider: {a.provider_reference ?? 'Not linked'}<br/>Original shortfall: ₱{(Number(a.shortfall)/100).toFixed(2)}</p>{a.kind==='refund' && a.status==='requested' && <div className="flex gap-3"><button className={button} disabled={busy || reason.length<5} onClick={()=>{if(window.confirm('Send this real-money refund to its original payment method?')) void act({ action:'refund_send',id:a.id });}}>Send refund (second administrator)</button><button className={button} disabled={busy || reason.length<5} onClick={()=>void act({ action:'refund_cancel',id:a.id })}>Cancel unsubmitted refund</button></div>}</article>)}
+        {data.adjustments.map(a=><article className="rounded-lg bg-slate-900 p-3" key={a.id}><p>{a.kind} · {formatPhp((Number(a.amount)/100))} · {a.status}</p><p className="break-all text-sm">Case: {a.id}<br/>Deposit: {a.transaction_id}<br/>Provider: {a.provider_reference ?? 'Not linked'}<br/>Original shortfall: {formatPhp((Number(a.shortfall)/100))}</p>{a.kind==='refund' && a.status==='requested' && <div className="flex gap-3"><button className={button} disabled={busy || reason.length<5} onClick={()=>{if(window.confirm('Send this real-money refund to its original payment method?')) void act({ action:'refund_send',id:a.id });}}>Send refund (second administrator)</button><button className={button} disabled={busy || reason.length<5} onClick={()=>void act({ action:'refund_cancel',id:a.id })}>Cancel unsubmitted refund</button></div>}</article>)}
       </div>
       <div className="space-y-3"><h3 className="text-xl">Unresolved operations alerts</h3><p className="text-sm text-slate-400">Critical alerts restrict affected customers; unmatched events restrict all financial processing until investigated. Acknowledgment does not erase debt or release disputed funds.</p>{data.alerts.map(a=><article className="rounded-lg border border-amber-700 p-3" key={a.key}><p>{a.severity}: {a.message}</p><p className="break-all text-sm">{a.key} · {a.transaction_id ?? 'Unmatched event'}</p><button className={button} disabled={busy || reason.length<5} onClick={()=>{if(window.confirm('Acknowledge this alert only after investigating and recording evidence.')) void act({ action:'alert_resolve',key:a.key });}}>Resolve with evidence</button></article>)}</div>
     </>}

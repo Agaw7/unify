@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
@@ -24,10 +25,7 @@ type Withdrawal = {
 };
 
 function peso(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-  }).format(amount);
+  return formatPhp(amount);
 }
 
 export default function WithdrawPage() {

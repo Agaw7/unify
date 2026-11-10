@@ -1,8 +1,9 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { moneyRequest } from '@/lib/money-client';
 
-const bonusAmount = (amount: number) => new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount / 100);
+const bonusAmount = (amount: number) => formatPhp(amount / 100);
 
 type Bonus = { user_id:string;phone_last4:string|null;amount:number;revoked_at:string|null;reclaim_reason:string|null;has_deposit:boolean;has_identity:boolean;unspent:boolean;can_reclaim:boolean };
 export default function RegistrationBonusAdmin({ onChanged }: { onChanged:()=>Promise<void> }) {

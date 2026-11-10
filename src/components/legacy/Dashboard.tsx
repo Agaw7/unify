@@ -1,21 +1,20 @@
 "use client";
 
 
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 import {
 
-  Home, Sprout, Store, Wallet, UserRound, Users, ExternalLink,
-
-  ArrowUpFromLine, TrendingUp,
+  Home, Sprout, Store, UserRound, Users,
 
   ChevronRight, ShieldCheck,
 
-  Copy, Check, History,
+  Copy, Check,
 
-  UserPlus, RefreshCw, X, CheckCircle2,
+  UserPlus, RefreshCw, X,
 
   Gift
 
@@ -47,39 +46,7 @@ type Product = {
 
 };
 
-type Investment = {
-  acquisition_type?: string;
-
-  id: string;
-
-  amount: number;
-
-  status: string;
-
-  daily_income: number;
-
-  created_at: string;
-
-  product_id: string;
-
-};
-
-type Transaction = {
-
-  id: number;
-
-  type: string;
-
-  amount: number;
-
-  created_at: string;
-
-};
-
 type Profile = {
-
-  full_name: string | null;
-
   invite_code?: string | null;
   short_invite_code?: string | null;
 
@@ -98,7 +65,6 @@ type Member = {
 
 };
 
-type ActionKind = "deposit" | "withdrawal" | "investment";
 type TeamSummary = {
   total_commission: number;
   activeFriends: number | null;
@@ -111,59 +77,8 @@ type Tab = "home" | "products" | "assets" |
 
 const peso = (value: number) =>
 
-  new Intl.NumberFormat("en-PH", {
+  formatPhp(value);
 
-    style: "currency",
-
-    currency: "PHP"
-
-  }).format(value);
-
-type PaymentTransaction = {
-
-  id: string;
-
-  user_id: string;
-
-  transaction_type: "deposit" | "withdrawal";
-
-  amount: number;
-
-  currency: string;
-
-  status: string;
-
-  provider: string;
-
-  created_at: string;
-
-};
-
-type HistoryEntry = {
-  id: string;
-  label: string;
-  amount: number;
-  status: string;
-  created_at: string;
-  isCredit: boolean;
-};
-
-function PaymentHistory({ entries }: { entries: HistoryEntry[] }) {
-  return (
-    <section className="unify-payment-history" aria-label={`Payment history: ${entries.length} transactions`}>
-      <div className="wallet-history-header">
-        <div>
-          <h4>Payment History</h4>
-          <p>All your wallet and payment transactions</p>
-        </div>
-        <a href="/deposit/history" className="deposit-history-link">Show all deposits <ChevronRight size={16} /></a>
-      </div>
-    </section>
-  );
-}
-
-type SimCredit = { investment_id: string; day_number: number };
-const DAY_MS = 86400000;
 type DailyTask = { threshold: number; reward: number; active_count: number; claimed: boolean; funded?:boolean };
 const TASK_MILESTONES = [
   { threshold: 10, reward: 100 },
@@ -172,8 +87,7 @@ const TASK_MILESTONES = [
   { threshold: 50, reward: 1500 },
 ];
 
-export default function HomePage({initialTab="home",simulationArchive=false}:{initialTab?:Tab;simulationArchive?:boolean}={}) {
-  const router = useRouter();
+export default function HomePage({initialTab="home"}:{initialTab?:Tab}={}) {
 
   const [checkoutProduct,setCheckoutProduct] = useState<string|null>(null);
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -189,28 +103,10 @@ export default function HomePage({initialTab="home",simulationArchive=false}:{in
     (productDetails(a.name)?.tier ?? Infinity) - (productDetails(b.name)?.tier ?? Infinity)
   );
 
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const [claimedByInvestment,setClaimedByInvestment] = useState<Record<string,number>>({});
-  const [claimBusy,setClaimBusy] = useState<string|null>(null);
-  const [claimFeedback,setClaimFeedback] = useState("");
-  const [clockNow,setClockNow] = useState(() => Date.now());
-  useEffect(() => {const timer=window.setInterval(()=>setClockNow(Date.now()),1000);return ()=>window.clearInterval(timer);},[]);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-
   const [selectedTeamLevel, setSelectedTeamLevel] = useState<1 | 2 | 3>(1);
   const [teamSummary, setTeamSummary] = useState<TeamSummary | null>(null);
 
   
-  const [balance, setBalance] = useState(0);
-  const [remainingBalance, setRemainingBalance] = useState(0);
-  const [claimedTotal, setClaimedTotal] = useState<number | null>(null);
-  // Display the existing recorded wallet balance.
-  // This is a temporary read-only display mapping; do not credit funds here.
-  const purchaseBalance = (Math.round(remainingBalance * 100) + Math.round(balance * 100)) / 100;
-  
-
   const [userId, setUserId] = useState<string | null>(null);
 
   const [email, setEmail] = useState("");
@@ -218,6 +114,7 @@ export default function HomePage({initialTab="home",simulationArchive=false}:{in
   const [verified, setVerified] = useState(false);
 
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [memberName, setMemberName] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -241,271 +138,25 @@ useEffect(() => {
   setInviteLink(url.toString());
 }, [profile?.invite_code, profile?.short_invite_code]);
 
-  // Payment transactions
-
-  const [paymentTransactions, setPaymentTransactions] =
-
-  useState<PaymentTransaction[]>([]);
-
-const loadWalletData = useCallback(async (userId: string) => {
-  const { data, error } = await supabase
-    .from("payment_transactions")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.warn("Transaction loading error:", error.message);
-  } else {
-    setPaymentTransactions((data ?? []) as PaymentTransaction[]);
-  }
-}, []);
-
-  const loadSimulationClaims = useCallback(async (id:string) => {
-    const [wallet,credits] = await Promise.all([
-      supabase.from("sandbox_wallets").select("remaining_balance").eq("user_id",id).maybeSingle(),
-      supabase.from("simulation_daily_credits").select("investment_id,day_number,amount").eq("user_id",id)
-    ]);
-    if(wallet.error || credits.error){setClaimFeedback(wallet.error?.message ?? credits.error?.message ?? "Claims unavailable");return;}
-    if (!wallet.data || !Number.isFinite(Number(wallet.data.remaining_balance))) {
-      setClaimFeedback("Unable to confirm your test wallet balance.");
-      return;
-    }
-    setRemainingBalance(Number(wallet.data.remaining_balance));
-    setClaimedTotal((credits.data ?? []).reduce((sum, credit) => sum + Math.round(Number(credit.amount) * 100), 0) / 100);
-
-    const counts:Record<string,number>={};
-    for(const c of (credits.data ?? []) as SimCredit[]) counts[c.investment_id]=(counts[c.investment_id]??0)+1;
-    setClaimedByInvestment(counts);
-  },[]);
-
-  async function claimInvestmentDays(investmentId:string){
-    if(!userId || claimBusy) return;
-    setClaimBusy(investmentId);setClaimFeedback("");
-    try{
-      const {data,error}=await supabase.rpc("claim_simulation_days",{p_investment_id:investmentId});
-      if(error)throw new Error(error.message);
-      await loadSimulationClaims(userId);
-      const result=data as {claimed_days?:number;credited?:number}|null;
-      setClaimFeedback(
-  result?.claimed_days
-    ? `Claimed ${result.claimed_days} simulated day(s): ${peso(
-        Number(result.credited ?? 0)
-      )}. Added to Remaining Balance (Test Mode).`
-    : "No new simulated days available."
-);
-    }catch(e){setClaimFeedback(e instanceof Error?e.message:"Claim failed");}
-    finally{setClaimBusy(null);}
-  }
-
-  const [actionKind, setActionKind] =
-
-    useState<ActionKind | null>(null);
-
-  const [selectedProduct, setSelectedProduct] =
-
-    useState<Product | null>(null);
-
-  const [actionAmount, setActionAmount] = useState("");
-
-  const [actionBusy, setActionBusy] = useState(false);
-
   const loadData = useCallback(async (id: string) => {
-
-  const [p, i, t, b, pr] = await Promise.all([
-
-    supabase
-
-      .from("investment_products")
-
-      .select("*")
-
-      .order("price", { ascending: true }),
-
-    supabase.from("demo_investments")
-
-        .select("*")
-
-        .eq("user_id", id)
-
-        .order("created_at", { ascending: false }),
-
-      supabase.from("transactions")
-
-        .select("*")
-
-        .eq("user_id", id)
-
-        .order("created_at", { ascending: false }),
-
-      supabase
-        .from("wallet_accounts")
-        .select("balance, currency")
-        .eq("user_id", id)
-        .maybeSingle(),
-
-      supabase.from("profiles")
-
-        .select("*")
-
-        .eq("id", id)
-
-        .maybeSingle(),
-
+    const [catalog, member] = await Promise.all([
+      supabase.from("investment_products").select("id,name,price,daily_income,duration_days")
+        .order("price", { ascending: true }),
+      supabase.from("profiles").select("invite_code,short_invite_code").eq("id", id).maybeSingle(),
     ]);
 
-    // Core wallet and investment queries must succeed.
-
-const results = {
-
-  products: p.error,
-
-  investments: i.error,
-
-  transactions: t.error,
-
-  balance: b.error,
-
-  profile: pr.error,
-
-
-
-};
-
-Object.entries(results).forEach(([name, error]) => {
-
-  if (error) {
-
-    console.warn(`${name} query failed`, {
-
-      message: error.message,
-
-      code: error.code,
-
-      details: error.details,
-
-      hint: error.hint,
-
-    });
-
-  }
-
-});
-
-if (p.error) {
-
-  throw new Error(`Products: ${p.error.message}`);
-
-}
-
-const requiredError = [i.error, t.error, b.error].find(Boolean);
-
-if (requiredError) {
-
-  console.warn("Required data failed:", {
-
-    message: requiredError.message,
-
-    code: requiredError.code,
-
-    details: requiredError.details,
-
-  });
-
-}
-
-  setProducts((p.data ?? []).map((item) => ({
-
-    id: item.id,
-
-    name: item.name,
-
-    description: "AUREVIA product plan",
-
-    minimum_amount: Number(item.price),
-
-    illustrative_return_pct:
-
-      Number(item.price) > 0
-
-        ? (Number(item.daily_income) / Number(item.price)) * 100
-
-        : 0,
-
-    duration_days: Number(item.duration_days ?? 365),
-
-  })) as Product[]);
-
-  // The sandbox purchase RPC writes to demo_investments.
-  // This table has no status column, so use a display-only label.
-  if (i.error) {
-    setMessage(`Unable to load your portfolio: ${i.error.message}`);
-  } else {
-    setInvestments((i.data ?? []).map((row) => ({
-      id: String(row.id),
-      product_id: String(row.product_id),
-      amount: Number(row.amount),
-      daily_income: Number(row.daily_income ?? 0),
-      acquisition_type: row.acquisition_type ?? 'purchase',
-      created_at: String(row.created_at),
-      status: "Simulated purchase",
+    if (catalog.error) setMessage("Unable to load Market products.");
+    else setProducts((catalog.data ?? []).map(item => ({
+      id: item.id,
+      name: item.name,
+      description: "AUREVIA product plan",
+      minimum_amount: Number(item.price),
+      illustrative_return_pct: Number(item.price) > 0 ? Number(item.daily_income) / Number(item.price) * 100 : 0,
+      duration_days: Number(item.duration_days ?? 365),
     })));
-  }
 
-  setTransactions((t.data ?? []) as Transaction[]);
-  
-if (b.error) {
-    console.error("AUREVIA balance error:", {
-      message: b.error.message,
-      code: b.error.code,
-      details: b.error.details,
-      hint: b.error.hint,
-    });
-    setMessage("Unable to load your wallet balance. Please refresh.");
-  } else if (b.data) {
-    setBalance(Number(b.data.balance));
-  } else {
-    console.warn("AUREVIA wallet account not found for user:", id);
-    setMessage("Wallet account not found. Please contact support.");
-  }
-  // Remaining Balance stays separate from the existing deposit wallet.
-  const sandboxWalletResult = await supabase.from("sandbox_wallets")
-    .select("remaining_balance")
-    .eq("user_id", id)
-    .maybeSingle();
-
-  if (sandboxWalletResult.error) {
-    console.error("Sandbox wallet error:", sandboxWalletResult.error);
-    setMessage(`Unable to load test balance: ${sandboxWalletResult.error.message}`);
-  } else if (!sandboxWalletResult.data) {
-    console.warn("No sandbox wallet found for:", id);
-    setMessage("Your test wallet was not found. Contact support.");
-  } else {
-    const amount = Number(sandboxWalletResult.data.remaining_balance);
-    if (!Number.isFinite(amount)) {
-      setMessage("Invalid test wallet balance received.");
-    } else {
-      setRemainingBalance(amount);
-      console.log("AUREVIA test balance loaded:", amount);
-    }
-  }
-
-  if (pr.error) {
-    console.error("AUREVIA profile error:", pr.error);
-    setMessage(`Profile loading failed: ${pr.error.message}`);
-  } else if (!pr.data) {
-    setProfile(null);
-    setMessage("Member profile not found.");
-  } else {
-    const memberProfile = pr.data as Profile;
-    setProfile(memberProfile);
-    console.log("AUREVIA profile loaded:", {
-      hasInviteCode: Boolean(memberProfile.invite_code),
-    });
-  }
-
-
-
+    if (member.error || !member.data) setMessage("Unable to load your member profile.");
+    else setProfile(member.data);
   }, []);
 
   useEffect(() => {
@@ -560,17 +211,16 @@ if (b.error) {
         }
 
         const user = data.user;
+        const name = user.user_metadata?.display_name || user.user_metadata?.full_name;
+        setMemberName(typeof name === "string" ? name : null);
 
         setUserId(user.id);
 
         setEmail(user.phone ?? user.email ?? "");
 
         setVerified(Boolean(user.phone_confirmed_at ?? user.email_confirmed_at));
-
+        setLoading(false);
         await loadData(user.id);
-
-        await loadWalletData(user.id);
-        await loadSimulationClaims(user.id);
 
       } catch (error) {
 
@@ -590,7 +240,7 @@ if (b.error) {
 
     initialize();
 
-  }, [loadData, loadWalletData, loadSimulationClaims]);
+  }, [loadData]);
 
   useEffect(() => {
     if (tab === "home" && userId) setAnnouncementOpen(true);
@@ -630,219 +280,9 @@ if (b.error) {
     await loadDailyTasks();
   }
 
-  async function refreshData() {
-
-    if (!userId) return;
-
-  
-
-    try {
-
-      await loadData(userId);
-        await loadWalletData(userId);
-        await loadSimulationClaims(userId);
-
-      setMessage("");
-
-    } catch (error) {
-
-      setMessage(
-
-        error instanceof Error ? error.message : "Refresh failed."
-
-      );
-
-    } finally {
-
-    
-
-    }
-
-  }
-
   function navigateTab(nextTab: Tab) {
     setTab(nextTab);
     window.scrollTo({ top: 0 });
-  }
-
-  function openAction(
-
-    kind: ActionKind,
-
-    product?: Product
-
-  ) {
-
-    if (kind === "investment") {
-      if(product){setCheckoutProduct(product.id);}else{setTab("home");}
-      return;
-    }
-
-    if (kind === "deposit") {
-      router.push("/deposit");
-      return;
-    }
-
-    setActionKind(kind);
-
-    setSelectedProduct(product ?? null);
-
-    setActionAmount(
-
-      product ? String(product.minimum_amount) : ""
-
-    );
-
-    setMessage("");
-
-  }
-
-  function closeAction() {
-
-    if (actionBusy) return;
-
-    setActionKind(null);
-
-    setSelectedProduct(null);
-
-    setActionAmount("");
-
-  }
-
-  async function submitAction() {
-
-    if (!actionKind || !userId || actionBusy) return;
-
-    const amount = Number(actionAmount);
-
-    if (
-
-      !Number.isFinite(amount) ||
-
-      amount < 0.01 ||
-
-      amount > 100000 ||
-
-      Math.round(amount * 100) !== amount * 100
-
-    ) {
-
-      setMessage("Enter a valid amount from ₱0.01 to ₱100,000.");
-
-      return;
-
-    }
-
-    if (
-
-      actionKind === "investment" &&
-
-      (!selectedProduct ||
-
-        amount < Number(selectedProduct.minimum_amount))
-
-    ) {
-
-      setMessage("Amount is below the product minimum.");
-
-      return;
-
-    }
-
-    if (
-
-      actionKind !== "deposit" &&
-
-      amount > (actionKind === "investment" ? purchaseBalance : balance)
-
-    ) {
-
-      setMessage(actionKind === "investment" ? "Insufficient combined test balance (Remaining + Deposit)." : "Insufficient balance.");
-
-      return;
-
-    }
-
-    // Never credit or debit real-money wallets through the legacy my_action RPC.
-    if (actionKind === "deposit") {
-      setActionKind(null);
-      router.push("/deposit");
-      return;
-    }
-
-    if (actionKind === "withdrawal") {
-      setMessage("Withdrawals require an approved payout integration. No funds were moved.");
-      return;
-    }
-
-    setActionBusy(true);
-
-    setMessage("");
-
-    try {
-
-      if (actionKind === "investment") {
-        if (!selectedProduct?.id) {
-          throw new Error("Please select an investment product.");
-        }
-
-        throw new Error("Use the live product purchase page. No funds were moved.");
-      } else {
-        const { error } = await supabase.rpc("my_action", {
-          p_kind: actionKind,
-          p_amount: amount,
-          p_product_id: null,
-        });
-
-        if (error) throw error;
-      }
-
-      const completedKind = actionKind;
-
-      setActionKind(null);
-
-      setSelectedProduct(null);
-
-      setActionAmount("");
-
-      await loadData(userId);
-        await loadWalletData(userId);
-        await loadSimulationClaims(userId);
-
-      setMessage(
-
-        "Your transaction was completed successfully."
-
-      );
-
-      if (completedKind === "investment") {
-
-        setTab("assets");
-
-      } else {
-
-        setTab("wallet");
-
-      }
-
-    } catch (error) {
-
-      setMessage(
-
-        error instanceof Error
-
-          ? error.message
-
-          : "transaction failed."
-
-      );
-
-    } finally {
-
-      setActionBusy(false);
-
-    }
-
   }
 
   async function copyInvite() {
@@ -886,35 +326,6 @@ if (b.error) {
   const peopleInTeam = teamSummary?.levels.reduce((total, tier) => total + tier.count, 0);
   const currentTeamLevel = teamSummary?.levels.find(level => level.level === selectedTeamLevel);
   const currentTeamMembers = currentTeamLevel?.members ?? [];
-
-  // Only a projection: never label this as earnings already received.
-  const projected = investments.reduce(
-    (sum, inv) => sum + Number(inv.daily_income),
-    0
-  );
-
-  // Combine transaction sources for payment history.
-  const allPaymentHistory: HistoryEntry[] = [
-    ...transactions.map((tx) => ({
-      id: `ledger-${tx.id}`,
-      label: tx.type === "deposit" ? "Deposit" :
-        tx.type === "withdrawal" ? "Withdrawal" :
-        tx.type === "investment" ? "Investment" :
-        tx.type === "return" ? "Return" : tx.type,
-      amount: Number(tx.amount),
-      status: "Recorded",
-      created_at: tx.created_at,
-      isCredit: tx.type === "deposit" || tx.type === "return",
-    })),
-    ...paymentTransactions.map((tx) => ({
-      id: `payment-${tx.id}`,
-      label: tx.transaction_type === "deposit" ? "Deposit" : "Withdrawal",
-      amount: Number(tx.amount),
-      status: tx.status,
-      created_at: tx.created_at,
-      isCredit: tx.transaction_type === "deposit",
-    })),
-  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   if (loading) {
 
@@ -1031,7 +442,7 @@ if (b.error) {
 
                   product={product}
 
-                  onInvest={() => openAction("investment", product)}
+                  onInvest={() => setCheckoutProduct(product.id)}
 
                 />
 
@@ -1120,7 +531,7 @@ if (b.error) {
 
                   product={product}
 
-                  onInvest={() => openAction("investment", product)}
+                  onInvest={() => setCheckoutProduct(product.id)}
 
                 />
 
@@ -1142,172 +553,7 @@ if (b.error) {
 
         {/* ASSETS */}
 
-        {tab === "assets" && !simulationArchive && <LiveInvestments view="portfolio"/>}
-        {tab === "assets" && simulationArchive && (
-
-          <>
-
-            <div className="page-heading">
-
-              <h2>My Portfolio</h2>
-
-              <p>Track your investments.</p>
-
-            </div>
-
-            <div className="portfolio-summary">
-
-              <span>Remaining Balance · Test Mode</span>
-
-              <h2>{peso(remainingBalance)}</h2>
-
-              <small>Illustrative daily projection: {peso(projected)}. Unclaimed projections are not included in this balance.</small>
-              <small>Daily credits claimed so far: {claimedTotal === null ? '—' : peso(claimedTotal)}. These are included in your test balance.</small>
-              <small>Includes the one-time ₱30 registration bonus and other test wallet activity.</small>
-              <small>Simulation only — no real earnings.</small></div>
-              {claimFeedback && <p role="status">{claimFeedback}</p>}
-
-
-            {investments.length === 0 && (
-              <div className="empty-state">
-                <p>No simulated purchases found in your portfolio.</p>
-                <button type="button" onClick={refreshData}>
-                  Refresh Portfolio
-                </button>
-              </div>
-            )}
-
-            <div className="product-grid">
-
-              {investments.map(inv => {
-
-                const product = getProduct(inv.product_id);
-
-                const start = new Date(inv.created_at);
-
-                const duration = product?.duration_days ?? 100;
-
-                const elapsed = Math.max(
-
-                  0,
-
-                  Math.floor(
-
-                    (Date.now() - start.getTime()) / 86400000
-
-                  )
-
-                );
-
-                const progress = duration
-
-                  ? Math.min(100, elapsed / duration * 100)
-
-                  : 0;
-
-                const eligibleDays=Math.min(365,Math.max(0,Math.floor((clockNow-start.getTime())/DAY_MS)));
-                const alreadyClaimed=claimedByInvestment[inv.id]??0;
-                const availableDays=Math.max(0,eligibleDays-alreadyClaimed);
-                const claimFinished=eligibleDays>=365 && availableDays===0;
-                const earnings = Number(inv.daily_income);
-
-                const productName = product?.name ?? "Investment";
-
-                return (
-
-                  <div className="investment-card" key={inv.id}>
-
-                    <div className="card-top">
-
-                      <div className="product-image-box">
-
-                        {productImages[productName] ? (
-
-                          <img
-
-                            src={productDisplayImage(productName)}
-
-                            alt={productDisplayName(productName)}
-
-                            className="product-image"
-
-                          />
-
-                        ) : (
-
-                          <TrendingUp size={25} />
-
-                        )}
-
-                      </div>
-
-                      <div>
-
-                        <h3>
-
-                          {productDisplayName(productName)}
-
-                        </h3>
-
-                        <strong>
-
-                          {inv.acquisition_type === 'admin_free_plan' ? 'Free welcome plan' : peso(Number(inv.amount))}
-
-                        </strong>
-
-                      </div>
-
-                      <span className="duration-badge">
-
-                        {Math.min(elapsed, duration)}/{duration} days
-
-                      </span>
-
-                    </div>
-
-                  <div className="product-stats">
-
-                    <div>
-
-                      <span>Illustrative Daily Amount</span>
-
-                    <strong className="green">
-
-                      {peso(earnings)}
-
-                    </strong>
-
-                     </div>
-
-                    </div>
-
-                    <div className="progress-track">
-
-                      <div style={{ width: `${progress}%` }} />
-
-                    </div>
-
-                    <button type="button" className="invest-now-button" disabled={claimBusy!==null || availableDays===0}
-                      onClick={()=>void claimInvestmentDays(inv.id)}>
-                      {claimBusy===inv.id?"Claiming...":availableDays>0?`Claim ${peso(availableDays*earnings)} (simulation)`:claimFinished?"Simulation completed":"Claim locked · wait 24 hours"}
-                    </button>
-                    <p className="simulation-note">Simulated credits only. Not real earnings or withdrawable funds.</p>
-                    <p className="simulation-note">
-
-                      {inv.status}
-                    </p>
-
-                  </div>
-
-                );
-
-              })}
-
-            </div>
-
-          </>
-
-        )}
+        {tab === "assets" && <LiveInvestments view="portfolio" />}
 
         {/* TEAM */}
 
@@ -1411,20 +657,33 @@ if (b.error) {
 
             <RealWalletSummary />
 
-              <PaymentHistory entries={allPaymentHistory} />
+            <Link href="/money">View wallet transaction history</Link>
 
           </>
 
         )}
 
         {tab === "profile" && (
-          <MemberProfile contact={email} name={profile?.full_name} verified={verified}
+          <MemberProfile contact={email} name={memberName} verified={verified}
             onBank={() => navigateTab("bank")} onLogout={logout} />
         )}
 
       </main>
     
-      {checkoutProduct && <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/70 p-4" role="dialog" aria-modal="true" aria-label="Confirm product purchase"><div className="mx-auto my-6 max-w-xl rounded-2xl border border-slate-700 bg-[#0b1320] p-5"><button className="mb-4 text-cyan-300" onClick={()=>setCheckoutProduct(null)}>← Back to {tab === "products" ? "Market" : "Home"}</button><LiveInvestments view="checkout" selectedProductId={checkoutProduct} onPurchased={()=>{setCheckoutProduct(null);setTab("assets");}}/></div></div>}
+      {checkoutProduct && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-[#23102e]/70 p-3 sm:p-4">
+          <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-sm overflow-y-auto rounded-3xl border border-[#eadff0] bg-[#faf5fb] p-3 shadow-xl sm:p-4"
+            role="dialog" aria-modal="true" aria-label="Confirm product purchase">
+            <button type="button" className="mb-2 min-h-9 text-sm font-semibold text-[#54265e]" onClick={() => setCheckoutProduct(null)}>
+              ← Back to {tab === "products" ? "Market" : "Home"}
+            </button>
+            <LiveInvestments view="checkout" selectedProductId={checkoutProduct} onPurchased={() => {
+              setCheckoutProduct(null);
+              setTab("assets");
+            }} />
+          </div>
+        </div>
+      )}
 
       {announcementOpen && tab === "home" && (
         <div
@@ -1455,22 +714,17 @@ if (b.error) {
               Official Announcement
             </h2>
             <p className="aurevia-announcement-description">
-              Please use our official website and share it with current and prospective members.
+              Check back here for official AUREVIA links.
             </p>
 
             <div className="aurevia-announcement-links">
-              <a
-                href="https://bydmch.cyou/login"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="aurevia-announcement-link"
-              >
+              <div className="aurevia-announcement-link">
                 <span>
                   <span className="aurevia-announcement-link-label">OFFICIAL WEBSITE</span>
-                  <span className="aurevia-announcement-url">https://bydmch.cyou/login</span>
+                  <span className="aurevia-announcement-url">Coming soon</span>
                 </span>
-                <ExternalLink size={17} aria-hidden="true" />
-              </a>
+                <span className="aurevia-announcement-badge">SOON</span>
+              </div>
               <div className="aurevia-announcement-link aurevia-announcement-telegram">
                 <span>
                   <span className="aurevia-announcement-link-label">TELEGRAM GROUP CHAT</span>
@@ -1480,15 +734,6 @@ if (b.error) {
               </div>
             </div>
 
-            <a
-              href="https://bydmch.cyou/login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="aurevia-announcement-primary"
-            >
-              <ExternalLink size={17} aria-hidden="true" />
-              Open Official Website
-            </a>
             <button
               type="button"
               onClick={() => setAnnouncementOpen(false)}
@@ -1500,191 +745,6 @@ if (b.error) {
         </div>
       )}
       {/*  TRANSACTION  */}
-
-      {actionKind && actionKind !== "deposit" && (
-
-        <div
-
-          className="modal-overlay unify-modal-overlay"
-
-          role="presentation"
-
-          onClick={closeAction}
-
-        >
-
-          <div
-
-            className="modal unify-modal-card"
-
-            role="dialog"
-
-            aria-modal="true"
-
-            aria-labelledby="modal-title"
-
-            onClick={e => e.stopPropagation()}
-
-          >
-
-            <button
-              type="button"
-              className="modal-close unify-modal-close"
-
-              onClick={closeAction}
-
-              disabled={actionBusy}
-
-              aria-label="Close"
-
-            >
-
-              <X size={22} />
-
-            </button>
-
-            <div className="modal-icon">
-
-              {actionKind === "withdrawal" ? (
-
-                <ArrowUpFromLine size={26} />
-
-              ) : (
-
-                <TrendingUp size={26} />
-
-              )}
-
-            </div>
-
-            <h2 id="modal-title">
-
-              {actionKind === "withdrawal"
-
-                  ? "Withdrawal"
-
-                  : "Start Investment"}
-
-            </h2>
-
-            {selectedProduct && (
-
-              <p className="modal-description">
-
-                {productDisplayName(selectedProduct.name)} ·{" "}
-
-                {selectedProduct.illustrative_return_pct}%
-
-                estimated return over{" "}
-
-                {selectedProduct.duration_days} days
-
-              </p>
-
-            )}
-
-            <div className="modal-balance">
-
-              <span>{actionKind === "investment" ? "Available for test purchases" : "Available"}</span>
-              <strong>{peso(actionKind === "investment" ? purchaseBalance : balance)}</strong>
-              {actionKind === "investment" && <div className="purchase-balance-details">
-                <div><span>Remaining Balance</span><b>{peso(remainingBalance)}</b></div>
-                <div><span>Deposit Balance</span><b>{peso(balance)}</b></div>
-                <small>Remaining Balance is used first.</small>
-              </div>}
-
-            </div>
-
-            <label htmlFor="amount">
-
-              Amount (PHP)
-
-            </label>
-
-            <input
-
-              id="amount"
-
-              type="number"
-
-              min={
-
-                selectedProduct
-
-                  ? Number(selectedProduct.minimum_amount)
-
-                  : 0.01
-
-              }
-
-              max="100000"
-
-              step="0.01"
-
-              value={actionAmount}
-
-              onChange={e => setActionAmount(e.target.value)}
-
-              placeholder="Enter amount"
-
-              disabled={actionBusy}
-
-            />
-
-            {selectedProduct && (
-
-              <p className="minimum">
-
-                Minimum:{" "}
-
-                {peso(Number(selectedProduct.minimum_amount))}
-
-              </p>
-
-            )}
-
-            {message && <p className="unify-modal-feedback" role="alert">{message}</p>}
-
-            <button
-              type="button"
-              className="confirm-button unify-modal-confirm"
-
-              onClick={submitAction}
-
-              disabled={actionBusy}
-
-            >
-
-              {actionBusy
-
-                ? "Processing..."
-
-                : actionKind === "withdrawal" ? "Confirm Withdrawal"
-                : "Confirm Investment"}
-
-              {!actionBusy && <CheckCircle2 size={19} />}
-
-            </button>
-
-            <button
-              type="button"
-              className="cancel-button unify-modal-cancel"
-
-              onClick={closeAction}
-
-              disabled={actionBusy}
-
-            >
-
-              Cancel
-
-            </button>
-
-          </div>
-
-        </div>
-
-      )}
 
       {/* BOTTOM NAVIGATION */}
 
@@ -1793,7 +853,7 @@ function ProductCard({ product, onInvest }: { product: Product; onInvest: () => 
           <div><strong>{peso(earnings)}</strong><span>PER DAY</span></div>
           <div><strong>{peso(earnings * rewardDays)}</strong><span>TOTAL INCOME</span></div>
         </div>
-        <p className="world-terms">{product.duration_days}-day plan · Entry price is not automatically returned. Funding verified at checkout.</p>
+        <p className="world-duration">{rewardDays}-day plan</p>
         <button type="button" className="invest-now-button" onClick={onInvest}>Start Investment <ChevronRight size={20} /></button>
       </div>
     </article>

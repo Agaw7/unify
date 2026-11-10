@@ -5,11 +5,12 @@ const path = require('node:path');
 const Module = require('node:module');
 const ts = require('typescript');
 
-test('investment API keeps wallet reporting read-only and production purchases hard-locked', async () => {
+test('investment API reports purchase authorization and blocks unauthorized purchases', async () => {
   const file = path.resolve('src/app/api/investments/route.ts');
   const product = '11111111-1111-4111-8111-111111111111';
   const scopes = [];
   let auth = true;
+  const readiness = { productionPaymentsAuthorized: false };
   let purchaseCalls = 0;
   const rows = {
     investment_products: [{ id: product, name: 'Product', price: 200, daily_income: 50, duration_days: 365 }],
@@ -58,7 +59,7 @@ test('investment API keeps wallet reporting read-only and production purchases h
   loaded.require = name => name === '@/lib/money-server'
     ? server
     : name === '@/lib/payment-readiness'
-      ? { productionPaymentsAuthorized: false }
+      ? readiness
       : name === '@/lib/money-validation'
         ? { record: value => value, uuid: value => typeof value === 'string' && /^[0-9a-f-]{36}$/.test(value) }
         : original(name);
@@ -66,7 +67,7 @@ test('investment API keeps wallet reporting read-only and production purchases h
     compilerOptions: { module: ts.ModuleKind.CommonJS },
   }).outputText, file);
 
-  const get = await loaded.exports.GET({});
+  const get = await loaded.exports.GET({ nextUrl: new URL('https://aurevia.example/api/investments') });
   assert.equal(get.body.enabled, false);
   assert.equal(get.body.wallet.available, 3000);
   assert.deepEqual(scopes, [['money_investments', 'user_id', 'trusted-user'], ['money_wallets', 'user_id', 'trusted-user']]);
@@ -76,5 +77,9 @@ test('investment API keeps wallet reporting read-only and production purchases h
   auth = true;
   const result = await request({ action: 'purchase', productId: product, accepted: true });
   assert.equal(result.status, 503);
+  assert.equal(purchaseCalls, 0);
+  readiness.productionPaymentsAuthorized = true;
+  const authorized = await loaded.exports.GET({ nextUrl: new URL('https://aurevia.example/api/investments') });
+  assert.equal(authorized.body.enabled, true);
   assert.equal(purchaseCalls, 0);
 });

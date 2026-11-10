@@ -1,10 +1,11 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { moneyRequest } from '@/lib/money-client';
 
 type Summary={members:number;deposits:number;paid:number;pending:number;depositCount:number};
-const php=(cents:number)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(cents/100);
+const php=(cents:number)=>formatPhp(cents/100);
 export default function LiveAdminHome(){
   const [data,setData]=useState<Summary|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
   const load=useCallback(async()=>{setBusy(true);setError('');try{setData(await moneyRequest('/api/admin/live-summary'));}catch(e){setError(e instanceof Error?e.message:'Unable to load administration');}finally{setBusy(false);}},[]);

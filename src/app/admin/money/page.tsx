@@ -1,4 +1,5 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { moneyRequest } from '@/lib/money-client';
@@ -69,10 +70,10 @@ export default function AdminMoneyPage() {
         <label className="block">{data.manualGoTyme?'Actual GoTyme transfer reference (required when recording a result)':'External transaction reference'}<input className={field} value={reference} onChange={e=>setReference(e.target.value)} placeholder={data.manualGoTyme?'Reference from GoTyme history':'External reference'}/></label>
         <p className="text-sm text-amber-200">Use the review reason above for approvals and rejections. Verify the amount, reference, and recipient directly in the official account history. Processing requests must never be resubmitted.</p>
         {data.transactions.map(t=><article key={t.id} className="space-y-2 rounded-xl border border-slate-700 p-4">
-          <p className="text-sm text-cyan-200">{t.kind==='withdrawal' ? (t.withdrawal_mode==='automatic'?'Automatic Withdrawal':'Admin Approval') : ''}</p><p className="text-lg">{t.kind} · ₱{(Number(t.amount)/100).toFixed(2)} · <strong>{t.status}</strong></p>
+          <p className="text-sm text-cyan-200">{t.kind==='withdrawal' ? (t.withdrawal_mode==='automatic'?'Automatic Withdrawal':'Admin Approval') : ''}</p><p className="text-lg">{t.kind} · {formatPhp((Number(t.amount)/100))} · <strong>{t.status}</strong></p>
           <p className="break-all text-sm text-slate-400">{t.id}<br/>Customer: {t.user_id}<br/>External reference: {t.provider_reference ?? 'Not linked'}<br/>{new Date(t.created_at).toLocaleString()}</p>
           {t.destination_snapshot && <p className="break-all text-sm">Recipient: {t.destination_snapshot.name} · {t.destination_snapshot.number} · {t.destination_snapshot.bic}</p>}
-          {t.kind==='withdrawal' && <p className="text-sm">Withdrawal fee ₱{(Number(t.withdrawal_fee ?? 0)/100).toFixed(2)} · Send ₱{(withdrawalPayout(t)/100).toFixed(2)}</p>}
+          {t.kind==='withdrawal' && <p className="text-sm">Withdrawal fee {formatPhp((Number(t.withdrawal_fee ?? 0)/100))} · Send {formatPhp((withdrawalPayout(t)/100))}</p>}
           {t.status==='pending' && t.provider_reference?.startsWith('manual-qrph:') &&
             <ManualQrDepositReview id={t.id} onVerified={() => void refresh()} />}
           <p className="text-sm text-amber-200">{Number(t.amount)>=1000000 ? 'Review: large transaction (₱10,000+). ' : ''}{['creating','processing'].includes(t.status) && Date.now()-Date.parse(t.created_at)>20*60*1000 ? 'Review: confirmation delayed.' : ''}</p>

@@ -1,10 +1,11 @@
 "use client";
+import { formatPhp } from '@/lib/format-php';
 import {useCallback,useEffect,useState} from "react";
 import {supabase} from "@/lib/supabase";
 
 type Investment={id:string;purchasedAt:string;dailyAmount:number;eligibleDays:number;claimedDays:number;claimableDays:number;nextUnlockAt:string|null};
 type ClaimsData={mode:string;balance:number;investments:Investment[]};
-const php=(n:number)=>new Intl.NumberFormat("en-PH",{style:"currency",currency:"PHP"}).format(n);
+const php=(n:number)=>formatPhp(n);
 export default function SandboxClaimsPage(){
   const [data,setData]=useState<ClaimsData|null>(null);
   const [error,setError]=useState("");

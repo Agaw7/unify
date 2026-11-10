@@ -12,7 +12,7 @@ function schemaNotReady(error: { code?: string; message?: string }) {
 
 export function GET(request: NextRequest) {
   return handled(async () => {
-    const { db } = await authenticate(request, 'role-only');
+    const { db, user } = await authenticate(request, 'role-only');
     if (request.nextUrl.searchParams.get('hideRecords') === 'true') {
       return json({
         transactions: [],
@@ -85,6 +85,7 @@ export function GET(request: NextRequest) {
         channel,
         submittedReference: manual?.instapay_reference ?? null,
         hasReceipt: manual?.has_receipt ?? false,
+        ownDeposit: transaction.user_id === user.id,
         member: members[transaction.user_id] ?? { phone: null, name: null },
       };
     });

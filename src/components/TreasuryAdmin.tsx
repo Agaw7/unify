@@ -1,4 +1,5 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {moneyRequest} from '@/lib/money-client';
@@ -8,7 +9,7 @@ type Account={id:'palawan'|'gotyme';balance:number;reconciled_at:string|null;ref
 type Summary={ready:boolean;cash:number;liabilities:number;unallocated:number;rewardAvailable:number;rewardReserved:number;sales:number;shortfall:number;accounts:Account[]};
 type Entry={id:string;account_id:string;kind:string;delta:number;balance_after:number;reference:string;occurred_at:string};
 type State={summary:Summary;entries:Entry[]};
-const php=(v:number)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(Number(v)/100);
+const php=(v:number)=>formatPhp(Number(v)/100);
 const name=(id:string)=>id==='palawan'?'PalawanPay':'GoTyme';
 const field='mt-2 block w-full min-w-0 rounded-xl border border-slate-600 bg-slate-900 p-3';
 const button='rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 disabled:opacity-40';
@@ -43,7 +44,7 @@ export default function TreasuryAdmin(){
   {error&&<p role="alert" className="rounded-xl bg-red-950 p-4">{error}</p>}{notice&&<p role="status" className="rounded-xl bg-cyan-950 p-4">{notice}</p>}
   <button disabled={busy} className={button} onClick={()=>void load()}>Refresh cash ledger</button>
   {s&&<>
-   <section className="rounded-3xl border border-slate-700 bg-slate-900 p-6"><p>Combined recorded cash balance</p><h2 className="mt-3 text-4xl font-bold">{s.ready?php(s.cash):'Opening confirmation required'}</h2><div className="mt-5 grid gap-4 sm:grid-cols-2">{s.accounts.map(a=><div key={a.id}><h3 className="font-semibold">{name(a.id)}</h3><p className="mt-2 text-2xl font-semibold">{a.reconciled_at?php(a.balance):'Not confirmed'}</p><p className="mt-1 text-xs">{a.reconciled_at?`Last statement: ${new Date(a.reconciled_at).toLocaleString('en-PH')}`:'Owner-reported starting amount: ₱50,000.00; not yet recorded'}</p></div>)}</div></section>
+   <section className="rounded-3xl border border-slate-700 bg-slate-900 p-6"><p>Combined recorded cash balance</p><h2 className="mt-3 text-4xl font-bold">{s.ready?php(s.cash):'Opening confirmation required'}</h2><div className="mt-5 grid gap-4 sm:grid-cols-2">{s.accounts.map(a=><div key={a.id}><h3 className="font-semibold">{name(a.id)}</h3><p className="mt-2 text-2xl font-semibold">{a.reconciled_at?php(a.balance):'Not confirmed'}</p><p className="mt-1 text-xs">{a.reconciled_at?`Last statement: ${new Date(a.reconciled_at).toLocaleString('en-PH')}`:'Owner-reported starting amount: ₱50,000; not yet recorded'}</p></div>)}</div></section>
    {Number(s.shortfall)>0&&s.ready&&<p role="alert" className="rounded-xl bg-red-950 p-4">Cash shortfall against existing obligations: {php(s.shortfall)}. Reconcile actual funds before allocating rewards.</p>}
    <MoneyAdminMFA onVerified={()=>void load()}/>
    <section className="space-y-4 rounded-3xl border border-slate-700 p-5"><h2 className="text-xl font-bold">{s.ready?'Record verified ledger changes':'Confirm opening balances'}</h2>

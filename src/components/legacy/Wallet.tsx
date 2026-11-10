@@ -1,6 +1,7 @@
 
 "use client";
 
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -14,10 +15,7 @@ type Transaction = {
 };
 
 const peso = (centavos: number) =>
-  new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-  }).format(centavos / 100);
+  formatPhp(centavos / 100);
 
 export default function SafeWalletPage() {
   const router = useRouter();

@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import { productDisplayName, productDisplayImage, isCatalogProduct } from '@/lib/product-presentation';
 import Image from 'next/image';
 import { PackageOpen, RefreshCw, Layers } from 'lucide-react';
@@ -8,9 +9,9 @@ import { moneyRequest } from '@/lib/money-client';
 type Product={id:string;name:string;price:number;daily_amount:number;duration_days:number;funded:boolean};
 type Contract={id:string;product_id:string;idempotency_key:string;name:string;price:number;daily_amount:number;duration_days:number;claimed_days:number;created_at:string;acquisition:string};
 type State={enabled:boolean;eligible:boolean;wallet:{available:number;deposit_available:number;currency:string};products:Product[];investments:Contract[]};
-const php=(cents:number)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(Number(cents)/100);
+const php=(cents:number)=>formatPhp(Number(cents)/100);
 export default function LiveInvestments({selectedProductId,view="portfolio",onPurchased}:{selectedProductId?:string;view?:"checkout"|"portfolio"|"market";onPurchased?:()=>void}){
- const [data,setData]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[accepted,setAccepted]=useState(false),[now,setNow]=useState(0),[marketSelection,setMarketSelection]=useState<string|null>(null);const lock=useRef(false);
+ const [data,setData]=useState<State|null>(null),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[now,setNow]=useState(0),[marketSelection,setMarketSelection]=useState<string|null>(null);const lock=useRef(false);
  const [refreshing,setRefreshing]=useState(false);
  const loading=useRef(false);
  const load=useCallback(async()=>{
@@ -20,18 +21,17 @@ export default function LiveInvestments({selectedProductId,view="portfolio",onPu
   const result:State=await moneyRequest(view==='portfolio'?'/api/investments?view=portfolio':'/api/investments');let recovered=false;
   for(const investment of result.investments){const storageKey=`unify-live-plan:${investment.product_id}`;if(investment.acquisition==='purchase' && sessionStorage.getItem(storageKey)===investment.idempotency_key){sessionStorage.removeItem(storageKey);recovered=true;}}
   setData(result);setNow(Date.now());
-  if(recovered){setAccepted(false);setError('');setNotice('Your earlier purchase is confirmed in the portfolio. Review it before buying another plan.');}
+  if(recovered){setError('');setNotice('Your earlier purchase is confirmed in the portfolio. Review it before buying another plan.');}
  }catch(e){setError(e instanceof Error?e.message:'Unable to load plans');}
  finally{loading.current=false;setRefreshing(false);}
  },[view]);
  useEffect(()=>{void load();const timer=setInterval(()=>setNow(Date.now()),30000);const refresh=()=>void load();window.addEventListener('focus',refresh);return()=>{clearInterval(timer);window.removeEventListener('focus',refresh);};},[load]);
- useEffect(()=>{setAccepted(false);},[selectedProductId,marketSelection]);
  async function purchase(id:string){
   if(lock.current)return;lock.current=true;setBusy(true);setError('');setNotice('');
   try{
-    const product=data?.products.find(p=>p.id===id);if(!product || !accepted)throw new Error('Select a product and accept its displayed terms.');
+    const product=data?.products.find(p=>p.id===id);if(!product)throw new Error('Select a product to continue.');
     const storageKey=`unify-live-plan:${id}`;let key=sessionStorage.getItem(storageKey);if(!key){key=crypto.randomUUID();sessionStorage.setItem(storageKey,key);}
-    await moneyRequest('/api/investments',{action:'purchase',productId:id,key,accepted,expectedPrice:product.price,expectedDaily:product.daily_amount,expectedDuration:product.duration_days});sessionStorage.removeItem(storageKey);setNotice('Live product purchased. Deposit Balance was used first, then available PHP funds. Daily rewards are reserved from the business budget.');setAccepted(false);if(view==='market')setMarketSelection(null);onPurchased?.();
+    await moneyRequest('/api/investments',{action:'purchase',productId:id,key,accepted:true,expectedPrice:product.price,expectedDaily:product.daily_amount,expectedDuration:product.duration_days});sessionStorage.removeItem(storageKey);setNotice('Live product purchased. Deposit Balance was used first, then available PHP funds. Daily rewards are reserved from the business budget.');if(view==='market')setMarketSelection(null);onPurchased?.();
    await load();
   }catch(e){setError(e instanceof Error?e.message:'Unable to complete request. Refresh before retrying.');await load();}
   finally{lock.current=false;setBusy(false);}
@@ -41,11 +41,10 @@ export default function LiveInvestments({selectedProductId,view="portfolio",onPu
  const shownProducts=data?.products.filter(p=>isCatalogProduct(p.name) && (!effectiveProductId || p.id===effectiveProductId)) ?? [];
  const isCheckout=view==='checkout' || (view==='market' && marketSelection!==null);
  return <div className={view==='portfolio'?'live-assets space-y-5 text-white':'space-y-5 text-[#48204f]'}>{view!=='checkout' && <header className="assets-heading"><div><span className="assets-eyebrow"><Layers size={15}/> {view==='market'?'AUREVIA MARKET':'YOUR PORTFOLIO'}</span><h2>{view==='market'?'Market':'My Tier'}</h2><p>{view==='market'?'Browse the current product catalog and review plan terms.':'Your purchased products and daily rewards, in one place.'}</p></div><button type="button" disabled={busy || refreshing} aria-busy={refreshing} className="assets-refresh" aria-label={view==='market'?'Refresh market':'Refresh my tiers'} onClick={()=>{setError('');void load();}}><RefreshCw size={16}/><span>{refreshing ? 'Refreshing…' : 'Refresh'}</span></button></header>}
- {view==='market' && marketSelection && <button type="button" className="text-sm font-semibold text-[#54265e] underline" onClick={()=>{setMarketSelection(null);setAccepted(false);}}>← Back to Market</button>}
+ {view==='market' && marketSelection && <button type="button" className="text-sm font-semibold text-[#54265e] underline" onClick={()=>{setMarketSelection(null);}}>← Back to Market</button>}
  {error && <p role="alert" className={`rounded-xl p-4 ${view==='market'?'border border-red-200 bg-red-50 text-red-800':'bg-red-950 text-red-200'}`}>{error}</p>}{notice && <p role="status" className={`rounded-xl p-4 ${view==='market'?'border border-cyan-200 bg-cyan-50 text-cyan-800':'bg-cyan-950 text-cyan-100'}`}>{notice}</p>}
  {data && !data.enabled && <p role="status" className={view==='market'?'text-amber-800':'text-amber-200'}>Live purchases are currently disabled.</p>}
  {data && !data.eligible && <p role="status" className={view==='market'?'text-amber-800':'text-amber-200'}>This account has a financial restriction. Contact support.</p>}
- {isCheckout && <section className="space-y-3 rounded-xl border border-[#eadff0] bg-white/80 p-5"><h2 className="text-xl font-semibold">Confirm purchase</h2><p className="text-sm text-[#775d80]">Rewards become eligible after each full 24 hours and are credited automatically on the next scheduled run, for the duration shown on the plan. The plan price is not automatically returned at maturity. New plans require the full daily rewards allocation to be funded before purchase; paid deposit holds cannot be spent.</p><label className="flex items-start gap-3 text-sm text-[#54265e]"><input className="mt-1" type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)} disabled={busy}/><span>I have read these terms and authorize the displayed purchase price to be deducted from my PHP wallet when I confirm a purchase.</span></label></section>}
  {!data?<p className={view==='market'?'text-[#775d80]':'text-white'}>Loading plans…</p>:<>
   {isCheckout && shownProducts.length===0 && <p role="alert">Product unavailable. Return to Market to choose another product.</p>}
   {view==='market' && !marketSelection && <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{shownProducts.map(p=><article key={p.id} className="space-y-3 rounded-2xl border border-[#eadff0] bg-white/80 p-4 shadow-sm">
@@ -55,13 +54,16 @@ export default function LiveInvestments({selectedProductId,view="portfolio",onPu
    <button type="button" className="w-full rounded-xl bg-[#54265e] p-3 font-semibold text-white" onClick={()=>setMarketSelection(p.id)}>Review plan</button>
   </article>)}
   {shownProducts.length===0 && <p className="rounded-2xl border border-[#eadff0] bg-white/80 p-5 text-[#775d80]">No catalog products are available.</p>}</section>}
-  {isCheckout && <section className="grid gap-4">{shownProducts.map(p=><article key={p.id} className="space-y-3 rounded-xl border border-[#eadff0] bg-white/80 p-5">
-   <Image src={productDisplayImage(p.name)} alt={productDisplayName(p.name)} width={640} height={480} className="aspect-[4/3] w-full rounded-lg bg-white object-contain"/>
-   <h2 className="text-xl font-semibold text-[#54265e]">{productDisplayName(p.name)}</h2><p className="text-2xl font-bold text-[#48204f]">{php(p.price)}</p>
-   <p className="text-[#775d80]">Daily reward: <strong className="text-emerald-700">{php(p.daily_amount)}</strong></p><p className="text-sm text-[#775d80]">{p.duration_days} days · Total rewards {php(p.daily_amount*p.duration_days)}</p>
+  {isCheckout && <section className="grid gap-3">{shownProducts.map(p=><article key={p.id} className="space-y-2.5 rounded-2xl border border-[#eadff0] bg-white/80 p-3">
+   <Image src={productDisplayImage(p.name)} alt={productDisplayName(p.name)} width={640} height={480} sizes="360px" className="h-auto max-h-[24dvh] w-full rounded-xl bg-[#f7f0fa] object-contain"/>
+   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+     <h2 className="text-base font-semibold text-[#54265e]">{productDisplayName(p.name)}</h2>
+     <p className="text-xl font-bold text-[#48204f]">{php(p.price)}</p>
+   </div>
+   <p className="text-sm text-[#775d80]"><strong className="text-emerald-700">{php(p.daily_amount)}/day</strong> · {p.duration_days} days · {php(p.daily_amount*p.duration_days)} total rewards</p>
    {!p.funded && <p className="text-sm text-amber-800">Awaiting business funding. Required rewards reserve: {php(p.daily_amount*p.duration_days)}.</p>}
    {spendable<p.price && <p className="text-sm text-amber-800">Available purchase funds {php(spendable)} are below the price of {php(p.price)}.</p>}
-   <button className="w-full rounded-lg bg-[#54265e] p-3 font-semibold text-white disabled:opacity-50" disabled={busy || !accepted || !p.funded || !data.enabled || !data.eligible || spendable<p.price} onClick={()=>{if(window.confirm(`Purchase ${productDisplayName(p.name)} for ${php(p.price)}? Deposit Balance is used first, then available PHP funds. The price is not automatically returned.`))void purchase(p.id);}}>{data.enabled?'Buy product':'Purchases unavailable'} · {php(p.price)}</button>
+   <button className="tier-purchase-confirm w-full rounded-lg p-3 font-semibold" disabled={busy || !p.funded || !data.enabled || !data.eligible || spendable<p.price} onClick={()=>{if(window.confirm(`Purchase ${productDisplayName(p.name)} for ${php(p.price)}? Deposit Balance is used first, then available PHP funds. The price is not automatically returned.\n\nRewards become eligible after each full 24 hours and are credited on the next scheduled run for the duration shown. Rewards must be funded in full before purchase. Deposit holds cannot be spent.`))void purchase(p.id);}}>{data.enabled?'Confirm purchase':'Purchases unavailable'}</button>
   </article>)}</section>}
  {view==='portfolio' && <section id="portfolio" className="space-y-4">{data.investments.length===0 && <div className="assets-empty"><div className="assets-empty-icon"><PackageOpen size={34} strokeWidth={1.5}/></div><h3>No products yet</h3><p>Plans you purchase from Market will appear here.<br/>Track automatic daily rewards from My Tier.</p><span className="assets-cycle">24-hour reward cycle</span></div>}{data.investments.map(inv => {
    const nextDay = inv.claimed_days + 1;

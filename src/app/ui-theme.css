@@ -37,6 +37,17 @@
 .unify-pastel .green,.unify-pastel .member-status {color:var(--mint)!important}
 .unify-pastel .invest-now-button,.unify-pastel .invite-button,.unify-pastel .confirm-button,.unify-pastel .action-buttons button,.unify-pastel .sheet-primary {background:var(--plum);color:#fff;border-radius:16px;box-shadow:0 8px 18px #54265e18;font-weight:700;border:none}
 .unify-pastel button:disabled{opacity:.5}
+.tier-purchase-confirm {
+  background: #54265e;
+  color: #fff;
+}
+.tier-purchase-confirm:disabled,
+.unify-pastel .tier-purchase-confirm:disabled {
+  background: #eee2f2;
+  color: #54265e;
+  opacity: 1;
+  cursor: not-allowed;
+}
 .unify-pastel .unify-balance-card {background:transparent;border-color:var(--line);padding:24px}
 .unify-pastel .unify-balance-card>span {font-size:12px;font-weight:700;color:var(--ink-soft)}
 .unify-pastel .unify-balance-card h2 {color:var(--ink)!important;font-size:38px;letter-spacing:-1.8px;margin:10px 0}
@@ -250,7 +261,17 @@
 .world-amounts>div{background:#ffffffb8;border-radius:22px;padding:18px 5px;text-align:center;min-width:0;}
 .world-amounts strong{display:block;color:#4d2059;font-size:clamp(15px,2vw,23px);overflow-wrap:anywhere;font-weight:800;}
 .world-amounts span{display:block;color:#937e98;font-size:10px;letter-spacing:.7px;margin-top:8px;}
-.world-terms{font-size:11px;line-height:1.6;color:#856d8b;margin:16px 0;}
+.world-duration {
+  width: fit-content;
+  margin: 16px 0;
+  padding: 8px 16px;
+  border: 1px solid #ddc5e8;
+  border-radius: 999px;
+  background: #f0e2f6;
+  color: #51225f;
+  font-size: 17px;
+  font-weight: 750;
+}
 @media(max-width:480px){.world-product-body{padding:20px 16px}.world-amounts{gap:6px}.world-amounts>div{border-radius:18px;padding:16px 4px}.world-amounts strong{font-size:16px}.world-amounts span{font-size:9px;letter-spacing:0}.world-country{font-size:10px}.world-description{font-size:14px}}
 
 .home-wallet-label { display: flex; align-items: center; gap: 8px; color: #f0e2f4; font-weight: 600; }

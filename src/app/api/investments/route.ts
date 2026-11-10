@@ -17,7 +17,7 @@ export function GET(request:NextRequest){return handled(async()=>{
     db.rpc('money_deposit_ready',{p_user:user.id}),
   ]);
   if(products.error || investments.error || budget.error || wallet.error || readiness.error)throw new MoneyError('Live product wallet is not available. Contact support.',503);
-  return json({enabled:false,eligible:readiness.data===true,wallet:wallet.data ?? {available:0,deposit_available:0,currency:'PHP'},products:(products.data ?? []).map(p=>({...p,price:Math.round(Number(p.price)*100),daily_amount:Math.round(Number(p.daily_income)*100),funded:Number(budget.data.available)>=Math.round(Number(p.daily_income)*100)*p.duration_days})),investments:investments.data});
+  return json({enabled:productionPaymentsAuthorized,eligible:readiness.data===true,wallet:wallet.data ?? {available:0,deposit_available:0,currency:'PHP'},products:(products.data ?? []).map(p=>({...p,price:Math.round(Number(p.price)*100),daily_amount:Math.round(Number(p.daily_income)*100),funded:Number(budget.data.available)>=Math.round(Number(p.daily_income)*100)*p.duration_days})),investments:investments.data});
 });}
 export function POST(request:NextRequest){return handled(async()=>{
   const {db,user}=await authenticate(request);requireProductionApproval();const b=record(await request.json());

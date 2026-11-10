@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, Gift, RefreshCw } from 'lucide-react';
@@ -17,7 +18,7 @@ type InvitePage = {
   total: number;
   hasMore: boolean;
 };
-const peso = (value: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
+const peso = (value: number) => formatPhp(value);
 
 function GrantInvites({ grantId }: { grantId: string }) {
   const [details, setDetails] = useState<InvitePage | null>(null);

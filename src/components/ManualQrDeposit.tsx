@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Download } from 'lucide-react';
@@ -16,7 +17,6 @@ type Method = {
 };
 type Configuration = { methods: Method[]; approvalPaused: boolean };
 type MarketProduct = { name: string; price: number };
-const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
 
 async function authorizedFetch(path: string, init?: RequestInit) {
   const { data, error } = await supabase.auth.getSession();
@@ -39,6 +39,7 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const idempotencyKey = useRef<string | null>(null);
+  const receiptInput = useRef<HTMLInputElement>(null);
   const method = configuration?.approvalPaused
     ? undefined
     : configuration?.methods.find(item => item.id === 'palawan');
@@ -145,15 +146,21 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
             onChange={event => { setAmount(event.target.value); idempotencyKey.current = null; }}>
             {!amount && <option value="">{marketAmounts === null ? 'Loading Market amounts…' : 'No Market amounts available'}</option>}
             {marketAmounts?.map(price => (
-              <option key={price} value={price / 100}>{peso.format(price / 100)}</option>
+              <option key={price} value={price / 100}>{formatPhp(price / 100)}</option>
             ))}
           </select>
           <label className={styles.fieldLabel} htmlFor="deposit-receipt">Payment screenshot <span>PNG, JPG, JPEG · max 5 MB</span></label>
-          <input id="deposit-receipt" className={styles.fileInput} type="file" accept="image/png,image/jpeg,.jpg,.jpeg"
+          <input ref={receiptInput} id="deposit-receipt" className={styles.fileInput} type="file" accept="image/png,image/jpeg,.jpg,.jpeg"
             onChange={event => { chooseProof(event.target.files?.[0]); event.currentTarget.value = ''; }} disabled={busy || submitted} />
           {previewUrl ? <div className={styles.preview}>
             <Image src={previewUrl} alt="Payment screenshot preview" width={720} height={480} unoptimized />
-            <div><span>{proof?.name}</span><button type="button" onClick={() => { setProof(null); idempotencyKey.current = null; }} disabled={busy}>Remove</button><label htmlFor="deposit-receipt">Replace</label></div>
+            <div className={styles.previewDetails}>
+              <span className={styles.previewName}>{proof?.name}</span>
+              <div className={styles.previewActions}>
+                <button type="button" onClick={() => receiptInput.current?.click()}>Replace screenshot</button>
+                <button type="button" onClick={() => { setProof(null); idempotencyKey.current = null; }}>Remove</button>
+              </div>
+            </div>
           </div> : <label className={styles.upload} htmlFor="deposit-receipt"><strong>Choose payment screenshot</strong><small>PNG, JPG, or JPEG · maximum 5 MB</small></label>}
           <label className={styles.attestation}><input type="checkbox" name="attest" required /><span>I confirm these details and screenshot are accurate. I understand the request stays pending until an administrator verifies the payment in the merchant account.</span></label>
           <button className={styles.submit} type="submit" disabled={busy || !proof || !method || !amount}>{busy ? 'Submitting…' : 'Submit Deposit Request'}</button>

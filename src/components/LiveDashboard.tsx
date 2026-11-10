@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -33,10 +34,7 @@ type WalletState = {
   totalEarned?: number | null;
 };
 
-const php = (cents: number) => new Intl.NumberFormat('en-PH', {
-  style: 'currency',
-  currency: 'PHP',
-}).format(Number(cents) / 100);
+const php = (cents: number) => formatPhp(Number(cents) / 100);
 
 export default function LiveDashboard() {
   const [data, setData] = useState<WalletState | null>(null);

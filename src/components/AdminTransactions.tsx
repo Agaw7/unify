@@ -1,5 +1,6 @@
 
 "use client";
+import { formatPhp } from '@/lib/format-php';
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -239,10 +240,7 @@ async function approveWithdrawal(id: string, source: Withdrawal['source']) {
     : withdrawals;
 
   const money = (amount: number) =>
-    new Intl.NumberFormat("en-PH", {
-      style: "currency",
-      currency: "PHP",
-    }).format(amount);
+    formatPhp(amount);
 
   const panelStyle: React.CSSProperties = {
     background: "#14243B",

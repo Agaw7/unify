@@ -1,11 +1,12 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { moneyRequest } from '@/lib/money-client';
 type Member={id:string;created_at:string;phone_last4:string;deposits:number;commission:number};
 type Level={level:number;rate:number;count:number;commission:number;members:Member[]};
 type State={inviteCode:string;team:{total_commission:number;pending_commission:number;levels:Level[]}};
-const php=(n:number)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(Number(n)/100);
+const php=(n:number)=>formatPhp(Number(n)/100);
 export default function LiveTeam(){
  const [data,setData]=useState<State|null>(null),[level,setLevel]=useState(1),[error,setError]=useState(''),[origin,setOrigin]=useState(''),[copied,setCopied]=useState(false);
  const load=useCallback(async()=>{setError('');try{setData(await moneyRequest('/api/team'));}catch(e){setError(e instanceof Error?e.message:'Unable to load team');}},[]);

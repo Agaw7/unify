@@ -38,7 +38,7 @@ export function POST(request: NextRequest) {
     if (typeof body.amount !== 'number' || !Number.isFinite(body.amount)) throw new MoneyError('Enter a valid PHP amount.');
     const amount = Math.round(body.amount * 100);
     if (!Number.isSafeInteger(amount) || amount < 10000 || amount > 100000000 || Math.abs(body.amount * 100 - amount) > 0.000001) {
-      throw new MoneyError('Enter a deposit from ₱100.00 to ₱1,000,000.00.');
+      throw new MoneyError('Enter a deposit from ₱100 to ₱1,000,000.');
     }
 
     const { data, error } = await db.rpc('money_treasury_reward_deposit', {

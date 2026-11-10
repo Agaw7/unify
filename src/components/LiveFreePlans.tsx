@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, Gift, RefreshCw } from 'lucide-react';
@@ -10,7 +11,7 @@ import { productDetails, productDisplayName } from '@/lib/product-presentation';
 type Member = { id: string; phone: string | null; role: string; created_at: string | null };
 type Product = { id: string; name: string; price: number; daily_income: number; duration_days: number };
 type Grant = { id: string; user_id: string; product_id: string; created_at: string; note: string };
-const peso = (value: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
+const peso = (value: number) => formatPhp(value);
 
 export default function FreePlansPage() {
   const [members, setMembers] = useState<Member[]>([]);

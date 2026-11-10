@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
@@ -35,10 +36,7 @@ type AdminStats = {
 };
 
 const peso = (value: number) =>
-  new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-  }).format(value);
+  formatPhp(value);
 
 export default function AdminPage() {
   const [loading, setLoading] = useState(true);

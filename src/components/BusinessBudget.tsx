@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { moneyRequest } from '@/lib/money-client';
@@ -14,7 +15,7 @@ type State = {
   fundingEnabled: boolean;
 };
 
-const php = (cents: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(Number(cents) / 100);
+const php = (cents: number) => formatPhp(Number(cents) / 100);
 const field = 'mt-2 block w-full min-w-0 rounded-xl border border-slate-600 bg-slate-900 p-3';
 const button = 'rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 disabled:opacity-40';
 const accountName = (id: string) => id === 'palawan' ? 'PalawanPay' : 'GoTyme Bank';

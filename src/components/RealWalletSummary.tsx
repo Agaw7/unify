@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPhp } from '@/lib/format-php';
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { moneyRequest } from "@/lib/money-client";
@@ -7,9 +8,7 @@ import { moneyRequest } from "@/lib/money-client";
 const DAY_MS = 86_400_000;
 type EarningPlan = { created_at: string; claimed_days: number; duration_days: number };
 
-const php = (centavos: number) => new Intl.NumberFormat("en-PH", {
-  style: "currency", currency: "PHP",
-}).format(centavos / 100);
+const php = (centavos: number) => formatPhp(centavos / 100);
 
 export default function RealWalletSummary({ homeCard = false }: { homeCard?: boolean }) {
   const [available, setAvailable] = useState<number | null>(null);
@@ -31,8 +30,6 @@ export default function RealWalletSummary({ homeCard = false }: { homeCard?: boo
       inFlight = true;
       setLoading(true);
       setError("");
-      setAvailable(null);
-      setDeposit(null);
       try {
         const result = await moneyRequest("/api/money?summary=balance");
         const value = result.wallet?.available;

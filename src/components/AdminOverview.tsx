@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
@@ -16,9 +17,9 @@ type MemberOption = { id: string; phone: string | null; role: string };
 type MarketProduct = { id: string; name: string; price: number; daily_income: number; duration_days: number };
 type Row = { id: string; user_id?: string; kind?: string; amount?: number; status?: string; created_at?: string; level?: number; name?: string; acquisition?: string; source?: string; reference?: string };
 type Data = { members: Member[]; summary: Record<string, number | null>; recent: Row[]; fetchedAt: string; detailMember: string | null; detail: { historical: Row[] | null; commissions: Row[] | null; plans: Row[] | null; inviteDeposits: Row[] | null } | null; recordsHidden?: boolean };
-type DashboardStats = { businessBudget: { available: number }; totalDeposits: number; totalWithdrawalsPaid: number; depositsToday: number; withdrawalsPaidToday: number; signinsToday: number; totalMembers: number; pendingWithdrawals: number; pendingDeposits: number };
-const peso = (value: number | null | undefined) => value == null ? '—' : new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value / 100);
-const php = (value: number | null | undefined) => value == null ? '—' : new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
+type DashboardStats = { businessBudget: { available: number }; totalDeposits: number; totalWithdrawalsPaid: number; depositsToday: number; withdrawalsPaidToday: number; signinsToday: number; totalMembers: number; pendingWithdrawals: number };
+const peso = (value: number | null | undefined) => value == null ? '—' : formatPhp(value / 100);
+const php = (value: number | null | undefined) => value == null ? '—' : formatPhp(value);
 const tabs = ['Overview', 'Invites', 'Deposits', 'Commission', 'Daily Reward'] as const;
 const date = (value?: string) => value ? new Date(value).toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' }) : '—';
 function Panel({ title, subtitle, Icon, action, children, className = '', id }: { title: string; subtitle?: string; Icon: LucideIcon; action?: ReactNode; children: ReactNode; className?: string; id?: string }) {
@@ -177,13 +178,12 @@ function GiftCodeCreator() {
   const [copied, setCopied] = useState(false);
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const maxClaims = Number(new FormData(event.currentTarget).get('maxClaims'));
     setBusy(true);
     setCode('');
     setError('');
     setCopied(false);
     try {
-      const result = await moneyRequest('/api/rewards', { action: 'create', maxClaims });
+      const result = await moneyRequest('/api/rewards', { action: 'create' });
       setCode(result.code);
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Unable to create gift code.');
@@ -202,11 +202,9 @@ function GiftCodeCreator() {
   return <div className={styles.inset}>
     <h3>Create gift code</h3>
     <form onSubmit={create}>
-      <label className={styles.fieldLabel} htmlFor="dashboard-gift-code-limit">Maximum redemptions</label>
-      <input id="dashboard-gift-code-limit" name="maxClaims" type="number" min={1} max={100} defaultValue={1} required style={{ display: 'block', width: '100%', margin: '8px 0 12px', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.16)', background: '#171124', color: 'inherit' }} />
       <button type="submit" className={styles.primaryButton} disabled={busy}><Gift size={16} />{busy ? 'Creating…' : 'Create code'}</button>
     </form>
-    <p className={styles.caption}>Codes expire after 5 minutes. Redemptions remain subject to approval and available funded rewards budget.</p>
+    <p className={styles.caption}>Each code is available to 50 members, with one redemption per member. Most rewards are ₱1–₱5, with a 5% chance of ₱6–₱10.</p>
     {code && <p role="status" style={{ overflowWrap: 'anywhere', marginTop: 10 }}>New code: <code>{code}</code> <button type="button" className={styles.miniButton} onClick={() => void copyCode()}><Copy size={13} />{copied ? 'Copied' : 'Copy'}</button></p>}
     {error && <p role="alert" style={{ color: '#ff9b9b', marginTop: 8 }}>{error}</p>}
   </div>;
@@ -228,26 +226,30 @@ export default function AdminOverview() {
   const [page, setPage] = useState(0);
   const [error, setError] = useState('');
   const [statsError, setStatsError] = useState('');
+  const [statsLoading, setStatsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [activeNav, setActiveNav] = useState('Dashboard');
   const generation = useRef(0);
+  const hideRecords = activeNav !== 'FreePlan';
   const load = useCallback(async () => {
     const current = ++generation.current;
     setLoading(true); setError('');
     try {
-      const hideRecords = activeNav !== 'FreePlan';
       const result: Data = await moneyRequest(`/api/admin/member-overview${hideRecords ? '?hideRecords=true' : ''}`);
       if (current === generation.current) setData(result);
     } catch (e) { if (current === generation.current) setError(e instanceof Error ? e.message : 'Unable to load records'); }
     finally { if (current === generation.current) setLoading(false); }
-  }, [activeNav]);
+  }, [hideRecords]);
   const loadDashboardStats = useCallback(async () => {
+    setStatsLoading(true);
     setStatsError('');
     try {
       setDashboardStats(await moneyRequest('/api/admin/live-dashboard'));
     } catch (e) {
       setStatsError(e instanceof Error ? e.message : 'Unable to load dashboard statistics');
+    } finally {
+      setStatsLoading(false);
     }
   }, []);
   const refreshDashboard = useCallback(() => {
@@ -304,7 +306,7 @@ export default function AdminOverview() {
   return <div className={styles.shell}>
     <aside className={styles.sidebar}><Link href="/admin" className={styles.brand}><span className={styles.brandMark}><Image src="/aurevia-icon.png" alt="" fill sizes="66px" /></span><strong>AUREVIA</strong><small>Admin Panel</small></Link><button className={styles.mobileMenu} aria-expanded={mobileMenu} aria-controls="admin-navigation" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={16} /> Menu</button><nav id="admin-navigation" className={mobileMenu ? styles.navOpen : ''} aria-label="Admin navigation">{nav.map(([label,section,Icon]) => section === 'reward-budget' ? <Link href="/admin/reward-budget" className={styles.navItem} key={section} onClick={() => setMobileMenu(false)}><Icon size={18} aria-hidden="true" />{label}</Link> : <button type="button" className={`${styles.navItem} ${activeNav === label ? styles.navActive : ''}`} key={section} aria-current={activeNav === label ? 'page' : undefined} onClick={() => {setActiveNav(label);setMobileMenu(false);}}><Icon size={18} aria-hidden="true" />{label}</button>)}</nav><div className={styles.sideFoot}><ShieldCheck size={16} /><span>Protected workspace<small>{data ? 'Admin session verified' : 'Admin sign-in required'}</small></span></div><Link className={styles.homeLink} href="/dashboard">← Member Home</Link></aside>
     <main className={styles.main} id="dashboard">
-      <header className={styles.header}><div><span className={styles.eyebrow}>AUREVIA / ADMINISTRATION</span><h1>Admin Dashboard</h1><p>Financial overview, member activity and pending requests</p></div><div className={styles.headerTools}><span className={styles.date}><CalendarDays size={15} />{date(data?.fetchedAt)}</span>      <Link className={styles.mode} href="/admin/payment-settings"><Eye size={15} /> Live execution paused</Link><button aria-label="Refresh dashboard" className={styles.refresh} onClick={refreshDashboard} disabled={loading}><RefreshCw size={18} className={loading ? styles.spinning : ''} /></button><Link className={styles.adminProfile} href="/admin/payment-settings"><span><UserRound size={21} /></span><div>Admin<small>Administrator</small></div></Link></div></header>
+      <header className={styles.header}><div><span className={styles.eyebrow}>AUREVIA / ADMINISTRATION</span><h1>Admin Dashboard</h1><p>Financial overview, member activity and pending requests</p></div><div className={styles.headerTools}><span className={styles.date}><CalendarDays size={15} />{date(data?.fetchedAt)}</span>      <Link className={styles.mode} href="/admin/payment-settings"><Eye size={15} /> Payment settings</Link><button aria-label="Refresh dashboard" className={styles.refresh} onClick={refreshDashboard} disabled={loading || statsLoading}><RefreshCw size={18} className={loading || statsLoading ? styles.spinning : ''} /></button><Link className={styles.adminProfile} href="/admin/payment-settings"><span><UserRound size={21} /></span><div>Admin<small>Administrator</small></div></Link></div></header>
       {error && <p className={styles.error} role="alert">{error} {data && 'Last loaded figures retained.'}</p>}
       {statsError && <p className={styles.error} role="alert">{statsError} {dashboardStats && 'Last loaded statistics retained.'}</p>}
       {activeNav === 'Dashboard' && <section className={styles.summary} aria-label="Financial overview, member activity and pending requests">
@@ -316,7 +318,6 @@ export default function AdminOverview() {
         <DashboardStat label="Today's Sign-ins" value={dashboardStats?.signinsToday.toLocaleString('en-PH') ?? '—'} description="Unique member logins" Icon={LogIn} />
         <DashboardStat label="Overall Members" value={dashboardStats?.totalMembers.toLocaleString('en-PH') ?? '—'} description="Registered members" Icon={Users} />
         <DashboardStat label="Pending Withdrawals" value={php(dashboardStats?.pendingWithdrawals)} description="Awaiting approval" Icon={Clock3} />
-        <DashboardStat label="Pending Deposits" value={php(dashboardStats?.pendingDeposits)} description="Awaiting approval" Icon={ReceiptText} />
       </section>}
       <div className={styles.grid}>
         {activeNav === 'Dashboard' && <Panel title="Payment Methods (Manual)" subtitle="Configuration overview · live execution paused" Icon={Wallet} className={styles.half}>

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatPhp } from '@/lib/format-php';
 import { useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import AureviaLogo from '@/components/AureviaLogo';
@@ -7,15 +8,75 @@ import { ArrowDownLeft, ArrowUpRight, BookOpen, ChevronRight, Eye, EyeOff, Headp
 import { moneyRequest } from '@/lib/money-client';
 import { supabase } from '@/lib/supabase';
 
+type Transaction = { id: string; kind: string; amount: number; status: string; created_at: string };
 type ProfileData = {
-  wallet: { available: number; held: number; reserved: number };
+  wallet: { available: number };
   totalEarned: number | null;
-  transactions: { id: string; kind: string; amount: number; status: string; created_at: string }[];
+  transactions: Transaction[];
 };
-type Panel = 'Cash-out history' | 'About us' | 'Change password' | 'Edit profile';
+type Panel = 'Transaction history' | 'Cash-out history' | 'About us' | 'Change password' | 'Edit profile';
 const php = (amount: number | null | undefined) => Number.isSafeInteger(amount)
-  ? new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount! / 100)
+  ? formatPhp(amount! / 100)
   : '—';
+
+const transactionLabels: Record<string, string> = {
+  deposit: 'Deposit',
+  withdrawal: 'Withdrawal',
+  investment_purchase: 'Tier purchase',
+  investment_return: 'Tier daily reward',
+  referral_commission: 'Referral commission',
+  daily_task_reward: 'Task reward',
+  check_in_reward: 'Daily check-in reward',
+  gift_code_reward: 'Gift code reward',
+  registration_bonus: 'Registration bonus',
+  registration_bonus_reversal: 'Registration bonus reversal',
+  admin_balance_grant: 'Wallet balance grant',
+};
+
+function TransactionHistory() {
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [entries, setEntries] = useState<Transaction[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const query = new URLSearchParams({ summary: 'history' });
+    if (cursor) query.set('before', cursor);
+    void moneyRequest(`/api/money?${query}`).then((result: {
+      entries: Transaction[]; nextCursor: string | null;
+    }) => {
+      if (!active) return;
+      setEntries(previous => cursor ? [...previous, ...result.entries] : result.entries);
+      setNextCursor(result.nextCursor);
+    }).catch(failure => {
+      if (active) setError(failure instanceof Error ? failure.message : 'Unable to load transaction history.');
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [cursor, retry]);
+
+  return <div aria-busy={loading}>
+    {entries.map(entry => <article className="member-cashout" key={entry.id}>
+      <strong>{transactionLabels[entry.kind] ?? entry.kind.replaceAll('_', ' ')}</strong>
+      <strong>{php(entry.amount)}</strong>
+      <small>{new Date(entry.created_at).toLocaleString('en-PH')} · {entry.status.replaceAll('_', ' ')}</small>
+    </article>)}
+    {loading && <p role="status">Loading transactions…</p>}
+    {error && <p role="alert">{error}</p>}
+    {!loading && !error && entries.length === 0 && <p>No transactions yet.</p>}
+    {error && <button type="button" className="invest-now-button" onClick={() => {
+      setError('');
+      setLoading(true);
+      setRetry(value => value + 1);
+    }}>Try again</button>}
+    {!loading && !error && nextCursor && <button type="button" className="invest-now-button" onClick={() => {
+      setLoading(true);
+      setCursor(nextCursor);
+    }}>Load older transactions</button>}
+  </div>;
+}
 
 function PasswordField({ label, name, autoComplete, minLength }: {
   label: string; name: string; autoComplete: string; minLength?: number;
@@ -99,6 +160,7 @@ export default function MemberProfile({ contact, name, verified, onBank, onLogou
   };
   const rows = [
     { title: 'History', items: [
+      { label: 'Transaction history', icon: BookOpen, action: () => open('Transaction history') },
       { label: 'Top-up history', icon: BookOpen, href: '/deposit/history' },
       { label: 'Cash-out history', icon: BookOpen, action: () => open('Cash-out history') },
     ] },
@@ -152,6 +214,7 @@ export default function MemberProfile({ contact, name, verified, onBank, onLogou
   if (panel) return <section className="member-profile member-profile-detail">
     <button type="button" className="member-profile-back" disabled={busy} onClick={() => setPanel(null)}>← Back to Profile</button>
     <h2>{panel}</h2>
+    {panel === 'Transaction history' && <TransactionHistory />}
     {panel === 'About us' && <p>AUREVIA brings your tier plans, wallet, and rewards together in one account.</p>}
     {panel === 'Cash-out history' && <>
       {error && <p role="alert">{error}</p>}
@@ -188,7 +251,7 @@ export default function MemberProfile({ contact, name, verified, onBank, onLogou
     <section className="member-wallet" aria-label="Profile wallet">
       <div className="member-wallet-label">Available balance <button type="button" aria-label={showBalance ? 'Hide balances' : 'Show balances'} onClick={() => setShowBalance(!showBalance)}>{showBalance ? <Eye size={18} /> : <EyeOff size={18} />}</button></div>
       <strong className="member-wallet-amount">{amount(data?.wallet.available)}</strong>
-      <div className="member-wallet-stats"><span>On hold <b>{amount(data ? data.wallet.held + data.wallet.reserved : null)}</b></span><span>Total earned <b>{amount(data?.totalEarned)}</b></span></div>
+      <div className="member-wallet-stats"><span>Total earned <b>{amount(data?.totalEarned)}</b></span></div>
       {error && <p role="alert">{error}</p>}
       <div className="member-wallet-actions"><Link href="/deposit"><ArrowDownLeft size={20} />Top up</Link><Link href="/withdraw"><ArrowUpRight size={20} />Cash out</Link></div>
     </section>

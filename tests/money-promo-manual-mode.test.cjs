@@ -26,7 +26,8 @@ test('admin can create a hashed gift code without bypassing approval on reward c
   assert.match(result.code,/^A-[A-Z0-9]{6}$/);
   assert.match(inserted.code_hash,/^[0-9a-f]{64}$/);
   assert.equal(inserted.created_by,'admin');
-  assert.equal(inserted.max_claims,3);
+  assert.equal(inserted.max_claims,50);
+  assert.equal(inserted.expires_at,'infinity');
 });
 
 test('gift-code redemption accepts new codes and still accepts unexpired legacy codes',async()=>{

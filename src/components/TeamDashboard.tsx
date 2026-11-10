@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Copy, House, RefreshCw, ShieldCheck, Sprout, Store, UserRound, UsersRound } from 'lucide-react';
@@ -34,10 +35,7 @@ type TeamData = {
   };
 };
 
-const peso = (centavos: number) => new Intl.NumberFormat('en-PH', {
-  style: 'currency',
-  currency: 'PHP',
-}).format(Number(centavos) / 100);
+const peso = (centavos: number) => formatPhp(Number(centavos) / 100);
 
 export default function TeamDashboard({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<TeamData | null>(null);

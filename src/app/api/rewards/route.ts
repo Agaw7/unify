@@ -23,10 +23,13 @@ export function POST(request: NextRequest) {
     // Funded wallet rewards do not call the payment gateway. Keep their existing
     // database budget, account-restriction and duplicate-claim checks in force.
     if (body.action === 'create') {
-      const maxClaims = Number(body.maxClaims);
-      if (!Number.isInteger(maxClaims) || maxClaims < 1 || maxClaims > 100) throw new MoneyError('Enter a redemption limit from 1 to 100.');
       const code = createGiftCode();
-      const { error } = await db.from('money_gift_codes').insert({ code_hash: hash(code), created_by: user.id, max_claims: maxClaims });
+      const { error } = await db.from('money_gift_codes').insert({
+        code_hash: hash(code),
+        created_by: user.id,
+        max_claims: 50,
+        expires_at: 'infinity',
+      });
       if (error) throw new MoneyError('Unable to create gift code.', 503);
       return json({ code });
     }
@@ -37,10 +40,15 @@ export function POST(request: NextRequest) {
       p_user: user.id,
       p_kind: body.action === 'check-in' ? 'check_in_reward' : 'gift_code_reward',
       p_code_hash: body.action === 'redeem' ? hash(code) : null,
-      p_gift_amount: body.action === 'redeem' ? randomInt(1, 11) * 100 : null,
+      p_gift_amount: body.action === 'redeem'
+        ? (randomInt(100) < 5 ? randomInt(6, 11) : randomInt(1, 6)) * 100
+        : null,
     });
     if (error) {
-      const known = ['Account restricted', 'Invalid or expired gift code', 'Gift code is fully claimed', 'Insufficient funded business rewards budget'];
+      if (error.message.includes('Gift code is fully claimed')) {
+        throw new MoneyError('This gift code has run out.', 409);
+      }
+      const known = ['Account restricted', 'Invalid or expired gift code', 'Insufficient funded business rewards budget'];
       throw new MoneyError(known.find(message => error.message.includes(message)) ?? 'Unable to claim reward.', 409);
     }
     return json(data);

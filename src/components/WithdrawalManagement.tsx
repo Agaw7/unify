@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Check, Copy, ImagePlus, RefreshCw, ShieldAlert, X } from 'lucide-react';
@@ -24,7 +25,7 @@ type Withdrawal = {
 type State = { transactions: Withdrawal[]; canConfirmPayout: boolean; recordsHidden?: boolean };
 type Tab = 'Pending' | 'Approved' | 'Rejected' | 'Completed';
 
-const currency = (cents: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
+const currency = (cents: number) => formatPhp(cents / 100);
 const paymentMethod = (method: string) => ({ gotyme: 'GoTyme Bank', gcash: 'GCash', maya: 'Maya' }[method] ?? method);
 const dateTime = (value: string) => new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
 const getTab = (status: Status): Tab => status === 'reserved' ? 'Pending'

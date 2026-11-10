@@ -1,6 +1,7 @@
 
 "use client";
 
+import { formatPhp } from '@/lib/format-php';
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
@@ -63,10 +64,7 @@ export default function WalletBalance() {
         <p className="text-red-400">{error}</p>
       ) : (
         <h2 className="mt-2 text-3xl font-bold">
-          ₱{balance.toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
+          {formatPhp(balance)}
         </h2>
       )}
 

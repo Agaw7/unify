@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Image from 'next/image';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Check, ExternalLink, Image as ImageIcon, RefreshCw, ShieldAlert, X } from 'lucide-react';
@@ -17,12 +18,13 @@ type Deposit = {
   channel: 'palawan' | 'gcash' | null;
   submittedReference: string | null;
   hasReceipt: boolean;
+  ownDeposit: boolean;
   member: { phone: string | null; name: string | null };
 };
 type State = { transactions: Deposit[]; canApprove: boolean; treasuryEnabled: boolean; recordsHidden?: boolean };
 type Tab = 'Pending' | 'Approved' | 'Rejected' | 'Completed';
 
-const currency = (cents: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cents / 100);
+const currency = (cents: number) => formatPhp(cents / 100);
 const paymentMethod = (item: Deposit) => item.channel === 'palawan' ? 'PalawanPay' : item.channel === 'gcash' ? 'GCash' : item.method.toUpperCase();
 const dateTime = (value: string) => new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -49,6 +51,7 @@ function tabFor(deposit: Deposit): Tab {
 export default function DepositManagement({ onReviewed }: { onReviewed: () => void }) {
   const [data, setData] = useState<State | null>(null);
   const [tab, setTab] = useState<Tab>('Pending');
+  const [showOwnDeposits, setShowOwnDeposits] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [proofUrl, setProofUrl] = useState('');
   const [paymentReference, setPaymentReference] = useState('');
@@ -64,7 +67,7 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
     setLoading(true);
     setError('');
     try {
-      const response = await request('/api/admin/deposits?hideRecords=true');
+      const response = await request('/api/admin/deposits');
       setData(await response.json());
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to load deposit records.');
@@ -72,7 +75,10 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  const records = useMemo(() => data?.transactions ?? [], [data?.transactions]);
+  const records = useMemo(
+    () => (data?.transactions ?? []).filter(item => showOwnDeposits || !item.ownDeposit),
+    [data?.transactions, showOwnDeposits],
+  );
   const selected = records.find(item => item.id === selectedId) ?? null;
   const visible = records.filter(item => tabFor(item) === tab);
   const counts = useMemo(() => ({
@@ -111,7 +117,7 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
   }
 
   async function review(action: 'approve' | 'reject') {
-    if (!selected || busy) return;
+    if (!selected || busy || selected.ownDeposit) return;
     if (action === 'approve') {
       if (!data?.canApprove || !confirm || selected.status !== 'pending') return;
       if (!window.confirm(`Confirm that you independently verified receipt of ${currency(selected.amount)} in the authorized ${paymentMethod(selected)} merchant account before approving this deposit?`)) return;
@@ -156,6 +162,10 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
     </header>
     <section className={styles.records} aria-label="Deposit records">
       <h3>Deposit Records</h3>
+      <label className={styles.checkbox}>
+        <input type="checkbox" checked={showOwnDeposits} onChange={event => setShowOwnDeposits(event.target.checked)} />
+        <span>Show my deposits</span>
+      </label>
       <div className={styles.tabs} role="tablist" aria-label="Deposit status">
         {(['Pending', 'Approved', 'Rejected', 'Completed'] as const).map(item =>
           <button type="button" role="tab" aria-selected={tab === item} key={item} onClick={() => setTab(item)}>{item}{data?.recordsHidden ? '' : ` (${counts[item]})`}</button>)}
@@ -207,7 +217,10 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
             {selected.hasReceipt && !proofUrl && <p className={styles.empty}>Loading secure screenshot…</p>}
           </section>
 
-          {selected.status === 'pending' && <>
+          {selected.status === 'pending' && selected.ownDeposit && (
+            <p className={styles.lockNotice}><ShieldAlert size={16} /> You submitted this deposit. Another administrator must review it.</p>
+          )}
+          {selected.status === 'pending' && !selected.ownDeposit && <>
             <section className={styles.confirmCard}>
               <h3>Approve Deposit</h3>
               <p>Independently verify the amount and reference in the authorized merchant account history. A screenshot alone is not proof of receipt.</p>

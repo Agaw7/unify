@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw, Save, CheckCircle2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,7 +19,7 @@ type Wallet = {
   wallet:{available:number;reserved:number}; destinations:Recipient[]; verifications:Review[]; transactions:Entry[];
   legacyDestinations?:LegacyRecipient[];
 };
-const php=(value:number)=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(value/100);
+const php=(value:number)=>formatPhp(value/100);
 const label=(method:string)=>method==='maya'?'Maya':'GCash';
 const statusLabel=(status:string)=>status==='reserved'?'Pending approval':status.replaceAll('_',' ');
 

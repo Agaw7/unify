@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowDownToLine, ArrowUpFromLine, RefreshCw } from 'lucide-react';
@@ -7,7 +8,7 @@ import { moneyRequest } from '@/lib/money-client';
 
 type Entry = { id: string; amount: number; status: string; method: string | null; destination: string | null; created_at: string };
 type History = { entries: Entry[]; total: number; page: number; pageSize: number };
-const peso = (value: number) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
+const peso = (value: number) => formatPhp(value);
 
 export default function DepositHistoryPage() {
   const [kind, setKind] = useState('deposit');

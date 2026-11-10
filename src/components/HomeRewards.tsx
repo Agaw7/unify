@@ -1,5 +1,6 @@
 'use client';
 
+import { formatPhp } from '@/lib/format-php';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AlertCircle, CalendarCheck, CheckCircle2, Gift, LoaderCircle, X } from 'lucide-react';
 import { moneyRequest } from '@/lib/money-client';
@@ -31,8 +32,8 @@ export default function HomeRewards({ onTasks, onClaim }: { onTasks: () => void;
     setError('');
     try {
       const result = await moneyRequest('/api/rewards', checkIn ? { action: 'check-in' } : { action: 'redeem', code });
-      const amount = (Number(result.amount) / 100).toFixed(2);
-      setMessage(result.alreadyClaimed ? (checkIn ? 'You already checked in today.' : 'Reward already claimed.') : `₱${amount} credited to your available balance.`);
+      const amount = formatPhp(Number(result.amount) / 100);
+      setMessage(result.alreadyClaimed ? (checkIn ? 'You already checked in today.' : 'Reward already claimed.') : `${amount} credited to your available balance.`);
       onClaim();
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : 'Unable to claim reward.');

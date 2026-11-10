@@ -8,6 +8,29 @@ export const runtime = 'nodejs';
 export function GET(request: NextRequest) {
   return handled(async () => {
     const { db, user } = await authenticate(request);
+    if (request.nextUrl.searchParams.get('summary') === 'history') {
+      const cursor = request.nextUrl.searchParams.get('before');
+      const [createdAt, id, extra] = cursor?.split('|') ?? [];
+      if (cursor !== null && (!createdAt || !uuid(id) || extra !== undefined ||
+          !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(createdAt) ||
+          !Number.isFinite(Date.parse(createdAt)))) {
+        throw new MoneyError('Invalid transaction history cursor');
+      }
+
+      const pageSize = 25;
+      let query = db.from('money_transactions')
+        .select('id,kind,amount,status,created_at').eq('user_id', user.id)
+        .order('created_at', { ascending: false }).order('id', { ascending: false })
+        .limit(pageSize + 1);
+      if (createdAt && id) {
+        query = query.or(`created_at.lt.${createdAt},and(created_at.eq.${createdAt},id.lt.${id})`);
+      }
+      const { data, error } = await query;
+      if (error) throw new MoneyError('Unable to load transaction history', 503);
+      const entries = data.slice(0, pageSize);
+      const last = entries[entries.length - 1];
+      return json({ entries, nextCursor: data.length > pageSize ? `${last.created_at}|${last.id}` : null });
+    }
     if (request.nextUrl.searchParams.get('summary') === 'balance') {
       if (productionPaymentsAuthorized) {
         const result = await rpc('money_credit_due_tier_rewards', { p_user: user.id });

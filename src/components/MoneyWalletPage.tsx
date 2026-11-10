@@ -1,4 +1,5 @@
 'use client';
+import { formatPhp } from '@/lib/format-php';
 import Link from 'next/link';
 import MemberVerification from '@/components/MemberVerification';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -9,7 +10,7 @@ type Transaction = { id:string; kind:string; amount:number; status:string; creat
 type Destination = { id:string; method:string; account_name:string; account_number:string; verified:boolean };
 type Verification={ id:string;kind:string;destination_id:string|null;status:string;expires_at:string|null };
 type State = { manualPalawan?:boolean;manualGoTyme?:boolean;enabled:boolean;payoutsEnabled:boolean;withdrawalMode:string;ready:boolean;depositReady:boolean; wallet:{ available:number;deposit_available:number; reserved:number;held:number;debt:number }; customer:{ verified:boolean; blocked:boolean }|null; transactions:Transaction[]; destinations:Destination[];verifications:Verification[] };
-const php = (cents:number) => new Intl.NumberFormat('en-PH',{ style:'currency',currency:'PHP' }).format(Number(cents)/100);
+const php = (cents:number) => formatPhp(Number(cents)/100);
 const field = 'w-full rounded-xl border border-slate-700 bg-slate-900 p-3';
 export default function MoneyPage() {
   const [data,setData] = useState<State|null>(null);
