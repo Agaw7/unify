@@ -72,11 +72,15 @@ test('two-account treasury preserves cash, liabilities, references and opening-s
  }finally{await db.close();}
 });
 
-test('manual payout proof settles a claimed withdrawal once and records private evidence',async()=>{
+test('manual payout attestation settles a reviewed withdrawal once without a screenshot',async()=>{
  const db=new PGlite();const [member,reviewer,payoutAdmin]=Array.from({length:3},()=>randomUUID());
  const q=async(sql,args=[])=>(await db.query(sql,args)).rows;
  try{
   await install(db);
+  await db.exec(readFileSync('database/54_manual_payout_finalization.sql','utf8'));
+  await db.exec(readFileSync('database/55_mfa_manual_payout.sql','utf8'));
+  await db.exec(readFileSync('database/56_manual_payout_without_verification_review.sql','utf8'));
+  await db.exec(readFileSync('database/57_manual_payout_attestation.sql','utf8'));
   await q('insert into auth.users(id) values($1),($2),($3)',[member,reviewer,payoutAdmin]);
   await q("insert into profiles values($1,'user'),($2,'admin'),($3,'admin')",[member,reviewer,payoutAdmin]);
   await q("select money_treasury_open($1,5000000,5000000,$2,'OPENING-STATEMENT',$3,false,true)",[reviewer,randomUUID(),new Date(Date.now()-10000).toISOString()]);
@@ -87,18 +91,29 @@ test('manual payout proof settles a claimed withdrawal once and records private 
   await q('insert into money_wallets(user_id,available) values($1,30000)',[member]);
   const tx=(await q("select * from money_request_withdrawal($1,20000,'gotyme',$2,$3)",[member,randomUUID(),destination]))[0];
   await q("select money_review($1,$2,'approve','Ownership checked')",[tx.id,reviewer]);
-  await q('select money_claim_payout($1,$2)',[tx.id,payoutAdmin]);
   const proof=`${tx.id}/${randomUUID()}.png`;
-  await q('select money_confirm_manual_payout($1,$2,$3,true)',[tx.id,payoutAdmin,proof]);
+  const finalize=(actor,path)=>q('select money_finalize_mfa_manual_payout($1,$2,$3,true)',[tx.id,actor,path]);
+  await q('delete from money_verifications where user_id=$1',[member]);
+  await q('update money_customers set verified=false,blocked=true where user_id=$1',[member]);
+  await q('update money_destinations set verified=false where id=$1',[destination]);
+  await assert.rejects(finalize(reviewer,proof),/Account restricted/);
+  await q('update money_customers set blocked=false where user_id=$1',[member]);
+  await assert.rejects(finalize(member,proof),/Independent payout administrator required/);
+  await assert.rejects(finalize(reviewer,'invalid-proof'),/Invalid manual payout confirmation/);
+  assert.equal((await q('select status from money_transactions where id=$1',[tx.id]))[0].status,'approved');
+  const attest=actor=>q('select money_attest_manual_payout($1,$2)',[tx.id,actor]);
+  await assert.rejects(attest(member),/Independent payout administrator required/);
+  await attest(reviewer);
+  await attest(reviewer);
   const result=(await q('select status,payout_proof_path,payout_confirmed_by,payout_confirmed_at from money_transactions where id=$1',[tx.id]))[0];
   assert.equal(result.status,'completed');
-  assert.equal(result.payout_proof_path,proof);
-  assert.equal(result.payout_confirmed_by,payoutAdmin);
+  assert.equal(result.payout_proof_path,null);
+  assert.equal(result.payout_confirmed_by,reviewer);
   assert.ok(result.payout_confirmed_at);
   assert.equal((await q('select reserved from money_wallets where user_id=$1',[member]))[0].reserved,0);
   assert.equal((await q("select count(*)::int n from money_ledger where transaction_id=$1 and action='settle'",[tx.id]))[0].n,1);
   assert.equal((await q("select balance from money_treasury_accounts where id='gotyme'"))[0].balance,4981000);
-  await assert.rejects(q('select money_confirm_manual_payout($1,$2,$3,true)',[tx.id,payoutAdmin,proof]),/Invalid manual payout confirmation/);
+  await assert.rejects(finalize(payoutAdmin,proof),/Invalid manual payout confirmation/);
   await assert.rejects(q('select money_confirm_manual_payout($1,$2,$3,true)',[tx.id,reviewer,`${tx.id}/${randomUUID()}.png`]),/Independent payout administrator required/);
  }finally{await db.close();}
 });

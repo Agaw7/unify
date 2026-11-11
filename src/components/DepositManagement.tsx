@@ -22,11 +22,13 @@ type Deposit = {
   member: { phone: string | null; name: string | null };
 };
 type State = { transactions: Deposit[]; canApprove: boolean; treasuryEnabled: boolean; recordsHidden?: boolean };
-type Tab = 'Pending' | 'Approved' | 'Rejected' | 'Completed';
+const tabs = ['Pending', 'Approved', 'Rejected'] as const;
+type Tab = typeof tabs[number];
 
 const currency = (cents: number) => formatPhp(cents / 100);
 const paymentMethod = (item: Deposit) => item.channel === 'palawan' ? 'PalawanPay' : item.channel === 'gcash' ? 'GCash' : item.method.toUpperCase();
 const dateTime = (value: string) => new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
+const depositReference = (value: string | null) => value?.replace(/^PALAWAN-REQUEST-[A-F0-9]{64}$/, 'Screenshot only');
 
 async function request(path: string, init?: RequestInit) {
   const { data, error } = await supabase.auth.getSession();
@@ -41,11 +43,11 @@ async function request(path: string, init?: RequestInit) {
   return response;
 }
 
-function tabFor(deposit: Deposit): Tab {
+function tabFor(deposit: Deposit): Tab | null {
   if (deposit.status === 'pending') return 'Pending';
   if (deposit.status === 'rejected' || deposit.status === 'failed') return 'Rejected';
   if (deposit.status === 'approved' || (deposit.status === 'completed' && deposit.channel)) return 'Approved';
-  return 'Completed';
+  return null;
 }
 
 export default function DepositManagement({ onReviewed }: { onReviewed: () => void }) {
@@ -85,7 +87,6 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
     Pending: records.filter(item => tabFor(item) === 'Pending').length,
     Approved: records.filter(item => tabFor(item) === 'Approved').length,
     Rejected: records.filter(item => tabFor(item) === 'Rejected').length,
-    Completed: records.filter(item => tabFor(item) === 'Completed').length,
   }), [records]);
 
   useEffect(() => {
@@ -167,12 +168,31 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
         <span>Show my deposits</span>
       </label>
       <div className={styles.tabs} role="tablist" aria-label="Deposit status">
-        {(['Pending', 'Approved', 'Rejected', 'Completed'] as const).map(item =>
+        {tabs.map(item =>
           <button type="button" role="tab" aria-selected={tab === item} key={item} onClick={() => setTab(item)}>{item}{data?.recordsHidden ? '' : ` (${counts[item]})`}</button>)}
       </div>
       {error && <p className={styles.error} role="alert">{error}</p>}
       {notice && <p className={styles.notice} role="status">{notice}</p>}
-      <div className={styles.tableWrap}>
+      {tab === 'Approved' && !data?.recordsHidden ? (
+        <div className={styles.paymentCardList}>
+          {visible.map(item => (
+            <article className={styles.paymentCard} key={item.id}>
+              <div className={styles.recordId}>
+                <strong className={styles.paymentCardAmount}>{currency(item.amount)}</strong>
+                <span className={`${styles.status} ${styles.statusDone}`}>Approved</span>
+              </div>
+              <p><strong>{item.member.name ?? `Member ${item.user_id.slice(0, 8)}`}</strong> · {dateTime(item.created_at)}</p>
+              <p>Phone {item.member.phone ?? 'Unavailable'} · {paymentMethod(item)}</p>
+              <p>Request DP-{item.id.slice(0, 8).toUpperCase()}</p>
+              {item.submittedReference && <p>Reference {depositReference(item.submittedReference)}</p>}
+              <button type="button" className={styles.viewButton} onClick={() => openDetails(item)}>
+                {item.hasReceipt ? <><ImageIcon size={15} aria-hidden="true" /> View deposit photo</> : 'View Details'}
+              </button>
+            </article>
+          ))}
+          {!visible.length && <p className={styles.empty}>{loading ? 'Loading deposits…' : 'No approved deposits.'}</p>}
+        </div>
+      ) : <div className={styles.tableWrap}>
         <table className={styles.mobileTable}>
           <thead><tr><th>Member</th><th>Phone</th><th>Payment Method</th><th>Amount</th><th>Date Requested</th><th>Screenshot</th><th>Action</th></tr></thead>
           <tbody>{!data?.recordsHidden && visible.map(item => <tr key={item.id}>
@@ -186,7 +206,7 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
           </tr>)}
           {(!visible.length || data?.recordsHidden) && <tr><td colSpan={7} className={styles.empty}>{loading ? 'Loading deposits…' : data?.recordsHidden ? 'Deposit records are hidden on this dashboard. Stored records are unchanged.' : `No ${tab.toLowerCase()} deposits.`}</td></tr>}</tbody>
         </table>
-      </div>
+      </div>}
     </section>
 
     {!data?.recordsHidden && selected && <div className={styles.overlay} onMouseDown={event => { if (event.target === event.currentTarget) closeDetails(); }}>
@@ -200,7 +220,7 @@ export default function DepositManagement({ onReviewed }: { onReviewed: () => vo
               <div><dt>Phone Number</dt><dd>{selected.member.phone ?? 'Unavailable'}</dd></div>
               <div><dt>Deposit Request ID</dt><dd>{selected.id}</dd></div>
               <div><dt>Payment Method</dt><dd>{paymentMethod(selected)}</dd></div>
-              <div><dt>Submitted Reference</dt><dd>{selected.submittedReference?.replace(/^PALAWAN-REQUEST-[A-F0-9]{64}$/, 'Screenshot only') ?? 'Unavailable'}</dd></div>
+              <div><dt>Submitted Reference</dt><dd>{depositReference(selected.submittedReference) ?? 'Unavailable'}</dd></div>
               <div><dt>Deposit Amount</dt><dd>{currency(selected.amount)}</dd></div>
               <div><dt>Request Date</dt><dd>{dateTime(selected.created_at)}</dd></div>
               <div><dt>Status</dt><dd>{selected.status}</dd></div>

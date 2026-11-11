@@ -50,11 +50,11 @@
 .dropzone{min-height:105px;border:1px dashed #9b77b0;border-radius:11px;background:#ffffff05;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#e9d9f6;cursor:pointer}
 .dropzone svg{color:#e8c35a}
 .dropzone small{color:#c3b0d1;font-size:10px}
-.previewWrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;border:1px solid #674783;border-radius:10px;padding:8px}
+.previewWrap{display:grid;gap:10px;border:1px solid #674783;border-radius:10px;padding:10px}
 .previewWrap img,.savedProof{display:block;width:100%;max-height:210px;object-fit:contain;border-radius:7px;background:#100a17}
-.previewWrap>div{display:grid;gap:8px;max-width:100px}
+.previewWrap>div{display:grid;gap:8px;min-width:0}
 .previewWrap span{font-size:10px;overflow-wrap:anywhere}
-.previewWrap button,.previewWrap label{border:0;background:transparent;color:#f1d26d;text-decoration:underline;font:inherit;font-size:11px;cursor:pointer}
+.previewActions{display:flex;flex-wrap:wrap;gap:8px}.previewActions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;border:1px solid #8c64ab;border-radius:8px;padding:6px 12px;background:#35204a;color:#fff;font:inherit;cursor:pointer}.previewActions button:last-child{background:#42233c;color:#ffe4ee}.previewActions button:disabled{opacity:.55;cursor:default}
 .checkbox{display:flex;align-items:flex-start;gap:8px;margin:12px 0;font-size:11px;line-height:1.5}
 .checkbox input{flex:none;margin-top:2px;accent-color:#e9bf50}
 .drawerActions{display:flex;gap:9px}
@@ -69,3 +69,37 @@
 .approveButton:disabled,.rejectButton:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:760px){.heading{align-items:flex-start}.heading h2{font-size:18px}.heading p{font-size:11px}.records>h3{padding:14px 12px 8px}.tabs{padding-inline:10px}.drawer{width:100vw;border-left:0}.drawerBody{padding:10px}.detailCard dl>div{font-size:11px}}
 @media(max-width:700px){.records .mobileTable{width:100%;min-width:0}.mobileTable thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.mobileTable tbody{display:grid;gap:8px;padding:9px}.mobileTable tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #4f3264;border-radius:10px;background:#21142e;overflow:hidden}.mobileTable tr:hover td{background:transparent}.mobileTable td{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;border:0!important;padding:9px 10px!important;overflow-wrap:anywhere}.mobileTable td:not(.empty)::before{content:attr(data-label);color:#c8b7d8;font-size:9px}.mobileTable td[data-label="Action"]{grid-column:span 2;display:flex;justify-content:flex-end}.mobileTable td.empty{grid-column:span 2}.mobileTable td[data-label="Screenshot"] svg{color:#e8c35a}}
+.reviewReason { width: 100%; min-height: 5rem; padding: .75rem; border: 1px solid #9d76b5; border-radius: .5rem; background: #f8effb; color: #281337; font: inherit; }
+
+.paymentCardList {
+  display: grid;
+  gap: .75rem;
+  padding: .75rem;
+}
+
+.paymentCard {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #684484;
+  border-radius: .85rem;
+  background: linear-gradient(135deg, #302043, #1c142b);
+  color: #f9efff;
+}
+
+.paymentCard .paymentCardAmount {
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.paymentCard p {
+  margin: .4rem 0;
+  color: #e1cdea;
+  overflow-wrap: anywhere;
+}
+
+.paymentCard .viewButton {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .65rem;
+}

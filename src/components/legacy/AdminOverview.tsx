@@ -7,7 +7,7 @@ export default function AdminOverviewPage() {
       minHeight: "100vh",
       padding: 40,
     }}>
-      <h1>AUREVIA Admin Overview</h1>
+      <h1>AROMEVA Admin Overview</h1>
       <p>Admin dashboard interface — setup in progress.</p>
 
       <section style={{

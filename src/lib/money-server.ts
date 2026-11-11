@@ -38,6 +38,17 @@ export async function rpc(name: string, args: Record<string, unknown>) {
   if (error) {
     console.error('Money RPC failed', { name, code: error.code });
     const expected = ['Funding reference already allocated','Resolve payment shortfalls before allocating business funds','Insufficient unallocated verified business funds','Insufficient funded business rewards budget for this plan','Member already received a free welcome plan','Member account not found','Product unavailable','Plan request conflict','Funding request conflict','Account restricted','Insufficient available balance','Verified, unrestricted customer required','Verified destination required','Idempotency key conflict','Hourly request limit reached','Daily amount limit reached','Invalid review state','Cannot review own withdrawal','Current identity/ownership approval required or account has a financial restriction','Active refund or dispute prevents release','Unresolved risk alert prevents settlement release','Refund exceeds remaining payment','Insufficient refundable balance','Independent refund sender required','Refund already claimed','Only an unsubmitted refund may be cancelled'];
+    if (name === 'money_claim_payout') {
+      if (error.message.includes('Independent payout administrator required')) {
+        throw new MoneyError('A different administrator must start processing this withdrawal.', 409);
+      }
+      if (error.message.includes('Customer or destination restricted') || error.message.includes('Current identity/ownership approval required')) {
+        throw new MoneyError('Check the member’s identity and receiving account approvals, and resolve any account restrictions before processing.', 409);
+      }
+      if (error.message.includes('Payout already claimed or not approved')) {
+        throw new MoneyError('This withdrawal is already processing or is no longer approved. Refresh its status.', 409);
+      }
+    }
     throw new MoneyError(expected.find(message => error.message.includes(message)) ?? 'Money operation could not be completed', 409);
   }
   return data;

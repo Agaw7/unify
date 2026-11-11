@@ -60,7 +60,7 @@ export default function ProfilePage({
     <div className="profile-page">
       <div className="page-heading">
         <h2>My Profile</h2>
-        <p>Manage your AUREVIA account.</p>
+        <p>Manage your AROMEVA account.</p>
       </div>
 
       <div className="profile-banner">
@@ -69,7 +69,7 @@ export default function ProfilePage({
         </div>
         <div className="profile-details">
           <span>ACCOUNT</span>
-          <h3>{name || "AUREVIA Member"}</h3>
+          <h3>{name || "AROMEVA Member"}</h3>
           <p>{email}</p>
           <div className="verification-status">
             <ShieldCheck size={15} />

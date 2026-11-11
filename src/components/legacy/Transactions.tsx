@@ -7,7 +7,7 @@ export default function TransactionsPage() {
       minHeight: "100vh",
       padding: 40,
     }}>
-      <h1>AUREVIA Transaction History</h1>
+      <h1>AROMEVA Transaction History</h1>
       <p>
         Your sandbox transaction records will appear here
         after we connect the wallet to Supabase.

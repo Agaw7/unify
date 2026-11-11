@@ -120,17 +120,17 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
   return <main className={styles.page}>
     <header className={styles.pageHeader}>
       <Link href="/dashboard" className={styles.backLink}>← Back to dashboard</Link>
-      <span className={styles.brand}>AUREVIA <small>MEMBER DEPOSIT</small></span>
+      <span className={styles.brand}>AROMEVA <small>MEMBER DEPOSIT</small></span>
     </header>
     <div className={styles.layout}>
       <section className={styles.instructions}>
-        <div className={styles.sectionTitle}><span>01</span><div><h1>Scan to deposit</h1><p>Pay using the AUREVIA PalawanPay QR.</p></div></div>
+        <div className={styles.sectionTitle}><span>01</span><div><h1>Scan to deposit</h1><p>Pay using the AROMEVA PalawanPay QR.</p></div></div>
         {!configuration && !error && <p className={styles.loading}>Loading PalawanPay QR…</p>}
         {configuration && !method && <p className={styles.paused}>PalawanPay deposits are currently unavailable.</p>}
         {method && <>
           <div className={styles.merchantCard}>
-            <Image className={styles.qr} src={method.qr} alt={`Configured AUREVIA ${method.label} payment QR`} width={340} height={340} unoptimized />
-            <a className={styles.download} href={method.qr} download="AUREVIA-PalawanPay-QR.jpg">
+            <Image className={styles.qr} src={method.qr} alt={`Configured AROMEVA ${method.label} payment QR`} width={340} height={340} unoptimized />
+            <a className={styles.download} href={method.qr} download="AROMEVA-PalawanPay-QR.jpg">
               <Download size={16} aria-hidden="true" /> Download QR
             </a>
             <p className={styles.caution}>Confirm the recipient in your payment app before sending.</p>
@@ -167,7 +167,6 @@ export default function ManualQrDeposit({ initialAmount }: { initialAmount: numb
         </fieldset>
         {error && <p className={styles.error} role="alert">{error}</p>}
         {notice && <p className={styles.notice} role="status">{notice}{requestId && <><br />Request ID: <strong>{requestId}</strong><br />Status: <strong>{status}</strong></>}</p>}
-        <Link className={styles.historyLink} href="/deposit/history">View deposit history</Link>
       </form>
     </div>
   </main>;

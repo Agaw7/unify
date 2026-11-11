@@ -17,7 +17,7 @@ export function GET(request: NextRequest) {
         id: 'palawan',
         label: 'PalawanPay',
         qr: '/payments/aurevia-palawan-receive.jpg',
-        instructions: 'Use the configured AUREVIA PalawanPay receive QR. Confirm that the recipient shown by PalawanPay is the authorized AUREVIA merchant before sending.',
+        instructions: 'Use the configured PalawanPay QR. Confirm the displayed recipient against the official payment instructions before sending.',
         referenceLabel: 'PalawanPay / InstaPay reference number',
       });
     }

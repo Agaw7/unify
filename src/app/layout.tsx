@@ -4,11 +4,11 @@ import "./globals.css";
 import "./ui-theme.css";
 
 export const metadata: Metadata = {
-  title: "AUREVIA",
-  description: "AUREVIA Investment Simulator",
+  title: "AROMEVA",
+  description: "AROMEVA Investment Simulator",
   icons: {
     icon: [
-      { url: '/aurevia-icon.png', type: 'image/png' },
+      { url: '/aromeva-logo.png', type: 'image/png' },
     ],
   },
 };

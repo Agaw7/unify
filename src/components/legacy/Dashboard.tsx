@@ -16,7 +16,7 @@ import {
 
   UserPlus, RefreshCw, X,
 
-  Gift
+  Gift, Send
 
 } from "lucide-react";
 
@@ -87,7 +87,7 @@ const TASK_MILESTONES = [
   { threshold: 50, reward: 1500 },
 ];
 
-export default function HomePage({initialTab="home"}:{initialTab?:Tab}={}) {
+export default function HomePage({initialTab="home",initialProfilePanel=null}:{initialTab?:Tab;initialProfilePanel?:'Transaction history'|null}={}) {
 
   const [checkoutProduct,setCheckoutProduct] = useState<string|null>(null);
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -149,7 +149,7 @@ useEffect(() => {
     else setProducts((catalog.data ?? []).map(item => ({
       id: item.id,
       name: item.name,
-      description: "AUREVIA product plan",
+      description: "AROMEVA product plan",
       minimum_amount: Number(item.price),
       illustrative_return_pct: Number(item.price) > 0 ? Number(item.daily_income) / Number(item.price) * 100 : 0,
       duration_days: Number(item.duration_days ?? 365),
@@ -333,7 +333,7 @@ useEffect(() => {
 
       <main className="loading">
 
-        Loading AUREVIA...
+        Loading AROMEVA...
 
       </main>
 
@@ -347,7 +347,7 @@ useEffect(() => {
 
       <main className="loading">
 
-        <h1>AUREVIA</h1>
+        <h1>AROMEVA</h1>
 
         <p>{message || "Please sign in."}</p>
 
@@ -371,7 +371,7 @@ useEffect(() => {
 
           <div>
 
-            <h1>AUREVIA</h1>
+            <h1>AROMEVA</h1>
           </div>
 
         </div>
@@ -665,6 +665,7 @@ useEffect(() => {
 
         {tab === "profile" && (
           <MemberProfile contact={email} name={memberName} verified={verified}
+            initialPanel={initialProfilePanel}
             onBank={() => navigateTab("bank")} onLogout={logout} />
         )}
 
@@ -707,39 +708,36 @@ useEffect(() => {
               <X size={19} />
             </button>
             <div className="aurevia-announcement-icon">
-              <Image src="/aurevia-icon.png" alt="AUREVIA logo" width={64} height={64} priority />
+              <Image src="/aromeva-logo.png" alt="AROMEVA logo" width={64} height={64} priority />
             </div>
-            <p className="aurevia-announcement-eyebrow">AUREVIA COMMUNITY</p>
             <h2 id="aurevia-announcement-title" className="aurevia-announcement-title">
-              Official Announcement
+              Welcome to AROMEVA
             </h2>
             <p className="aurevia-announcement-description">
-              Check back here for official AUREVIA links.
+              Get started in three steps
             </p>
 
-            <div className="aurevia-announcement-links">
-              <div className="aurevia-announcement-link">
-                <span>
-                  <span className="aurevia-announcement-link-label">OFFICIAL WEBSITE</span>
-                  <span className="aurevia-announcement-url">Coming soon</span>
-                </span>
-                <span className="aurevia-announcement-badge">SOON</span>
-              </div>
-              <div className="aurevia-announcement-link aurevia-announcement-telegram">
-                <span>
-                  <span className="aurevia-announcement-link-label">TELEGRAM GROUP CHAT</span>
-                  <span className="aurevia-announcement-url">Official group coming soon</span>
-                </span>
-                <span className="aurevia-announcement-badge">SOON</span>
-              </div>
-            </div>
+            <ol className="aromeva-welcome-steps">
+              <li>Deposit via the PalawanPay QR</li>
+              <li>Choose a tier in Market</li>
+              <li>Track daily rewards in My Tier</li>
+            </ol>
+            <dl className="aromeva-welcome-amounts">
+              <div><dt>Free bonus</dt><dd>₱20</dd></div>
+              <div><dt>Min. deposit</dt><dd>₱300</dd></div>
+              <div><dt>Min. withdrawal</dt><dd>₱60</dd></div>
+            </dl>
+            <p className="aurevia-announcement-description">Registration bonus subject to availability. Withdrawals have a 5% fee.</p>
+            <a className="aurevia-announcement-primary" href="https://t.me/+hp4B1SgoHGsxOGNl" target="_blank" rel="noopener noreferrer">
+              <Send size={18} aria-hidden="true" /> Join our Telegram group
+            </a>
 
             <button
               type="button"
               onClick={() => setAnnouncementOpen(false)}
               className="aurevia-announcement-dismiss"
             >
-              Close
+              Maybe later
             </button>
           </section>
         </div>
@@ -830,7 +828,7 @@ function ProductCard({ product, onInvest }: { product: Product; onInvest: () => 
       <img className="world-product-image" src={productDisplayImage(product.name)} alt={productDisplayName(product.name)} />
       <div className="world-product-body">
         <div className="world-product-heading">
-          <div><p className="world-country">{detail?.country ?? 'AUREVIA'} · TIER {detail?.tier ?? '—'}</p><h3>{productDisplayName(product.name)}</h3></div>
+          <div><p className="world-country">{detail?.country ?? 'AROMEVA'} · TIER {detail?.tier ?? '—'}</p><h3>{productDisplayName(product.name)}</h3></div>
           <span className="world-mascot" aria-hidden="true">
             <svg viewBox="0 0 72 80" width="60" height="67" fill="none">
               <ellipse cx="23" cy="23" rx="8" ry="21" transform="rotate(-18 23 23)" fill="#fdfaf9" />

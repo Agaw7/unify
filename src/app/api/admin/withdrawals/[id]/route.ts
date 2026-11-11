@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   return handled(async () => {
-    const { user, db } = await authenticate(request, 'role-only');
+    const { user, db } = await authenticate(request, true);
     requireProductionApproval();
     if (process.env.MANUAL_GOTYME_WITHDRAWALS_ENABLED !== 'true') {
       throw new MoneyError('Manual withdrawals are unavailable', 503);
@@ -21,9 +21,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .eq('id', id).single();
     if (transaction.error || !transaction.data) throw new MoneyError('Withdrawal not found', 404);
     const row = transaction.data;
-    if (row.kind !== 'withdrawal' || row.status !== 'processing' || row.withdrawal_mode !== 'admin_approval' ||
-        !['gotyme', 'gcash', 'maya'].includes(row.method) || row.user_id === user.id || row.reviewed_by === user.id) {
-      throw new MoneyError('Withdrawal is not eligible for independent manual payout confirmation', 409);
+    if (row.kind !== 'withdrawal' || !['approved', 'processing'].includes(row.status) || row.withdrawal_mode !== 'admin_approval' ||
+        !['gotyme', 'gcash', 'maya'].includes(row.method) || row.user_id === user.id || !row.reviewed_by) {
+      throw new MoneyError('This withdrawal is not eligible for manual payout confirmation.', 409);
+    }
+
+    if (request.headers.get('content-type')?.startsWith('application/json')) {
+      const body = await request.json();
+      if (body?.action !== 'confirm_sent') throw new MoneyError('Invalid payout action');
+      const { error } = await db.rpc('money_attest_manual_payout', { p_id: id, p_actor: user.id });
+      if (error) {
+        if (error.message.includes('Account restricted')) throw new MoneyError('This member’s account is restricted from payouts.', 409);
+        if (error.message.includes('Withdrawal destination no longer matches')) throw new MoneyError('The saved receiving account has changed.', 409);
+        console.error('Manual payout attestation failed', { code: error.code });
+        throw new MoneyError('Payout could not be recorded. Refresh the request before retrying.', 409);
+      }
+      return json({ success: true });
     }
 
     const form = await request.formData();
@@ -47,7 +60,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     });
     if (uploaded.error) throw new MoneyError('Unable to securely store payout screenshot', 503);
 
-    const { error } = await db.rpc('money_confirm_manual_payout', {
+    const { error } = await db.rpc('money_finalize_mfa_manual_payout', {
       p_id: id,
       p_actor: user.id,
       p_proof_path: path,
@@ -62,8 +75,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       throw new MoneyError(error.message.includes('Withdrawal already completed')
         ? 'Withdrawal was already completed. Refresh the records.'
         : error.message.includes('Independent payout administrator required')
-          ? 'A different authorized administrator must confirm this payout.'
-          : 'Withdrawal could not be completed. Refresh its status before retrying.', 409);
+          ? 'An authorized administrator must confirm this payout. You cannot confirm your own withdrawal.'
+          : /Customer or destination restricted|Current identity\/ownership approval required/.test(error.message)
+            ? 'Check the member’s identity and receiving account approvals before recording the payout.'
+          : error.message.includes('Account restricted')
+            ? 'This member’s account is restricted from payouts.'
+            : error.message.includes('Withdrawal destination no longer matches')
+              ? 'The saved receiving account has changed. Review the original request before proceeding.'
+            : 'Withdrawal could not be completed. Refresh its status before retrying.', 409);
     }
     return json({ success: true, confirmedAt: new Date().toISOString() });
   });

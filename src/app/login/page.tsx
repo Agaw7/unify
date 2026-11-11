@@ -108,7 +108,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
       });
 
     if (authError) {
-      console.error("AUREVIA Supabase authentication error:", {
+      console.error("AROMEVA Supabase authentication error:", {
         message: authError.message,
         code: authError.code,
         status: authError.status,
@@ -166,7 +166,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
     // Replace the actual login history entry, including on mobile browsers.
     window.location.replace("/dashboard");
   } catch (err) {
-    console.error("AUREVIA unexpected login error:", err);
+    console.error("AROMEVA unexpected login error:", err);
 
     setError(
       "An unexpected login error occurred. Check the browser console."
@@ -186,7 +186,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
       <ThemeWelcome/>
       <form className="unify-login-card" onSubmit={handleLogin}>
         <AureviaLogo className="aurevia-login-logo" />
-        <h1>AUREVIA</h1>
+        <h1>AROMEVA</h1>
         <p>Sign in to your account</p>
 
         {error && <div className="unify-login-error" role="alert">{error}</div>}
@@ -271,7 +271,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
             Register Here
           </Link>
         </p>
-        <small>AUREVIA</small>
+        <small>AROMEVA</small>
       </form>
 
       {showTerms && (
@@ -302,7 +302,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
             </div>
             <div className="sheet-content" id="terms-description">
               <h3>1. Eligibility</h3>
-              <p>You must be at least 18 years old to register for AUREVIA.</p>
+              <p>You must be at least 18 years old to register for AROMEVA.</p>
               <h3>2. Account &amp; Security</h3>
               <p>Keep your password confidential. Do not share your account credentials.</p>
               <h3>3. Registration Bonus</h3>
@@ -310,7 +310,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
               <h3>4. Payments</h3>
               <p>Payment collection and withdrawals are currently paused pending independent authorization and provider eligibility verification.</p>
               <h3>5. Privacy &amp; Support</h3>
-              <p>Contact official AUREVIA support for account assistance or disputes. Review the platform privacy policy for how your personal information is handled.</p>
+              <p>Contact official AROMEVA support for account assistance or disputes. Review the platform privacy policy for how your personal information is handled.</p>
             </div>
             <button
               type="button"
@@ -355,7 +355,7 @@ async function handleLogin(event: FormEvent<HTMLFormElement>) {
             <div className="sheet-content" id="forgot-description">
               <LockKeyhole size={36} aria-hidden="true" />
               <p>To reset your password, your account ownership must be verified.</p>
-              <p>Phone-number password recovery is not available until a secure SMS verification provider or another verified recovery method is configured. Contact official AUREVIA support for assistance. Never share your password or verification codes.</p>
+              <p>Phone-number password recovery is not available until a secure SMS verification provider or another verified recovery method is configured. Contact official AROMEVA support for assistance. Never share your password or verification codes.</p>
             </div>
             <button
               type="button"

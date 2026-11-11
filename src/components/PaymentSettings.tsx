@@ -11,7 +11,7 @@ export default function PaymentSettings() {
   const [data, setData] = useState<Settings | null>(null);
   const [error, setError] = useState('');
   useEffect(() => { let active = true; moneyRequest('/api/admin/payment-settings').then(result => { if (active) setData(result); }).catch(e => { if (active) setError(e.message); }); return () => { active = false; }; }, []);
-  return <main className={styles.page}><header className={styles.heading}><div><Link href="/admin"><ArrowLeft size={15} /> Back to admin</Link><p>AUREVIA PAYMENT CONTROLS</p><h1>Payment readiness</h1></div><ShieldCheck size={32} /></header>
+  return <main className={styles.page}><header className={styles.heading}><div><Link href="/admin"><ArrowLeft size={15} /> Back to admin</Link><p>AROMEVA PAYMENT CONTROLS</p><h1>Payment readiness</h1></div><ShieldCheck size={32} /></header>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!data && !error && <p role="status">Checking payment readiness…</p>}
     {data && <><section className={styles.panel}><div className={styles.title}><h2>Execution environment</h2><span className={styles.badge}>Live payment paused</span></div><p>{data.reason}</p><div className={styles.metrics}>{['Customer collection', 'Cash withdrawals', 'Deposit commissions', 'Cashable investment rewards'].map(label => <div className={styles.metric} key={label}><div><span>{label}</span><strong>Disabled</strong></div></div>)}</div><p className={styles.notice}>Sandbox and test-payment interfaces are retired. Historical payment records are retained and separate from live wallet accounting.</p></section>

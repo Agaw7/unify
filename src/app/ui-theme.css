@@ -69,6 +69,10 @@
   background:linear-gradient(145deg,#5b3263 0%,#48204f 58%,#38203e 100%);
   color:#fffaf2;box-shadow:0 28px 80px #21152a66;
 }
+.unify-pastel .aurevia-announcement-overlay,
+.unify-pastel .aurevia-announcement {scrollbar-width:none}
+.unify-pastel .aurevia-announcement-overlay::-webkit-scrollbar,
+.unify-pastel .aurevia-announcement::-webkit-scrollbar {display:none}
 .unify-pastel .aurevia-announcement-close {
   position:absolute;top:14px;right:14px;display:grid;place-items:center;width:40px;height:40px;
   padding:0;border:0;border-radius:50%;background:#ffffff14;color:#f4dfae;transition:background .2s,color .2s;
@@ -89,6 +93,26 @@
 .unify-pastel .aurevia-announcement-description {
   max-width:370px;margin:12px auto 0;color:#e8dce9;font-size:14px;line-height:1.7;text-align:center;
 }
+.aromeva-welcome-steps {
+  display:grid;gap:8px;margin:16px 0;padding:0;list-style:none;counter-reset:welcome-step;
+}
+.aromeva-welcome-steps li {
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;
+  background:#ffffff12;color:#fffaf2;font-size:14px;font-weight:700;
+}
+.aromeva-welcome-steps li::before {
+  counter-increment:welcome-step;content:counter(welcome-step);display:grid;place-items:center;
+  flex:0 0 28px;height:28px;border-radius:50%;background:#efd287;color:#42224c;
+}
+.aromeva-welcome-amounts {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;
+}
+.aromeva-welcome-amounts div {
+  display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:4px;
+  padding:10px 4px;border:1px solid #d6bd8255;border-radius:12px;background:#ffffff12;text-align:center;
+}
+.aromeva-welcome-amounts dt {color:#f5e7f5;font-size:clamp(10px,2.6vw,12px)}
+.aromeva-welcome-amounts dd {margin:0;color:#f0d58f;font-size:clamp(17px,4.5vw,22px);font-weight:800}
 .unify-pastel .aurevia-announcement-links {display:grid;gap:12px;margin-top:24px}
 .unify-pastel .aurevia-announcement-link {
   display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;
@@ -147,7 +171,6 @@
 .theme-welcome p {font-size:16px;line-height:1.8;color:var(--ink-soft);max-width:350px}
 .theme-welcome-art{position:relative;width:210px;height:180px;margin:26px 0;background:linear-gradient(135deg,#eddafa,#ffe7ee);border-radius:70px 70px 35px 35px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #ffffffaa}
 .theme-welcome-art svg{width:120px;height:120px}
-.theme-welcome-art::after{content:'AUREVIA';position:absolute;bottom:15px;right:-18px;background:#fffafeee;box-shadow:0 6px 12px #54265e0c;border-radius:20px;padding:7px 15px;color:var(--plum);font-size:12px;font-weight:800;transform:rotate(-8deg)}
 .unify-pastel .unify-login-card {width:100%;max-width:450px;background:#fffcffed;border:1px solid #fff;border-radius:30px;padding:36px;box-shadow:0 22px 60px #63366c12;color:var(--ink)}
 .unify-pastel .unify-login-card h1 {font-size:29px;color:var(--ink);letter-spacing:-1px}
 .unify-pastel .unify-login-card>p {color:var(--ink-soft);font-size:14px}

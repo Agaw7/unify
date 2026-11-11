@@ -86,9 +86,9 @@ export default function TeamDashboard({ embedded = false }: { embedded?: boolean
     <main className={embedded ? 'text-[#48204f]' : 'min-h-screen bg-[#fcf8fd] text-[#48204f]'}>
       <div className={embedded ? 'mx-auto' : 'mx-auto flex min-h-screen max-w-[1500px]'}>
         {!embedded && <aside className="hidden w-56 shrink-0 border-r border-[#e7dce9] bg-[#fffbff] p-5 md:flex md:flex-col">
-          <Link href="/dashboard" className="mb-8 flex items-center gap-3" aria-label="AUREVIA dashboard">
+          <Link href="/dashboard" className="mb-8 flex items-center gap-3" aria-label="AROMEVA dashboard">
             <span className="grid size-11 place-items-center rounded-xl bg-gradient-to-br from-teal-300 to-violet-500 text-xl font-black text-[#281332]">A</span>
-            <span className="font-bold tracking-[0.2em]">AUREVIA</span>
+            <span className="font-bold tracking-[0.2em]">AROMEVA</span>
           </Link>
           <nav className="grid gap-2 text-sm" aria-label="Member navigation">
             <Link href="/dashboard" className="rounded-xl px-3 py-3 text-[#705a76] hover:bg-[#f4edf6]">Dashboard</Link>
@@ -108,7 +108,7 @@ export default function TeamDashboard({ embedded = false }: { embedded?: boolean
         <div className={embedded ? 'min-w-0 space-y-5' : 'min-w-0 flex-1 px-4 py-5 pb-28 sm:px-7 lg:px-10 md:pb-8'}>
           <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold tracking-[0.24em] text-teal-500">AUREVIA MEMBER AREA</p>
+              <p className="text-xs font-bold tracking-[0.24em] text-teal-500">AROMEVA MEMBER AREA</p>
               <h1 className="mt-2 text-2xl font-bold text-[#48204f] sm:text-3xl">Friends &amp; Referrals</h1>
               <p className="mt-1 text-sm text-[#806b87]">Your referral code, network, and recorded commissions.</p>
             </div>

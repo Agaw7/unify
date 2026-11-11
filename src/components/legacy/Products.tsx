@@ -20,7 +20,7 @@ export default function ProductsPage() {
       minHeight: "100vh",
       padding: 40,
     }}>
-      <h1>AUREVIA Products</h1>
+      <h1>AROMEVA Products</h1>
       {products.map(product => (
         <section
           key={product.name}

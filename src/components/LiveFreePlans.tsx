@@ -20,7 +20,7 @@ export default function FreePlansPage() {
   const [search, setSearch] = useState('');
   const [userId, setUserId] = useState('');
   const [productId, setProductId] = useState('');
-  const [note, setNote] = useState('Welcome to AUREVIA');
+  const [note, setNote] = useState('Welcome to AROMEVA');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -68,7 +68,7 @@ export default function FreePlansPage() {
   }
   return <main className="min-h-screen bg-[#0b1320] p-5 text-white"><div className="mx-auto max-w-4xl space-y-6">
     <Link href="/admin" className="inline-flex items-center gap-2 text-cyan-300"><ArrowLeft size={18} />Back to Admin</Link>
-    <header className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="flex items-center gap-3 text-2xl font-bold"><Gift className="text-cyan-300" />Free Welcome Plan</h1><p className="mt-2 text-slate-300">Give a member one funded investment product for free. Administrator MFA is required.</p></div><button type="button" onClick={() => { setError(''); void load(); }} disabled={loading || busy} className="flex items-center gap-2 rounded-xl border border-slate-600 px-4 py-3 disabled:opacity-50"><RefreshCw size={16} />Refresh</button></header>
+    <header className="flex flex-wrap items-center justify-between gap-4"><div><h1 className="flex items-center gap-3 text-2xl font-bold"><Gift className="text-cyan-300" />Free Welcome Plan</h1><p className="mt-2 text-slate-300">Give a member one funded investment product for free.</p></div><button type="button" onClick={() => { setError(''); void load(); }} disabled={loading || busy} className="flex items-center gap-2 rounded-xl border border-slate-600 px-4 py-3 disabled:opacity-50"><RefreshCw size={16} />Refresh</button></header>
     {error && <p role="alert" className="rounded-xl border border-red-700 bg-red-950 p-4 text-red-200">{error}</p>}
     {message && <p role="status" className="rounded-xl border border-emerald-700 bg-emerald-950 p-4 text-emerald-200">{message}</p>}
     <form onSubmit={grantPlan} className="space-y-5 rounded-2xl border border-slate-700 bg-[#10243b] p-6">

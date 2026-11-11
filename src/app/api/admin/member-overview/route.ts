@@ -38,6 +38,7 @@ export function GET(request: NextRequest) {
       const recorded = recordedWallets?.find(w => w.user_id === id);
       const direct = (invites ?? []).filter(i => i.invited_by === id && i.id !== id && accounts.has(String(i.id))).map(i => String(i.id));
       return { id, phone: accounts.get(id)?.phone ?? null, role: String(p.role), joined: String(p.created_at),
+        archived: p.role !== 'admin' && typeof accounts.get(id)?.app_metadata?.aromeva_archived_at === 'string',
         freePlan: (grants ?? []).some(g => g.user_id === id) || (funded ?? []).some(g => g.user_id === id && g.acquisition === 'free_plan'),
         invites: direct,
         recordedBalance: recordedWallets === null ? null : recorded ? walletTotal(recorded) : 0,
@@ -53,7 +54,9 @@ export function GET(request: NextRequest) {
       commissions: filter(commissions, 'beneficiary_id'), plans: filter(funded),
       inviteDeposits: transactions?.filter(t => t.kind === 'deposit' && t.status === 'completed' && members.find(m => m.id === selected)?.invites.includes(String(t.user_id))) ?? null,
     } : null;
-    const recent = [...(transactions ?? []).map((r): Record<string, unknown> => ({...r, source:'historical'}))]
+    const archivedIds = new Set(members.filter(member => member.archived).map(member => member.id));
+    const recent = (transactions ?? []).filter(row => !archivedIds.has(String(row.user_id)))
+      .map((r): Record<string, unknown> => ({...r, source:'historical'}))
       .sort((a,b) => String(b.created_at).localeCompare(String(a.created_at))).slice(0, 8);
     return json({
       members: hideRecords ? [] : members,

@@ -19,7 +19,7 @@ export default function FreePlansPage() {
   const [search, setSearch] = useState('');
   const [userId, setUserId] = useState('');
   const [productId, setProductId] = useState('');
-  const [note, setNote] = useState('Welcome to AUREVIA');
+  const [note, setNote] = useState('Welcome to AROMEVA');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');

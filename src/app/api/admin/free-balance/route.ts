@@ -100,6 +100,9 @@ export function POST(request: NextRequest) {
       p_reason: body.reason.trim(),
     });
     if (error) {
+      if (error.code === 'PGRST202') {
+        throw new MoneyError('Free Balance grants are unavailable. The database setup for grants is missing or has not loaded yet.', 503);
+      }
       const expected = [
         'Administrator required',
         'Invalid balance grant',
@@ -110,7 +113,9 @@ export function POST(request: NextRequest) {
         'Insufficient funded business rewards budget',
         'Reward budget unavailable',
       ];
-      throw new MoneyError(expected.find(message => error.message.includes(message)) ?? 'Free balance grant could not be confirmed. Refresh before retrying.', 409);
+      const knownError = expected.find(message => error.message.includes(message));
+      if (!knownError) console.error('Free Balance grant RPC failed', { code: error.code });
+      throw new MoneyError(knownError ?? 'Free balance grant could not be confirmed. Refresh before retrying.', 409);
     }
     return json(data);
   });

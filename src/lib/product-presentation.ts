@@ -1,6 +1,6 @@
 /** Display-only catalog branding; product IDs, prices and contract terms are unchanged. */
 const products: Record<string, { name: string; image: string }> = {
-  'UDM Pro Gateway': { name: 'Aurevia Golden Lantern', image: '/products/aurevia-lantern.jpg' },
+  'UDM Pro Gateway': { name: 'Aromeva Golden Lantern', image: '/products/aurevia-lantern.jpg' },
   'G5 Flex Camera': { name: 'Silk Lantern Set', image: '/products/aurevia-lantern.jpg' },
   'G5 Dome Camera': { name: 'Masala Chai Crate', image: '/products/aurevia-spiced-tea.jpg' },
   'G5 Bullet Camera': { name: 'Mexican Vanilla Pods', image: '/products/aurevia-vanilla.jpg' },

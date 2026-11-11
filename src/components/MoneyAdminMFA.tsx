@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { needsVerifiedMfaEmail } from '@/lib/mfa-readiness';
+import styles from './money-admin-mfa.module.css';
 
 export default function MoneyAdminMFA({ onVerified }: { onVerified:()=>void }) {
   const [factor,setFactor]=useState('');
@@ -80,7 +81,13 @@ export default function MoneyAdminMFA({ onVerified }: { onVerified:()=>void }) {
       <p className="text-xs text-slate-400">Confirm the email link yourself. Never share your confirmation link, enrollment QR, or authenticator code.</p>
     </form>}
     {qr && <Image unoptimized src={qr} width={200} height={200} alt="Authenticator enrollment QR code" className="bg-white"/>}
-    {factor && <form onSubmit={e=>{e.preventDefault();void verify();}} className="flex flex-wrap gap-3"><input aria-label="Authenticator code" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,'').slice(0,6))} className="min-w-0 max-w-full rounded-lg bg-slate-800 p-2"/><button disabled={busy} className="text-cyan-300">Verify code</button></form>}
+    {factor && <form onSubmit={e=>{e.preventDefault();void verify();}} className={styles.verifyForm}>
+      <label className={styles.codeLabel}>
+        Authenticator code
+        <input autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="6-digit code" required value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,'').slice(0,6))} className={styles.codeInput} />
+      </label>
+      <button type="submit" disabled={busy} className={styles.verifyButton}>Verify code</button>
+    </form>}
     {message && <p role="status">{message}</p>}
   </section>;
 }

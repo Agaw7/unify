@@ -9,31 +9,50 @@ export function GET(request:NextRequest){return handled(async()=>{
  const role=await db.from('profiles').select('role').eq('id',user.id).single();
  if(role.error || role.data?.role!=='admin')throw new MoneyError('Administrator required',403);
  const today=datePH(new Date().toISOString());
+ const accounts=await activeAuthUsers(db);
+ const archivedIds=new Set<string>();
+ let reportStart=Infinity;
+ for(const [id, account] of accounts){
+  const archivedAt=account.app_metadata?.aromeva_archived_at;
+  if(typeof archivedAt!=='string')continue;
+  archivedIds.add(id);
+  const timestamp=Date.parse(archivedAt);
+  if(Number.isFinite(timestamp))reportStart=Math.min(reportStart,timestamp);
+ }
+ const hasArchive=Number.isFinite(reportStart);
  let totalMembers=0,signupsToday=0,signinsToday=0,totalDeposits=0,depositsToday=0,verifiedDepositCount=0,pendingDeposits=0,pendingWithdrawals=0,totalWithdrawalsPaid=0,withdrawalsPaidToday=0;
  const readMembers=async()=>{
- const active = await activeAuthUsers(db);
  for(let offset=0;;offset+=500){
   const {data,error}=await db.from('profiles').select('id,role,created_at').order('id').range(offset,offset+499);
   if(error)throw new MoneyError('Unable to load live member totals',503);
   for(const p of data ?? []){
-   const authUser=active.get(p.id);
-   if (!authUser) continue;
+   const authUser=accounts.get(p.id);
+   if (!authUser || p.role!=='user' || archivedIds.has(p.id)) continue;
    totalMembers++;
    if(datePH(p.created_at)===today)signupsToday++;
-   if(p.role==='user' && authUser.last_sign_in_at && datePH(authUser.last_sign_in_at)===today)signinsToday++;
+   if(authUser.last_sign_in_at && datePH(authUser.last_sign_in_at)===today)signinsToday++;
   }
   if((data?.length ?? 0)<500)break;
  }};
  const completedDeposits=new Map<string,number>();
  const completedWithdrawals=new Map<string,number>();
  const readPayments=async()=>{for(let offset=0;;offset+=500){
-  const {data,error}=await db.from('money_transactions').select('id,kind,amount,status,created_at').order('id').range(offset,offset+499);
+  const {data,error}=await db.from('money_transactions').select('id,user_id,kind,amount,status,withdrawal_fee').order('id').range(offset,offset+499);
   if(error)throw new MoneyError('Unable to load live payment totals',503);
   for(const t of data ?? []){
    const amount=Number(t.amount);if(!Number.isSafeInteger(amount) || amount<0)throw new MoneyError('Invalid live payment amount',503);
-   if(t.kind==='deposit' && t.status==='completed'){totalDeposits+=amount;verifiedDepositCount++;completedDeposits.set(t.id,amount);}
+   if(t.kind==='deposit' && t.status==='completed' && !archivedIds.has(t.user_id)){
+    if(!hasArchive){totalDeposits+=amount;verifiedDepositCount++;}
+    completedDeposits.set(t.id,amount);
+   }
    if(t.kind==='deposit' && t.status==='pending')pendingDeposits+=amount;
-   if(t.kind==='withdrawal' && t.status==='completed'){totalWithdrawalsPaid+=amount;completedWithdrawals.set(t.id,amount);}
+   if(t.kind==='withdrawal' && t.status==='completed' && !archivedIds.has(t.user_id)){
+    const fee=Number(t.withdrawal_fee ?? 0);
+    if(!Number.isSafeInteger(fee) || fee<0 || fee>amount)throw new MoneyError('Invalid withdrawal fee',503);
+    const payout=amount-fee;
+    if(!hasArchive)totalWithdrawalsPaid+=payout;
+    completedWithdrawals.set(t.id,payout);
+   }
    if(t.kind==='withdrawal' && ['pending','reserved','approved','processing'].includes(t.status))pendingWithdrawals+=amount;
   }
   if((data?.length ?? 0)<500)break;
@@ -56,10 +75,18 @@ export function GET(request:NextRequest){return handled(async()=>{
   for(const entry of data ?? []){
    if(counted.has(entry.transaction_id))continue;
    if(entry.action==='deposit' && completedDeposits.has(entry.transaction_id)){
-    counted.add(entry.transaction_id);if(datePH(entry.created_at)===today)depositsToday+=completedDeposits.get(entry.transaction_id)!;
+    counted.add(entry.transaction_id);
+    if(hasArchive && Date.parse(entry.created_at)<reportStart)continue;
+    const amount=completedDeposits.get(entry.transaction_id)!;
+    if(hasArchive){totalDeposits+=amount;verifiedDepositCount++;}
+    if(datePH(entry.created_at)===today)depositsToday+=amount;
    }
    if(entry.action==='settle' && completedWithdrawals.has(entry.transaction_id)){
-    counted.add(entry.transaction_id);if(datePH(entry.created_at)===today)withdrawalsPaidToday+=completedWithdrawals.get(entry.transaction_id)!;
+    counted.add(entry.transaction_id);
+    if(hasArchive && Date.parse(entry.created_at)<reportStart)continue;
+    const amount=completedWithdrawals.get(entry.transaction_id)!;
+    if(hasArchive)totalWithdrawalsPaid+=amount;
+    if(datePH(entry.created_at)===today)withdrawalsPaidToday+=amount;
    }
   }
   if((data?.length ?? 0)<500)break;

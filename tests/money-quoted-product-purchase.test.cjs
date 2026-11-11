@@ -30,6 +30,52 @@ test('live quoted purchase debits real product funds once and rejects changed pr
   await q('update money_wallets set deposit_available=30000 where user_id=$1',[user]);
   assert.equal((await buyTier1(30))[0].duration_days,30);
   assert.equal(Number((await q('select reserved from money_business_budget'))[0].reserved),126500);
+  const uplines = [randomUUID(), randomUUID(), randomUUID()];
+  for (const id of uplines) {
+    await q('insert into auth.users(id) values($1)', [id]);
+    await q("insert into profiles values($1,'user')", [id]);
+  }
+  const chain = [user, ...uplines];
+  for (const [index, id] of chain.entries()) {
+    await q('insert into team_members(id,invited_by) values($1,$2)', [id, chain[index + 1] ?? null]);
+  }
+  await db.exec(fs.readFileSync('database/52_purchase_referral_commissions.sql','utf8'));
+  await q("select money_business_fund($1,200000,$2,'PURCHASE-COMMISSION-FUND','wallet_live',1000000)",[admin,randomUUID()]);
+  await q('update money_wallets set deposit_available=80000 where user_id=$1',[user]);
+  assert.equal((await q('select * from money_referral_commissions')).length,0);
+  const tierKey=randomUUID();
+  const purchaseTier=()=>q('select * from money_investment_purchase_quoted($1,$2,$3,30000,3000,30)',[user,tier1,tierKey]);
+  await Promise.all([purchaseTier(),purchaseTier()]);
+  await q('select money_referrals_backfill()');
+  const commissions=await q('select amount,status,deposit_id,purchase_id from money_referral_commissions order by level');
+  assert.deepEqual(commissions.map(c=>[Number(c.amount),c.status,c.deposit_id]),[[5400,'paid',null],[900,'paid',null],[300,'paid',null]]);
+  assert.equal(new Set(commissions.map(c=>c.purchase_id)).size,1);
+  for (const [index,id] of uplines.entries()) {
+    assert.equal(Number((await q('select available from money_wallets where user_id=$1',[id]))[0].available),[5400,900,300][index]);
+  }
+  await q('update money_business_budget set available=90000');
+  await buyTier1(30);
+  assert.equal((await q("select * from money_referral_commissions where status='pending'")).length,3);
+  await q('update money_business_budget set available=6600');
+  await q('select money_pay_purchase_commissions()');
+  await q('select money_pay_purchase_commissions()');
+  assert.equal((await q("select * from money_referral_commissions where status='paid'")).length,6);
+  assert.equal(Number((await q("select count(*) n from money_ledger where action='referral_commission'"))[0].n),6);
+  await db.exec(fs.readFileSync('database/58_sixty_day_market_tiers.sql','utf8'));
+  const totals = await q('select daily_income * duration_days as total, duration_days from investment_products where name = any($1::text[]) order by price', [names]);
+  assert.deepEqual(totals.map(tier => [tier.duration_days, Number(tier.total)]), [
+    [60, 1800], [60, 5040], [60, 9960], [60, 20400], [60, 34560], [60, 59400], [60, 119520],
+  ]);
+  assert.equal((await purchaseTier())[0].duration_days, 30);
+  await assert.rejects(buyTier1(30), /Product terms changed/);
+  await q('update money_wallets set deposit_available=30000 where user_id=$1', [user]);
+  await q('update money_business_budget set available=179999');
+  await assert.rejects(buyTier1(60), /Insufficient funded business rewards budget/);
+  await q('update money_business_budget set available=190000');
+  const [budgetBefore] = await q('select reserved from money_business_budget');
+  assert.equal((await buyTier1(60))[0].duration_days, 60);
+  const [budgetAfter] = await q('select reserved from money_business_budget');
+  assert.equal(Number(budgetAfter.reserved) - Number(budgetBefore.reserved), 180000);
   await db.exec('set role authenticated');await assert.rejects(buy(),/permission denied/);await db.exec('reset role');
  }finally{await db.close();}
 });

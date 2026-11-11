@@ -142,7 +142,7 @@ export default function SafeWalletPage() {
       padding: "40px 20px",
     }}>
       <div style={{ maxWidth: 680, margin: "auto" }}>
-        <h1>AUREVIA Wallet</h1>
+        <h1>AROMEVA Wallet</h1>
         
         <section style={card}>
           <p>Available Balance</p>

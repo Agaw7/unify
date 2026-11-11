@@ -174,7 +174,7 @@ export default function AdminPage() {
       <header className="admin-header">
         <ShieldCheck size={30} />
         <div>
-          <h1>AUREVIA Admin</h1>
+          <h1>AROMEVA Admin</h1>
           <p>Management Dashboard</p>
           <Link href="/admin/money" style={{ color: '#93c5fd' }}>PHP payment operations</Link>
           {adminPhone && (

@@ -21,7 +21,7 @@ export default function MemberVerification({reviews,recipients,onRefresh}:{revie
   const field='mt-1 w-full min-w-0 rounded-lg border border-slate-600 bg-slate-900 p-3 text-white';
   return <section id="verification" className="space-y-4 rounded-xl border border-slate-700 p-5">
     <h2 className="text-xl font-semibold">Withdrawal identity and recipient verification</h2>
-    <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-300"><li>Contact AUREVIA support through your established secure channel to arrange manual review.</li><li>Provide the requested identity or wallet ownership evidence through that channel and obtain a case reference.</li><li>Submit that reference below. An independent administrator checks the evidence before deciding.</li></ol>
+    <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-300"><li>Contact AROMEVA support through your established secure channel to arrange manual review.</li><li>Provide the requested identity or wallet ownership evidence through that channel and obtain a case reference.</li><li>Submit that reference below. An independent administrator checks the evidence before deciding.</li></ol>
     <p className="text-sm text-amber-200">Do not enter ID numbers, passwords, OTPs, document links, or upload identity documents here. A case reference alone does not verify your account.</p>
     {error && <p role="alert" className="text-red-200">{error}</p>}{notice && <p role="status" className="text-cyan-200">{notice}</p>}
     <form onSubmit={e=>void submit(e)} className="space-y-4">

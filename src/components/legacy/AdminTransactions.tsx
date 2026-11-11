@@ -279,7 +279,7 @@ async function approveWithdrawal(id: string, source: Withdrawal['source']) {
       }}
     >
       <h1 style={{ fontSize: 28, marginBottom: 8 }}>
-        AUREVIA Admin Transactions
+        AROMEVA Admin Transactions
       </h1>
 
       <p style={{ color: "#9BAFC7", marginBottom: 24 }}>

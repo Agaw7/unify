@@ -12,4 +12,4 @@ export function WelcomeArtwork(){return <svg viewBox="0 0 200 180" fill="none" a
  <ellipse cx="85" cy="139" rx="5" ry="3" fill="#EDBED3"/><ellipse cx="118" cy="139" rx="5" ry="3" fill="#EDBED3"/>
  <path d="M37 36V47M31.5 41.5H42.5M158 126V139M151.5 132.5H164.5" stroke="#BC89BD" strokeWidth="3" strokeLinecap="round"/>
  </svg>;}
-export default function ThemeWelcome(){return <aside className="theme-welcome" aria-label="Welcome to AUREVIA"><span className="theme-kicker">A FRESH LOOK. THE SAME AUREVIA.</span><h2>A little space<br/>for your<br/><em>next chapter.</em></h2><p>Your products, wallet and community, together in one welcoming place.</p><div className="theme-welcome-art"><WelcomeArtwork/></div></aside>;}
+export default function ThemeWelcome(){return <aside className="theme-welcome" aria-label="Welcome to AROMEVA"><span className="theme-kicker">A FRESH LOOK. THE SAME AROMEVA.</span><h2>A little space<br/>for your<br/><em>next chapter.</em></h2><p>Your products, wallet and community, together in one welcoming place.</p><div className="theme-welcome-art"><WelcomeArtwork/></div></aside>;}

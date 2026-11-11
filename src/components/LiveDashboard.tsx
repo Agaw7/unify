@@ -101,7 +101,7 @@ export default function LiveDashboard() {
       <div className="mx-auto min-h-screen max-w-[1100px] px-4 py-5 pb-28 sm:px-7 lg:px-10">
           <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold tracking-[0.24em] text-teal-500">AUREVIA MEMBER AREA</p>
+              <p className="text-xs font-bold tracking-[0.24em] text-teal-500">AROMEVA MEMBER AREA</p>
               <h1 className="mt-2 text-2xl font-bold text-[#48204f] sm:text-3xl">
                 {activeTab === 'home' ? 'Member Dashboard' : activeTab === 'tier' ? 'My Tier' : activeTab === 'market' ? 'Market' : activeTab === 'friends' ? 'Friends' : 'Profile'}
               </h1>
@@ -180,7 +180,7 @@ export default function LiveDashboard() {
               <button type="button" onClick={() => setActiveTab('market')} className="inline-flex items-center gap-2 rounded-full border border-[#eadff0] bg-[#fffaff] px-4 py-2 text-sm font-semibold text-[#54265e]">View All <span aria-hidden="true">›</span></button>
             </div>
             <div className="mt-4 rounded-2xl bg-gradient-to-r from-[#f1e5f6] via-[#f9eaf2] to-[#fff3df] p-4">
-              <p className="font-semibold text-[#54265e]">Explore the AUREVIA tier catalog</p>
+              <p className="font-semibold text-[#54265e]">Explore the AROMEVA tier catalog</p>
               <p className="mt-1 text-sm text-[#775d80]">Plan availability and terms are shown in Market. Purchases remain subject to current authorization settings.</p>
               <button type="button" onClick={() => setActiveTab('market')} className="mt-3 inline-flex rounded-xl bg-[#54265e] px-4 py-2 text-sm font-semibold text-white">Explore Market</button>
             </div>

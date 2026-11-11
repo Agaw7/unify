@@ -73,7 +73,7 @@ export default function TeamPage({
     <div className="team-page">
       <div className="page-heading">
         <h2>My Team</h2>
-        <p>Invite friends to explore AUREVIA.</p>
+        <p>Invite friends to explore AROMEVA.</p>
       </div>
 
       <section className="team-panel">

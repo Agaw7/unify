@@ -12,7 +12,7 @@ function schemaNotReady(error: { code?: string; message?: string }) {
 
 export function GET(request: NextRequest) {
   return handled(async () => {
-    const { db } = await authenticate(request, 'role-only');
+    const { db, user } = await authenticate(request, 'role-only');
     if (request.nextUrl.searchParams.get('hideRecords') === 'true') {
       return json({
         transactions: [],
@@ -56,6 +56,9 @@ export function GET(request: NextRequest) {
         const payout = payoutDetails.get(transaction.id);
         return {
           ...transaction,
+          canReject: ['reserved', 'approved'].includes(transaction.status) && transaction.user_id !== user.id,
+          canRecordPayout: ['approved', 'processing'].includes(transaction.status) &&
+            transaction.user_id !== user.id && Boolean(transaction.reviewed_by),
           payout_confirmed_at: payout?.payout_confirmed_at ?? null,
           hasPayoutProof: Boolean(payout?.payout_proof_path),
           member: members[transaction.user_id] ?? { phone: null, name: null },

@@ -62,7 +62,7 @@ export default function AdminUsersPage() {
         <header style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
           <div>
             <h1 style={{ display: "flex", gap: 10, alignItems: "center" }}><Users /> User Management</h1>
-            <p style={{ color: "#9BB5D1" }}>Registered AUREVIA members (read-only)</p>
+            <p style={{ color: "#9BB5D1" }}>Registered AROMEVA members (read-only)</p>
           </div>
           <button type="button" onClick={() => void loadMembers()} disabled={refreshing}
             style={{ padding: "10px 14px", background: "#00C8F8", color: "#061526", border: 0, borderRadius: 9, fontWeight: 700, cursor: "pointer", display: "flex", gap: 8, alignItems: "center" }}>

@@ -12,9 +12,8 @@ type Transaction = { id: string; kind: string; amount: number; status: string; c
 type ProfileData = {
   wallet: { available: number };
   totalEarned: number | null;
-  transactions: Transaction[];
 };
-type Panel = 'Transaction history' | 'Cash-out history' | 'About us' | 'Change password' | 'Edit profile';
+type Panel = 'Transaction history' | 'Top-up history' | 'Cash-out history' | 'About us' | 'Change password' | 'Edit profile';
 const php = (amount: number | null | undefined) => Number.isSafeInteger(amount)
   ? formatPhp(amount! / 100)
   : '—';
@@ -33,7 +32,7 @@ const transactionLabels: Record<string, string> = {
   admin_balance_grant: 'Wallet balance grant',
 };
 
-function TransactionHistory() {
+function TransactionHistory({ kind }: { kind?: 'deposit' | 'withdrawal' }) {
   const [cursor, setCursor] = useState<string | null>(null);
   const [entries, setEntries] = useState<Transaction[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -44,6 +43,7 @@ function TransactionHistory() {
   useEffect(() => {
     let active = true;
     const query = new URLSearchParams({ summary: 'history' });
+    if (kind) query.set('kind', kind);
     if (cursor) query.set('before', cursor);
     void moneyRequest(`/api/money?${query}`).then((result: {
       entries: Transaction[]; nextCursor: string | null;
@@ -55,7 +55,7 @@ function TransactionHistory() {
       if (active) setError(failure instanceof Error ? failure.message : 'Unable to load transaction history.');
     }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [cursor, retry]);
+  }, [cursor, retry, kind]);
 
   return <div aria-busy={loading}>
     {entries.map(entry => <article className="member-cashout" key={entry.id}>
@@ -105,15 +105,15 @@ async function passwordMfaFactor() {
   return factor.id;
 }
 
-export default function MemberProfile({ contact, name, verified, onBank, onLogout }: {
-  contact: string; name?: string | null; verified: boolean; onBank: () => void; onLogout: () => void;
+export default function MemberProfile({ contact, name, verified, onBank, onLogout, initialPanel = null }: {
+  contact: string; name?: string | null; verified: boolean; onBank: () => void; onLogout: () => void; initialPanel?: Panel | null;
 }) {
   const [data, setData] = useState<ProfileData | null>(null);
   const [error, setError] = useState('');
   const [displayName, setDisplayName] = useState(name ?? '');
   const [showContact, setShowContact] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
-  const [panel, setPanel] = useState<Panel | null>(null);
+  const [panel, setPanel] = useState<Panel | null>(initialPanel);
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
   const [checkingMfa, setCheckingMfa] = useState(false);
@@ -148,7 +148,7 @@ export default function MemberProfile({ contact, name, verified, onBank, onLogou
   }, []);
 
   const phone = /^(?:\+?63|0)(\d{3})\d{3}(\d{4})$/.exec(contact);
-  const member = displayName.trim() || (phone ? `AUREVIA ${phone[2]}` : 'AUREVIA Member');
+  const member = displayName.trim() || (phone ? `AROMEVA ${phone[2]}` : 'AROMEVA Member');
   const maskedContact = phone ? `+63 ${phone[1]}***${phone[2]}` : '••••••';
   const amount = (value: number | null | undefined) => showBalance ? php(value) : '••••';
   const open = (next: Panel) => {
@@ -161,11 +161,11 @@ export default function MemberProfile({ contact, name, verified, onBank, onLogou
   const rows = [
     { title: 'History', items: [
       { label: 'Transaction history', icon: BookOpen, action: () => open('Transaction history') },
-      { label: 'Top-up history', icon: BookOpen, href: '/deposit/history' },
+      { label: 'Top-up history', icon: BookOpen, action: () => open('Top-up history') },
       { label: 'Cash-out history', icon: BookOpen, action: () => open('Cash-out history') },
     ] },
     { title: 'Services', items: [
-      { label: 'Customer service', icon: Headphones, href: 'https://t.me/+q6uAIuQt50VlMjBl' },
+      { label: 'Customer service · @aromevacs', icon: Headphones, href: 'https://t.me/aromevacs' },
       { label: 'About us', icon: Info, action: () => open('About us') },
     ] },
     { title: 'Settings', items: [
@@ -215,15 +215,9 @@ export default function MemberProfile({ contact, name, verified, onBank, onLogou
     <button type="button" className="member-profile-back" disabled={busy} onClick={() => setPanel(null)}>← Back to Profile</button>
     <h2>{panel}</h2>
     {panel === 'Transaction history' && <TransactionHistory />}
-    {panel === 'About us' && <p>AUREVIA brings your tier plans, wallet, and rewards together in one account.</p>}
-    {panel === 'Cash-out history' && <>
-      {error && <p role="alert">{error}</p>}
-      {!data && !error && <p>Loading cash-out history…</p>}
-      {data && !data.transactions.some(entry => entry.kind === 'withdrawal') && <p>No recent cash-outs.</p>}
-      {data?.transactions.filter(entry => entry.kind === 'withdrawal').map(entry => <article className="member-cashout" key={entry.id}>
-        <strong>{php(entry.amount)}</strong><span>{entry.status.replaceAll('_', ' ')}</span><small>{new Date(entry.created_at).toLocaleString()}</small>
-      </article>)}
-    </>}
+    {panel === 'Top-up history' && <TransactionHistory kind="deposit" />}
+    {panel === 'About us' && <p>AROMEVA brings your tier plans, wallet, and rewards together in one account.</p>}
+    {panel === 'Cash-out history' && <TransactionHistory kind="withdrawal" />}
     {(panel === 'Edit profile' || panel === 'Change password') && <form onSubmit={save}>
       {panel === 'Edit profile' ? <label>Display name<input name="name" defaultValue={displayName} maxLength={60} required /></label> : <>
         <PasswordField label="Current password" name="current" autoComplete="current-password" />

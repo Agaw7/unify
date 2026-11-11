@@ -1,10 +1,12 @@
 'use client';
 
 import { formatPhp } from '@/lib/format-php';
+import { withdrawalPayout } from '@/lib/withdrawal-fee';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { Check, Copy, ImagePlus, RefreshCw, ShieldAlert, X } from 'lucide-react';
+import { Check, Copy, RefreshCw, ShieldAlert, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import MoneyAdminMFA from './MoneyAdminMFA';
 import styles from './withdrawal-management.module.css';
 
 type Status = 'reserved' | 'approved' | 'processing' | 'rejected' | 'failed' | 'completed';
@@ -18,19 +20,22 @@ type Withdrawal = {
   created_at: string;
   destination_snapshot: { name?: string; number?: string; bic?: string } | null;
   reviewed_by: string | null;
+  canRecordPayout: boolean;
+  canReject: boolean;
   payout_confirmed_at: string | null;
   hasPayoutProof: boolean;
   member: { phone: string | null; name: string | null };
 };
 type State = { transactions: Withdrawal[]; canConfirmPayout: boolean; recordsHidden?: boolean };
-type Tab = 'Pending' | 'Approved' | 'Rejected' | 'Completed';
+const tabs = ['Pending', 'Approved', 'Rejected'] as const;
+type Tab = typeof tabs[number];
 
 const currency = (cents: number) => formatPhp(cents / 100);
 const paymentMethod = (method: string) => ({ gotyme: 'GoTyme Bank', gcash: 'GCash', maya: 'Maya' }[method] ?? method);
 const dateTime = (value: string) => new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' });
-const getTab = (status: Status): Tab => status === 'reserved' ? 'Pending'
-  : status === 'approved' || status === 'processing' ? 'Approved'
-    : status === 'rejected' || status === 'failed' ? 'Rejected' : 'Completed';
+const getTab = (status: Status): Tab | null => status === 'reserved' || status === 'approved' || status === 'processing' ? 'Pending'
+  : status === 'completed' ? 'Approved'
+    : status === 'rejected' || status === 'failed' ? 'Rejected' : null;
 
 async function request(path: string, init?: RequestInit) {
   const { data, error } = await supabase.auth.getSession();
@@ -51,9 +56,9 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
   const [data, setData] = useState<State | null>(null);
   const [tab, setTab] = useState<Tab>('Pending');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [proof, setProof] = useState<File | null>(null);
-  const [confirm, setConfirm] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState('');
+  const [reviewReason, setReviewReason] = useState('');
+  const [activeAction, setActiveAction] = useState<'payout' | 'reject' | null>(null);
+  const [mfaRequired, setMfaRequired] = useState(false);
   const [savedProofUrl, setSavedProofUrl] = useState('');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -64,7 +69,7 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
     setLoading(true);
     setError('');
     try {
-      const response = await request('/api/admin/withdrawals?hideRecords=true');
+      const response = await request('/api/admin/withdrawals');
       setData(await response.json());
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to load withdrawals.');
@@ -74,24 +79,18 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => {
-    if (!proof) { setPreviewUrl(''); return; }
-    const url = URL.createObjectURL(proof);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [proof]);
 
   const records = useMemo(() => data?.transactions ?? [], [data?.transactions]);
   const selected = records.find(item => item.id === selectedId) ?? null;
+  const canOpenPayout = selected?.canRecordPayout || (selected?.status === 'reserved' && selected.canReject);
   const visible = records.filter(item => getTab(item.status) === tab);
   const counts = useMemo(() => ({
     Pending: records.filter(item => getTab(item.status) === 'Pending').length,
     Approved: records.filter(item => getTab(item.status) === 'Approved').length,
     Rejected: records.filter(item => getTab(item.status) === 'Rejected').length,
-    Completed: records.filter(item => getTab(item.status) === 'Completed').length,
   }), [records]);
   const fee = selected?.withdrawal_fee ?? 0;
-  const payout = selected ? selected.amount - fee : 0;
+  const payout = selected ? withdrawalPayout(selected) : 0;
 
   useEffect(() => {
     let active = true;
@@ -111,18 +110,6 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
     return () => { active = false; if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [selected?.id, selected?.hasPayoutProof]);
 
-  function chooseProof(file?: File) {
-    setError('');
-    setNotice('');
-    if (!file) { setProof(null); return; }
-    if (!['image/png', 'image/jpeg'].includes(file.type) || file.size < 8 || file.size > 5 * 1024 * 1024) {
-      setError('Choose a PNG, JPG, or JPEG screenshot up to 5 MB.');
-      setProof(null);
-      return;
-    }
-    setProof(file);
-  }
-
   async function copyAccountNumber() {
     const number = selected?.destination_snapshot?.number;
     if (!number) return;
@@ -135,33 +122,71 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
   }
 
   async function confirmPayout() {
-    if (!selected || !proof || !confirm || !data?.canConfirmPayout || selected.status !== 'processing') return;
-    if (!window.confirm(`Confirm that you independently verified this completed transfer in the official account history and sent ${currency(payout)} to the recipient?`)) return;
+    if (!selected || busy || mfaRequired || !data?.canConfirmPayout || !selected.canRecordPayout) return;
     setBusy(true);
     setError('');
     setNotice('');
     try {
-      const form = new FormData();
-      form.set('proof', proof);
-      form.set('confirm', 'true');
-      await request(`/api/admin/withdrawals/${encodeURIComponent(selected.id)}`, { method: 'POST', body: form });
-      setNotice('Payout confirmation recorded. The withdrawal is now completed.');
-      setProof(null);
-      setConfirm(false);
+      await request('/api/admin/withdrawals/' + encodeURIComponent(selected.id), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'confirm_sent' }),
+      });
+      setNotice('Payout recorded. The withdrawal is now in Approved.');
+      setTab('Approved');
+      setSelectedId(null);
+      setActiveAction(null);
       await load();
       onCompleted();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Unable to confirm payout.');
+      if (cause instanceof Error && cause.message === 'Administrator MFA required') {
+        setMfaRequired(true);
+      } else {
+        setError(cause instanceof Error ? cause.message : 'Unable to confirm payout.');
+        await load();
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function reviewWithdrawal(action: 'approve' | 'reject') {
+    if (!selected || busy || reviewReason.trim().length < 5) return;
+    if (action === 'approve' && (selected.status !== 'reserved' || !data?.canConfirmPayout)) return;
+    if (action === 'reject' && !selected.canReject) return;
+    setBusy(true);
+    setError('');
+    setNotice('');
+    try {
+      await request('/api/admin/money', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: selected.id, action, reason: reviewReason.trim() }),
+      });
+      setReviewReason('');
+      if (action === 'reject') {
+        setSelectedId(null);
+        setActiveAction(null);
+        setTab('Rejected');
+        setNotice('Withdrawal rejected. The reserved amount was returned to the member.');
+      } else {
+        setNotice('Review recorded. You can now record the verified payout.');
+      }
       await load();
+      onCompleted();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Unable to update the withdrawal.');
     } finally {
       setBusy(false);
     }
   }
 
   function closeDetails() {
+    if (busy) return;
     setSelectedId(null);
-    setProof(null);
-    setConfirm(false);
+    setReviewReason('');
+    setActiveAction(null);
+    setMfaRequired(false);
     setSavedProofUrl('');
     setNotice('');
     setError('');
@@ -175,25 +200,28 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
     <section className={styles.records} aria-label="Withdrawal records">
       <h3>Withdrawal Records</h3>
       <div className={styles.tabs} role="tablist" aria-label="Withdrawal status">
-        {(['Pending', 'Approved', 'Rejected', 'Completed'] as const).map(item =>
+        {tabs.map(item =>
           <button type="button" role="tab" aria-selected={tab === item} key={item} onClick={() => setTab(item)}>{item}{data?.recordsHidden ? '' : ` (${counts[item]})`}</button>)}
       </div>
-      {error && <p className={styles.error} role="alert">{error}</p>}
-      {notice && <p className={styles.notice} role="status">{notice}</p>}
-      <div className={styles.tableWrap}>
-        <table>
-          <thead><tr><th>Member</th><th>Phone</th><th>Bank / Wallet</th><th>Account Number</th><th>Amount</th><th>Date Requested</th><th>Action</th></tr></thead>
-          <tbody>{!data?.recordsHidden && visible.map(item => <tr key={item.id}>
-            <td>{item.member.name ?? item.destination_snapshot?.name ?? `Member ${item.user_id.slice(0, 8)}`}</td>
-            <td>{item.member.phone ?? '—'}</td>
-            <td>{paymentMethod(item.method)}</td>
-            <td>{item.destination_snapshot?.number ?? 'Unavailable'}</td>
-            <td>{currency(item.amount)}</td>
-            <td>{dateTime(item.created_at)}</td>
-            <td><button type="button" className={styles.viewButton} onClick={() => { setError(''); setNotice(''); setProof(null); setConfirm(false); setSelectedId(item.id); }}>View Details</button></td>
-          </tr>)}
-          {(!visible.length || data?.recordsHidden) && <tr><td colSpan={7} className={styles.empty}>{loading ? 'Loading withdrawals…' : data?.recordsHidden ? 'Withdrawal records are hidden on this dashboard. Stored records are unchanged.' : `No ${tab.toLowerCase()} withdrawals.`}</td></tr>}</tbody>
-        </table>
+      {!selected && error && <p className={styles.error} role="alert">{error}</p>}
+      {!selected && notice && <p className={styles.notice} role="status">{notice}</p>}
+      <div className={styles.paymentCardList}>
+        {!data?.recordsHidden && visible.map(item => (
+          <article className={styles.paymentCard} key={item.id}>
+            <div className={styles.recordId}>
+              <strong className={styles.paymentCardAmount}>{currency(item.amount)}</strong>
+              <span className={`${styles.status} ${tab === 'Approved' ? styles.statusDone : tab === 'Rejected' ? styles.statusRejected : ''}`}>{tab}</span>
+            </div>
+            <p><strong>{item.member.name ?? item.destination_snapshot?.name ?? `Member ${item.user_id.slice(0, 8)}`}</strong> · {dateTime(item.created_at)}</p>
+            <p>Phone {item.member.phone ?? 'Unavailable'} · {paymentMethod(item.method)}</p>
+            <p>Receiving account {item.destination_snapshot?.number ?? 'Unavailable'}</p>
+            <p>Request WD-{item.id.slice(0, 8).toUpperCase()}</p>
+            <p>Withdrawal fee {currency(item.withdrawal_fee ?? 0)}</p>
+            {tab !== 'Rejected' && <p>{tab === 'Approved' ? 'Amount received' : 'Expected payout'} <strong>{currency(withdrawalPayout(item))}</strong></p>}
+            <button type="button" className={styles.viewButton} onClick={() => { setError(''); setNotice(''); setActiveAction(null); setSelectedId(item.id); }}>View withdrawal details</button>
+          </article>
+        ))}
+        {(!visible.length || data?.recordsHidden) && <p className={styles.empty}>{loading ? 'Loading withdrawals…' : data?.recordsHidden ? 'Withdrawal records are hidden on this dashboard. Stored records are unchanged.' : `No ${tab.toLowerCase()} withdrawals.`}</p>}
       </div>
     </section>
 
@@ -201,6 +229,8 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
       <aside className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="withdrawal-details-title">
         <header className={styles.drawerHeader}><h2 id="withdrawal-details-title">Withdrawal Details</h2><button type="button" aria-label="Close withdrawal details" onClick={closeDetails}><X size={19} /></button></header>
         <div className={styles.drawerBody}>
+          {error && <p className={styles.error} role="alert">{error}</p>}
+          {notice && <p className={styles.notice} role="status">{notice}</p>}
           <section className={styles.detailCard}>
             <div className={styles.recordId}><strong>WD-{selected.id.slice(0, 8).toUpperCase()}</strong><span className={`${styles.status} ${selected.status === 'completed' ? styles.statusDone : selected.status === 'rejected' || selected.status === 'failed' ? styles.statusRejected : ''}`}>{selected.status}</span></div>
             <dl>
@@ -220,19 +250,38 @@ export default function WithdrawalManagement({ onCompleted }: { onCompleted: () 
 
           {selected.hasPayoutProof && savedProofUrl && <section className={styles.detailCard}><h3>Payment Screenshot</h3><Image className={styles.savedProof} src={savedProofUrl} alt="Private payout confirmation screenshot" width={640} height={420} unoptimized /></section>}
 
-          {selected.status === 'processing' && !selected.hasPayoutProof && <section className={styles.confirmCard}>
+          {activeAction === null && (canOpenPayout || selected.canReject) && <div className={styles.drawerActions}>
+            {canOpenPayout && <button type="button" className={styles.approveButton} onClick={() => setActiveAction('payout')}>Confirm Manual Payout</button>}
+            {selected.canReject && <button type="button" className={styles.rejectButton} onClick={() => setActiveAction('reject')}>Reject Withdrawal</button>}
+          </div>}
+          {activeAction === 'reject' && selected.canReject && <form className={styles.confirmCard} onSubmit={event => { event.preventDefault(); void reviewWithdrawal('reject'); }}>
+            <label className={styles.uploadLabel} htmlFor="withdrawal-rejection-reason">Rejection reason</label>
+            <textarea id="withdrawal-rejection-reason" className={styles.reviewReason} value={reviewReason} onChange={event => setReviewReason(event.target.value)} minLength={5} maxLength={500} required disabled={busy} />
+            <div className={styles.drawerActions}>
+              <button type="button" className={styles.cancelButton} disabled={busy} onClick={() => { setActiveAction(null); setReviewReason(''); }}>Back</button>
+              <button type="submit" className={styles.rejectButton} disabled={busy || reviewReason.trim().length < 5}>{busy ? 'Rejecting…' : 'Confirm Rejection'}</button>
+            </div>
+          </form>}
+          {activeAction === 'payout' && selected.canRecordPayout && !selected.hasPayoutProof && <section className={styles.confirmCard}>
             <h3>Confirm Manual Payout</h3>
-            <p>Only confirm after independently checking the successful transfer in the official bank or e-wallet transaction history. A screenshot alone is not proof of settlement.</p>
-            {!data?.canConfirmPayout && <p className={styles.lockNotice}><ShieldAlert size={16} /> Payout completion is locked pending independently verified authorization.</p>}
-            <label className={styles.uploadLabel} htmlFor="payout-proof">Upload Payment Screenshot <span>*</span></label>
-            <input id="payout-proof" className={styles.fileInput} type="file" accept="image/png,image/jpeg,.jpg,.jpeg" onChange={event => chooseProof(event.target.files?.[0])} disabled={busy} />
-            {previewUrl ? <div className={styles.previewWrap}><Image src={previewUrl} alt="Selected payout screenshot preview" width={640} height={420} unoptimized /><div><span>{proof?.name}</span><button type="button" onClick={() => setProof(null)} disabled={busy}>Remove</button><label htmlFor="payout-proof">Replace</label></div></div>
-              : <label className={styles.dropzone} htmlFor="payout-proof"><ImagePlus size={27} /><strong>Upload proof of payment</strong><small>PNG, JPG, or JPEG (Max 5 MB)</small></label>}
-            <label className={styles.checkbox}><input type="checkbox" checked={confirm} onChange={event => setConfirm(event.target.checked)} disabled={busy} /><span>I confirm that the money has been sent successfully and verified in the official account history.</span></label>
-            <div className={styles.drawerActions}><button type="button" className={styles.cancelButton} onClick={closeDetails} disabled={busy}>Cancel</button><button type="button" className={styles.approveButton} onClick={() => void confirmPayout()} disabled={busy || !proof || !confirm || !data?.canConfirmPayout}><Check size={16} />{busy ? 'Recording…' : 'Approve Withdrawal'}</button></div>
+            {!data?.canConfirmPayout && <p className={styles.lockNotice}><ShieldAlert size={16} /> Manual payout confirmation is unavailable in the current payment configuration.</p>}
+            {mfaRequired && <div>
+              <p>Verify your authenticator, then select Confirm Manual Payout again.</p>
+              <MoneyAdminMFA onVerified={() => setMfaRequired(false)} />
+            </div>}
+            <div className={styles.drawerActions}><button type="button" className={styles.cancelButton} onClick={closeDetails} disabled={busy}>Cancel</button><button type="button" className={styles.approveButton} onClick={() => void confirmPayout()} disabled={busy || mfaRequired || !data?.canConfirmPayout}><Check size={16} />{busy ? 'Recording…' : 'Confirm Manual Payout'}</button></div>
           </section>}
-          {selected.status === 'reserved' && <p className={styles.lockNotice}><ShieldAlert size={16} /> This request is awaiting admin review. It must be independently approved and claimed for manual processing before payout confirmation.</p>}
-          {selected.status === 'approved' && <p className={styles.lockNotice}><ShieldAlert size={16} /> Approved for processing; confirm the transfer only after it has been sent and the status moves to processing.</p>}
+          {activeAction === 'payout' && selected.status === 'reserved' && <form className={styles.confirmCard} onSubmit={event => { event.preventDefault(); void reviewWithdrawal('approve'); }}>
+            <h3>Approve Withdrawal Review</h3>
+            <p>Review the amount and receiving account before approving the request.</p>
+            <label className={styles.uploadLabel} htmlFor="withdrawal-review-reason">Review reason</label>
+            <textarea id="withdrawal-review-reason" className={styles.reviewReason} value={reviewReason} onChange={event => setReviewReason(event.target.value)} minLength={5} maxLength={500} required disabled={busy} />
+            <div className={styles.drawerActions}>
+              <button type="button" className={styles.cancelButton} disabled={busy} onClick={() => { setActiveAction(null); setReviewReason(''); }}>Back</button>
+              <button type="submit" className={styles.approveButton} disabled={busy || !data?.canConfirmPayout || reviewReason.trim().length < 5}><Check size={16} />{busy ? 'Saving…' : 'Approve Review'}</button>
+            </div>
+          </form>}
+          {['approved', 'processing'].includes(selected.status) && !selected.canRecordPayout && <p className={styles.lockNotice}>Payout confirmation is available for reviewed withdrawals belonging to another member.</p>}
         </div>
       </aside>
     </div>}

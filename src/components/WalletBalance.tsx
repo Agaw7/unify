@@ -31,7 +31,7 @@ export default function WalletBalance() {
       return;
     }
 
-    // Fetch balance from AUREVIA Supabase database.
+    // Fetch balance from AROMEVA Supabase database.
     const { data, error: walletError } = await supabase
       .from("wallet_accounts")
       .select("balance, currency")
@@ -55,7 +55,7 @@ export default function WalletBalance() {
   return (
     <div className="rounded-xl bg-slate-900 p-6 text-white">
       <p className="text-sm text-gray-400">
-        AUREVIA Wallet Balance
+        AROMEVA Wallet Balance
       </p>
 
       {loading ? (

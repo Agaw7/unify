@@ -1,14 +1,18 @@
 import { NextRequest } from 'next/server';
+import { isWithdrawalOpen, withdrawalHoursMessage } from '@/lib/withdrawal-hours';
 import { authenticate, handled, json, MoneyError, rpc } from '@/lib/money-server';
 import { centavos, record, uuid } from '@/lib/money-validation';
 import { requireProductionApproval } from '@/lib/money-server';
 import { productionPaymentsAuthorized } from '@/lib/payment-readiness';
 
 export const runtime = 'nodejs';
+const manualWithdrawalsEnabled = () => process.env.MANUAL_GOTYME_WITHDRAWALS_ENABLED === 'true';
 export function GET(request: NextRequest) {
   return handled(async () => {
     const { db, user } = await authenticate(request);
     if (request.nextUrl.searchParams.get('summary') === 'history') {
+      const kind = request.nextUrl.searchParams.get('kind');
+      if (kind !== null && kind !== 'deposit' && kind !== 'withdrawal') throw new MoneyError('Invalid transaction type');
       const cursor = request.nextUrl.searchParams.get('before');
       const [createdAt, id, extra] = cursor?.split('|') ?? [];
       if (cursor !== null && (!createdAt || !uuid(id) || extra !== undefined ||
@@ -22,6 +26,7 @@ export function GET(request: NextRequest) {
         .select('id,kind,amount,status,created_at').eq('user_id', user.id)
         .order('created_at', { ascending: false }).order('id', { ascending: false })
         .limit(pageSize + 1);
+      if (kind) query = query.eq('kind', kind);
       if (createdAt && id) {
         query = query.or(`created_at.lt.${createdAt},and(created_at.eq.${createdAt},id.lt.${id})`);
       }
@@ -78,7 +83,9 @@ export function GET(request: NextRequest) {
         if (data.length < 500) break;
       }
     }
-    return json({ manualPalawan:process.env.MANUAL_PALAWAN_DEPOSITS_ENABLED==='true', manualGoTyme:process.env.MANUAL_GOTYME_WITHDRAWALS_ENABLED==='true', enabled:false, payoutsEnabled:false, totalEarned, wallet: results[0].data ?? { available:0,deposit_available:0,reserved:0,held:0,debt:0,currency:'PHP' }, automaticRegistrationBonus:Boolean(results[9].data), registrationBonusGranted:Boolean(results[8].data), registrationBonusReclaimed:Boolean(results[8].data?.revoked_at), legacyDestinations:results[10].data, transactions:results[1].data, destinations:results[2].data, customer:results[3].data,verifications:results[4].data,ready:results[5].data,depositReady:results[6].data,withdrawalMode:results[7].data?.withdrawal_mode });
+    const withdrawalMode = results[7].data?.withdrawal_mode;
+    const manualWithdrawalAvailable = productionPaymentsAuthorized && manualWithdrawalsEnabled() && withdrawalMode === 'admin_approval';
+    return json({ manualPalawan:process.env.MANUAL_PALAWAN_DEPOSITS_ENABLED==='true', manualGoTyme:manualWithdrawalsEnabled(), manualWithdrawalAvailable, enabled:false, payoutsEnabled:false, totalEarned, wallet: results[0].data ?? { available:0,deposit_available:0,reserved:0,held:0,debt:0,currency:'PHP' }, automaticRegistrationBonus:Boolean(results[9].data), registrationBonusGranted:Boolean(results[8].data), registrationBonusReclaimed:Boolean(results[8].data?.revoked_at), legacyDestinations:results[10].data, transactions:results[1].data, destinations:results[2].data, customer:results[3].data,verifications:results[4].data,ready:results[5].data,depositReady:results[6].data,withdrawalMode });
   });
 }
 export function POST(request: NextRequest) {
@@ -102,7 +109,7 @@ export function POST(request: NextRequest) {
     }
     requireProductionApproval();
     if (body.action !== 'withdrawal') throw new MoneyError('Automated deposits are unavailable. Use an approved manual deposit process.', 503);
-    if (process.env.MANUAL_GOTYME_WITHDRAWALS_ENABLED !== 'true') throw new MoneyError('Manual withdrawals are unavailable', 503);
+    if (!manualWithdrawalsEnabled()) throw new MoneyError('Manual withdrawals are unavailable', 503);
     if (!uuid(body.idempotencyKey) || !uuid(body.destinationId)) throw new MoneyError('Choose a verified withdrawal destination');
     const { data: settings, error } = await db.from('money_settings').select('withdrawal_mode').eq('id', true).single();
     if (error || settings?.withdrawal_mode !== 'admin_approval') {
@@ -110,6 +117,7 @@ export function POST(request: NextRequest) {
     }
     let amount: number;
     try { amount = centavos(body.amount, 6000); } catch { throw new MoneyError('Enter a withdrawal amount within the displayed limits, with at most two decimal places'); }
+    if (!isWithdrawalOpen()) throw new MoneyError(withdrawalHoursMessage, 409);
     const transaction = await rpc('money_request_withdrawal', {
       p_user:user.id, p_amount:amount, p_method:body.method, p_key:body.idempotencyKey, p_destination:body.destinationId,
     });

@@ -46,7 +46,7 @@ export default function WithdrawPage() {
     setError("");
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError || !authData.user) throw new Error("Please sign in to AUREVIA first.");
+      if (authError || !authData.user) throw new Error("Please sign in to AROMEVA first.");
       const userId = authData.user.id;
       const [accountResult, walletResult, historyResult, settings] = await Promise.all([
         supabase.from("payment_accounts")
@@ -119,7 +119,7 @@ export default function WithdrawPage() {
     <main className="min-h-screen bg-slate-950 p-5 text-white">
       <div className="mx-auto max-w-lg space-y-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-bold">AUREVIA Simulated Withdrawal</h1>
+          <h1 className="text-2xl font-bold">AROMEVA Simulated Withdrawal</h1>
           <a href="/money" className="text-blue-300 underline">Open the separate real PHP wallet</a>
           <p className="text-sm text-slate-400">Test Mode only. No real money is transferred.</p>
           {mode && <p className="text-sm text-cyan-200">Processing: {mode === 'automatic' ? 'Automatic simulated withdrawal' : 'Administrator approval required'}</p>}

@@ -16,6 +16,10 @@ export function GET(request:NextRequest) {
       console.error('Scheduled tier rewards could not be processed');
       return { status: 'failed' };
     }) : { status: 'paused_pending_approval' };
-    return json({ ...await runReconciliation(), tierRewards });
+    const purchaseCommissions = productionPaymentsAuthorized ? await rpc('money_pay_purchase_commissions', {}).catch(() => {
+      console.error('Scheduled purchase commissions could not be processed');
+      return { status: 'failed' };
+    }) : { status: 'paused_pending_approval' };
+    return json({ ...await runReconciliation(), tierRewards, purchaseCommissions });
   });
 }

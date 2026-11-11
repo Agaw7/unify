@@ -33,6 +33,6 @@ test('scheduler rejects unauthenticated requests and runs only with its configur
   assert.equal((await get(`Basic ${secret}`)).status,401);
   assert.equal(runs,0);
   const response=await get(`Bearer ${secret}`);
-  assert.equal(response.status,200);assert.deepEqual(await response.json(),{paused:true,reason:'Automated provider reconciliation is unavailable.',tierRewards:{status:'paused_pending_approval'}});assert.equal(runs,1);
+  assert.equal(response.status,200);assert.deepEqual(await response.json(),{paused:true,reason:'Automated provider reconciliation is unavailable.',tierRewards:{status:'paused_pending_approval'},purchaseCommissions:{status:'paused_pending_approval'}});assert.equal(runs,1);
  } finally {if(previous===undefined) delete process.env.CRON_SECRET;else process.env.CRON_SECRET=previous;}
 });

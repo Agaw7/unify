@@ -1,6 +1,7 @@
 
 "use client";
 import ThemeWelcome from "@/components/WelcomeArtwork";
+import AureviaLogo from "@/components/AureviaLogo";
 import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
@@ -107,8 +108,8 @@ export default function RegisterPage() {
         className="unify-login-card"
         onSubmit={handleRegister}
       >
-        <div className="unify-login-logo">◆</div>
-        <h1>AUREVIA</h1>
+        <AureviaLogo className="aurevia-login-logo" />
+        <h1>AROMEVA</h1>
         <p>Create your account</p>
         <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5 }}>₱20 registration bonus is credited automatically when business funding is available. An unspent bonus may be reclaimed if there is no completed deposit or approved identity verification.</p>
 

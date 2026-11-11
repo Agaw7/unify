@@ -66,7 +66,7 @@ export function GET(request:NextRequest){return handled(async()=>{
  return json({products: marketProducts, grants});
 });}
 export function POST(request:NextRequest){return handled(async()=>{
- const {db,user}=await authenticate(request,true);const b=record(await request.json());
+ const {db,user}=await authenticate(request,'role-only');const b=record(await request.json());
  if(!uuid(b.userId) || !uuid(b.productId) || !uuid(b.key) || typeof b.note!=='string' || b.note.length>300)throw new MoneyError('Select a member, product, and valid grant details.');
  const {data: product, error: productError} = await db.from('investment_products').select('name').eq('id', b.productId).maybeSingle();
  if (productError) throw new MoneyError('Unable to verify the selected Market product.', 503);

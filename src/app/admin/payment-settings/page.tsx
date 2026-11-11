@@ -1,3 +1,5 @@
-import PaymentSettings from '@/components/PaymentSettings';
-export const dynamic = 'force-dynamic';
-export default function Page() { return <PaymentSettings />; }
+import { redirect } from 'next/navigation';
+
+export default function Page(): never {
+  redirect('/admin');
+}
